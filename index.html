@@ -233,7 +233,7 @@ var homeBase=[], homeIdx=0;
 function renderHome(){
   var q=document.getElementById('searchInput').value.trim();
   var l=listFor();
-  if(q) l=l.filter(function(s){return (s.n||'').indexOf(q)>=0 || (s.c||'').toLowerCase().indexOf(q.toLowerCase())>=0;});
+  if(q){ var ql=q.toLowerCase(); l=l.filter(function(s){ return (s.n||'').toLowerCase().indexOf(ql)>=0 || (s.c||'').toLowerCase().indexOf(ql)>=0 || (s.kw||'').toLowerCase().indexOf(ql)>=0; }); }
   homeBase=l;
   document.getElementById('homeGrid').innerHTML=l.map(cardHtml).join('');
   homeIdx=l.length; sq();
@@ -254,6 +254,17 @@ function goHome(){ show('home'); }
 
 var curDetail=null, relBase=[], relIdx=0;
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
+function relatedList(s){
+  var mine={}; ((s.kw||s.n||'').toLowerCase().split(/\s+/)).forEach(function(t){ if(t) mine[t]=1; });
+  var arr=STK.filter(function(x){return String(x.id)!==String(s.id);}).map(function(x){
+    var sc=0; if(x.c===s.c) sc+=2;
+    var xt=(x.kw||x.n||'').toLowerCase().split(/\s+/);
+    for(var i=0;i<xt.length;i++){ if(mine[xt[i]]) sc+=1; }
+    return {x:x, sc:sc};
+  });
+  arr.sort(function(a,b){ return b.sc-a.sc; });
+  return arr.map(function(o){ return o.x; });
+}
 function openDetail(id){
   var s=findSticker(id); if(!s) return; curDetail=s;
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
@@ -261,7 +272,7 @@ function openDetail(id){
   pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
   pic.src=s.u; pic.alt=s.n;
   document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
-  relBase=STK.filter(function(x){return String(x.id)!==String(s.id);});
+  relBase=relatedList(s);
   document.getElementById('relatedGrid').innerHTML=relBase.map(cardHtml).join('');
   relIdx=relBase.length; show('detail');
 }
@@ -306,7 +317,7 @@ async function loadSupabase(){
     var res=await sb.from('stickers').select('*').order('created_at',{ascending:false});
     if(res.error) throw res.error;
     STK=(res.data||[]).map(function(r){
-      return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)),
+      return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''),
                u:publicUrl(r.image_path), e:'🖼️',
                copy_count:r.copy_count||0, created:Date.parse(r.created_at)||r.id };
     });
