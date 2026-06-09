@@ -156,6 +156,22 @@
 </div>
 
 <script>
+/* ===== Supabase 설정 (채우면 실서버 데이터, 비우면 아래 더미로 미리보기) ===== */
+var SB_URL    = "";              // 예: https://xxxx.supabase.co  (Settings > API)
+var SB_KEY    = "";              // anon public key (공개용, 노출돼도 안전)
+var SB_BUCKET = "stickers";      // Storage 버킷 이름
+var sb=null;
+function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path; }
+
+/* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
+var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric'};
+function catFromFile(path){
+  var f=(path||'').split('/').pop();
+  var t=(f.split('_')[0]||'').toLowerCase();
+  return CATMAP[t] || (t? t.charAt(0).toUpperCase()+t.slice(1) : '기타');
+}
+
+/* ===== 더미 데이터 (Supabase 미설정 시 미리보기용) ===== */
 var A="https://www.figma.com/api/mcp/asset/";
 var STK=[
  {u:A+"cb9b2755-ffc6-483c-89f1-95236938697a",n:"밀크티 캔",c:"Food",e:"🥤"},
@@ -175,21 +191,22 @@ var STK=[
  {u:A+"eb7ddad6-cb23-41ed-85f4-7759131c442b",n:"실버 스타",c:"Mono",e:"⭐"},
  {u:A+"dc35a088-875e-4a03-9a8a-fdd967ed288a",n:"레트로 캔디",c:"Food",e:"🍬"},
  {u:A+"28f99e21-2afb-4bde-a359-b94d6c466278",n:"체리 쥬빌레",c:"Food",e:"🍒"},
- {u:A+"3394b484-26cb-4262-8336-265acc2f7864",n:"픽셀 하트",c:"Electronic",e:"💗"},
+ {u:A+"3394b484-26cb-4262-8336-265acc2f7864",n:"픽셀 하트",c:"Electric",e:"💗"},
  {u:A+"646b1505-1e3a-4022-ad3a-327c0e254d37",n:"빈티지 리본",c:"Mono",e:"🎀"},
- {u:A+"c71c83ae-e0eb-44e0-9178-05e2d33705ac",n:"샤이니 오브제",c:"Electronic",e:"💿"},
+ {u:A+"c71c83ae-e0eb-44e0-9178-05e2d33705ac",n:"샤이니 오브제",c:"Electric",e:"💿"},
  {u:A+"4c3a4607-148a-4ce0-b69b-f56b03450f25",n:"레터링 스티커",c:"Text",e:"✏️"},
  {u:A+"a27a14a9-4210-4b68-86f4-f24f811f547a",n:"여름 무드",c:"Summer Vive",e:"🌊"},
  {u:A+"6cb9e693-9e4c-46a3-9e08-9b7043cf2dac",n:"데일리 포인트",c:"Summer Vive",e:"🐚"}
 ];
-STK.forEach(function(s,i){ s.id=i+1; s.likes=9000-i*137; s.isNew=(i%4===0); });
+STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
+
 var CHIPS=['HOT','NEW','Summer Vive','Mono','Text','Food','Electric'];
 function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s){
-  return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail('+s.id+')">'+
+  return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
     '<img class="pic" src="'+s.u+'" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
-    '<span class="fallback">'+s.e+'</span></div>';
+    '<span class="fallback">'+(s.e||'🖼️')+'</span></div>';
 }
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
 
@@ -202,15 +219,20 @@ function buildChips(){
 }
 function selChip(c,el){ active=c; buildChips(); renderHome(); }
 
+/* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
+function listFor(){
+  var l=STK.slice();
+  if(active==='HOT') l.sort(function(a,b){return (b.copy_count||0)-(a.copy_count||0);});
+  else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
+  else l=l.filter(function(s){return s.c===active;});
+  return l;
+}
+
 var homeBase=[], homeIdx=0;
 function renderHome(){
   var q=document.getElementById('searchInput').value.trim();
-  var l=STK.slice();
-  if(active==='HOT') l.sort(function(a,b){return b.likes-a.likes;});
-  else if(active==='NEW') l=l.filter(function(s){return s.isNew;});
-  else if(active==='Electric') l=l.filter(function(s){return s.c==='Electronic';});
-  else l=l.filter(function(s){return s.c===active;});
-  if(q) l=l.filter(function(s){return s.n.indexOf(q)>=0 || s.c.toLowerCase().indexOf(q.toLowerCase())>=0;});
+  var l=listFor();
+  if(q) l=l.filter(function(s){return (s.n||'').indexOf(q)>=0 || (s.c||'').toLowerCase().indexOf(q.toLowerCase())>=0;});
   homeBase=l;
   document.getElementById('homeGrid').innerHTML=l.map(cardHtml).join('');
   homeIdx=l.length; sq();
@@ -230,15 +252,15 @@ function show(v){ document.querySelectorAll('.view').forEach(function(x){x.class
 function goHome(){ show('home'); }
 
 var curDetail=null, relBase=[], relIdx=0;
+function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
 function openDetail(id){
-  var s=null; for(var i=0;i<STK.length;i++) if(STK[i].id===id) s=STK[i];
-  if(!s) return; curDetail=s;
+  var s=findSticker(id); if(!s) return; curDetail=s;
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
-  pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e;
+  pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e||'🖼️';
   pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
   pic.src=s.u; pic.alt=s.n;
-  document.getElementById('detailName').textContent=s.n+'_'+pad(s.id);
-  relBase=STK.filter(function(x){return x.id!==s.id;});
+  document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
+  relBase=STK.filter(function(x){return String(x.id)!==String(s.id);});
   document.getElementById('relatedGrid').innerHTML=relBase.map(cardHtml).join('');
   relIdx=relBase.length; show('detail');
 }
@@ -257,19 +279,41 @@ scrollEl.addEventListener('scroll',function(){
   if(currentView==='home') appendHome(); else if(currentView==='detail') appendRelated();
 });
 
-function emojiPng(emoji){ return new Promise(function(res){ var sz=512,c=document.createElement('canvas'); c.width=sz;c.height=sz; var x=c.getContext('2d'); x.clearRect(0,0,sz,sz); x.font=Math.floor(sz*0.72)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(emoji,sz/2,sz/2+sz*0.04); c.toBlob(function(b){res(b);},'image/png'); }); }
+function emojiPng(emoji){ return new Promise(function(res){ var sz=512,c=document.createElement('canvas'); c.width=sz;c.height=sz; var x=c.getContext('2d'); x.clearRect(0,0,sz,sz); x.font=Math.floor(sz*0.72)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(emoji||'🖼️',sz/2,sz/2+sz*0.04); c.toBlob(function(b){res(b);},'image/png'); }); }
 async function copySticker(s){
+  /* 1) 이미지 클립보드 복사 */
   try{ var r=await fetch(s.u); var blob=await r.blob();
     if(blob.type!=='image/png'){ var bmp=await createImageBitmap(blob); var cv=document.createElement('canvas'); cv.width=bmp.width; cv.height=bmp.height; cv.getContext('2d').drawImage(bmp,0,0); blob=await new Promise(function(rs){cv.toBlob(rs,'image/png');}); }
     await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('복사완료!');
   }catch(e){ try{ var b=await emojiPng(s.e); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); toast('복사완료!'); }catch(e2){ toast('복사완료!'); } }
+  /* 2) 복사수 +1 (Supabase) */
+  s.copy_count=(s.copy_count||0)+1;
+  if(sb){ try{ await sb.rpc('increment_copy',{ p_id:s.id }); }catch(e3){ console.warn('count fail',e3); } }
+  if(active==='HOT' && currentView==='home') renderHome();
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 
 var tt=null;
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
-buildChips(); renderHome();
+/* ===== Supabase에서 실제 스티커 불러오기 ===== */
+async function loadSupabase(){
+  if(!SB_URL || !SB_KEY) return;            // 미설정이면 더미 유지
+  try{
+    var mod=await import("https://esm.sh/@supabase/supabase-js@2");
+    sb=mod.createClient(SB_URL,SB_KEY);
+    var res=await sb.from('stickers').select('*').order('created_at',{ascending:false});
+    if(res.error) throw res.error;
+    STK=(res.data||[]).map(function(r){
+      return { id:r.id, n:r.name||r.image_path, c:catFromFile(r.image_path),
+               u:publicUrl(r.image_path), e:'🖼️',
+               copy_count:r.copy_count||0, created:Date.parse(r.created_at)||r.id };
+    });
+    buildChips(); renderHome();
+  }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); }
+}
+
+buildChips(); renderHome(); loadSupabase();
 </script>
 
 <script type="module">
