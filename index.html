@@ -266,6 +266,7 @@ function show(v){ document.querySelectorAll('.view').forEach(function(x){x.class
 function goHome(){ show('home'); renderHome(); }
 
 var curDetail=null, relBase=[], relIdx=0;
+function bumpCount(s){ if(!s) return; s.copy_count=(s.copy_count||0)+1; if(sb){ try{ sb.rpc('increment_copy',{ p_id:s.id }); }catch(e){} } }
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
 function relatedList(s){
   var mine={}; ((s.kw||s.n||'').toLowerCase().split(/\s+/)).forEach(function(t){ if(t) mine[t]=1; });
@@ -279,7 +280,7 @@ function relatedList(s){
   return arr.map(function(o){ return o.x; });
 }
 function openDetail(id){
-  var s=findSticker(id); if(!s) return; curDetail=s;
+  var s=findSticker(id); if(!s) return; curDetail=s; bumpCount(s);
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
   pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e||'🖼️';
   pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
@@ -311,10 +312,8 @@ async function copySticker(s){
     if(blob.type!=='image/png'){ var bmp=await createImageBitmap(blob); var cv=document.createElement('canvas'); cv.width=bmp.width; cv.height=bmp.height; cv.getContext('2d').drawImage(bmp,0,0); blob=await new Promise(function(rs){cv.toBlob(rs,'image/png');}); }
     await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('복사완료!');
   }catch(e){ try{ var b=await emojiPng(s.e); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); toast('복사완료!'); }catch(e2){ toast('복사완료!'); } }
-  /* 2) 복사수 +1 (Supabase) */
-  s.copy_count=(s.copy_count||0)+1;
-  if(sb){ try{ await sb.rpc('increment_copy',{ p_id:s.id }); }catch(e3){ console.warn('count fail',e3); } }
-  if(active==='HOT' && currentView==='home') renderHome();
+  /* 2) 복사도 카운트 +1 */
+  bumpCount(s);
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 
