@@ -263,7 +263,7 @@ document.getElementById('searchInput').addEventListener('input',renderHome);
 
 var currentView='home';
 function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); }
-function goHome(){ show('home'); }
+function goHome(){ show('home'); renderHome(); }
 
 var curDetail=null, relBase=[], relIdx=0;
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
