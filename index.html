@@ -13,6 +13,13 @@
   function ga(ev, params){ try{ gtag('event', ev, params||{}); }catch(e){} }
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#e7ffb3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="스꾸">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -484,7 +491,6 @@ async function shareOrDownload(blob, s){
 function copySticker(s){
   bumpCount(s);
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
-  /* 핵심: write를 클릭과 동시에 호출 + Promise<Blob> 전달 (사파리/토스 WKWebView 규칙) */
   var blobPromise=(async function(){
     try{ return await fetchPngBlob(copyUrl(s)); }
     catch(e){ try{ return await fetchPngBlob(s.u); }catch(e2){ try{ return await emojiPng(s.e); }catch(e3){ return null; } } }
@@ -573,5 +579,6 @@ apply();
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
 </body>
 </html>

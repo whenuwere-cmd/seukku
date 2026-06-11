@@ -1,0 +1,15 @@
+{
+  "name": "스꾸 SEUKKU",
+  "short_name": "스꾸",
+  "description": "저장 없이 터치 한 번으로 복사해 스토리·카톡에 바로 붙여넣는 스티커 앱",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f6f6",
+  "theme_color": "#e7ffb3",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
