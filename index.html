@@ -154,6 +154,22 @@
   .fab.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
   .fab > svg:not(.sqbg){ width:22px; height:22px; color:var(--ink); }
   .fab:active{ transform:scale(.94); }
+  #topBtn{ bottom:86px; }
+  .fab-chat{ position:absolute; right:16px; bottom:24px; width:52px; height:52px; display:flex; align-items:center; justify-content:center;
+    background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; }
+  .fab-chat:active{ transform:scale(.94); }
+  .info-panel{ position:absolute; right:16px; bottom:86px; width:calc(100% - 32px); max-width:340px; background:#fff;
+    border:1px solid var(--ink); border-radius:18px; padding:16px; z-index:60; display:none;
+    box-shadow:0 8px 24px rgba(31,41,55,.16); }
+  .info-panel.open{ display:block; }
+  .info-panel h3{ margin:0 0 8px; font-size:14px; color:var(--ink); }
+  .info-panel p{ margin:0 0 12px; font-size:12px; line-height:1.65; color:#4b5563; }
+  .info-panel textarea{ width:100%; box-sizing:border-box; height:72px; resize:none; border:1px solid #e5e7eb; border-radius:12px;
+    padding:10px; font-size:13px; font-family:inherit; outline:none; }
+  .info-panel textarea:focus{ border-color:var(--ink); }
+  .info-row{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+  .info-send{ background:var(--lime); border:1px solid var(--ink); border-radius:12px; padding:8px 14px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
+  .info-send:active{ transform:scale(.96); }
 
   .toast{ position:absolute; left:50%; bottom:28px; transform:translateX(-50%) translateY(16px);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
@@ -225,6 +241,15 @@
   <button class="fab sq" data-r="14" data-fill="#ffffff" id="topBtn" aria-label="맨 위로" onclick="goTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
+  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="안내 및 의견" onclick="toggleInfo()"><span class="lbl">💬</span></button>
+  <div class="info-panel" id="infoPanel">
+    <h3>스꾸 안내 🍀</h3>
+    <p>스꾸의 일부 스티커는 온라인에서 널리 공유되는 이미지를 포함하고 있어요. 스꾸는 비상업 서비스이며, 권리자 분의 요청이 있으면 해당 스티커를 바로 내릴게요. 삭제 요청·문의·원하는 스티커 신청 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
+    <textarea id="fbText" maxlength="1000" placeholder="삭제 요청 / 의견 / 갖고 싶은 스티커 등 무엇이든!"></textarea>
+    <div class="info-row">
+      <button class="info-send" onclick="sendFeedback()">보내기</button>
+    </div>
+  </div>
   <div class="toast sq" data-r="14" data-fill="#e7ffb3" id="toast"><span class="lbl">복사완료!</span></div>
 </div>
 
@@ -409,6 +434,16 @@ function appendRelated(){
 
 var scrollEl=document.getElementById('scroll');
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
+function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')) ga('info_open',{}); }
+async function sendFeedback(){
+  var ta=document.getElementById('fbText'); var msg=ta.value.trim();
+  if(!msg){ toast('내용을 입력해주세요!'); return; }
+  try{
+    if(sb){ var res=await sb.from('seukku_feedback').insert({ message:msg }); if(res.error) throw res.error; }
+    ta.value=''; document.getElementById('infoPanel').classList.remove('open');
+    toast('전달됐어요! 고마워요 💚'); ga('feedback_send',{});
+  }catch(e){ toast('전송 실패.. 잠시 후 다시!'); }
+}
 function goTop(){ scrollEl.scrollTo({top:0,behavior:'smooth'}); }
 scrollEl.addEventListener('scroll',function(){
   toggleFab();
