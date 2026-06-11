@@ -223,7 +223,7 @@ var sb=null;
 function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path; }
 
 /* 썸네일: wsrv.nl로 리사이즈+WebP 변환 (랜딩 최적화용). 복사는 항상 원본(s.u) 사용 */
-function thumb(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||72)+'&output=webp&we&default='+encodeURIComponent(u); }
+function thumb(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
 
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
 var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric'};
