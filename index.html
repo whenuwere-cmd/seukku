@@ -353,8 +353,12 @@ function listFor(){
 var homeBase=[], homeIdx=0;
 function renderHome(){
   var q=document.getElementById('searchInput').value.trim();
-  var l=listFor();
-  if(q){ var toks=q.toLowerCase().split(/\s+/).filter(Boolean); l=l.filter(function(s){ var hay=((s.n||'')+' '+(s.c||'')+' '+(s.kw||'')+' '+(s.tg||'')).toLowerCase(); return toks.every(function(t){ return hay.indexOf(t)>=0; }); }); }
+  var l;
+  if(q){
+    var toks=q.toLowerCase().split(/\s+/).filter(Boolean);
+    l=STK.filter(function(s){ var hay=((s.n||'')+' '+(s.c||'')+' '+(s.kw||'')+' '+(s.tg||'')).toLowerCase(); return toks.every(function(t){ return hay.indexOf(t)>=0; }); });
+    l.sort(function(a,b){ return (b.copy_count||0)-(a.copy_count||0); });
+  } else { l=listFor(); }
   homeBase=l;
   var BATCH=24;
   document.getElementById('homeGrid').innerHTML=l.slice(0,BATCH).map(function(s,i){ return cardHtml(s, i<6); }).join('');
@@ -477,30 +481,21 @@ async function shareOrDownload(blob, s){
   setTimeout(function(){ URL.revokeObjectURL(url); },4000);
   toast('이미지 저장 완료!');
 }
-async function copySticker(s){
-  var blob;
-  try{
-    try{ blob=await fetchPngBlob(copyUrl(s)); }
-    catch(e){ blob=await fetchPngBlob(s.u); }
-  }catch(e){ try{ blob=await emojiPng(s.e); }catch(e2){ blob=null; } }
-
-  if(blob && canCopyImage()){
-    /* 1순위: 이미지 클립보드 복사 (지원 기기) */
-    try{
-      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-      toast('복사완료!');
-    }catch(e){
-      /* 권한 거부·미지원으로 실패 → 공유/다운로드로 폴백 */
-      await shareOrDownload(blob, s);
-    }
-  }else if(blob){
-    /* 삼성 인터넷 등 이미지 복사 미지원 → 공유 시트 또는 저장 */
-    await shareOrDownload(blob, s);
-  }else{
-    toast('잠시 후 다시 시도해주세요');
-  }
+function copySticker(s){
   bumpCount(s);
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
+  /* 핵심: write를 클릭과 동시에 호출 + Promise<Blob> 전달 (사파리/토스 WKWebView 규칙) */
+  var blobPromise=(async function(){
+    try{ return await fetchPngBlob(copyUrl(s)); }
+    catch(e){ try{ return await fetchPngBlob(s.u); }catch(e2){ try{ return await emojiPng(s.e); }catch(e3){ return null; } } }
+  })();
+  if(canCopyImage()){
+    navigator.clipboard.write([ new ClipboardItem({ 'image/png': blobPromise }) ])
+      .then(function(){ toast('복사완료!'); })
+      .catch(function(){ blobPromise.then(function(b){ if(b) shareOrDownload(b, s); else toast('잠시 후 다시 시도해주세요'); }); });
+  }else{
+    blobPromise.then(function(b){ if(b) shareOrDownload(b, s); else toast('잠시 후 다시 시도해주세요'); });
+  }
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 /* 이미지 복사 미지원 기기는 버튼 라벨을 '저장'으로 (Web Share 되면 '공유') */
