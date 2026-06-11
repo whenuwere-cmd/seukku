@@ -223,7 +223,7 @@ var sb=null;
 function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path; }
 
 /* 썸네일: wsrv.nl로 리사이즈+WebP 변환 (랜딩 최적화용). 복사는 항상 원본(s.u) 사용 */
-function thumb(u,w){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q=80&output=webp&we&default='+encodeURIComponent(u); }
+function thumb(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||72)+'&output=webp&we&default='+encodeURIComponent(u); }
 
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
 var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric'};
@@ -267,7 +267,7 @@ function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s){
   return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
-    '<img class="pic" loading="lazy" decoding="async" src="'+thumb(s.u,300)+'" srcset="'+thumb(s.u,300)+' 1x, '+thumb(s.u,600)+' 2x" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
+    '<img class="pic" loading="lazy" decoding="async" src="'+thumb(s.u,220)+'" srcset="'+thumb(s.u,220)+' 1x, '+thumb(s.u,360)+' 2x" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
     '<span class="fallback">'+(s.e||'🖼️')+'</span></div>';
 }
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
@@ -315,7 +315,7 @@ function show(v){ document.querySelectorAll('.view').forEach(function(x){x.class
 function goHome(){ show('home'); renderHome(); }
 
 var curDetail=null, relBase=[], relIdx=0;
-function bumpCount(s){ if(!s) return; s.copy_count=(s.copy_count||0)+1; if(sb){ try{ sb.rpc('increment_copy',{ p_id:s.id }); }catch(e){} } }
+function bumpCount(s){ if(!s) return; s.copy_count=(s.copy_count||0)+1; if(sb){ try{ sb.rpc('increment_copy',{ p_id:s.id }).then(function(){},function(){}); }catch(e){} } }
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
 function relatedList(s){
   var mine={}; ((s.kw||s.n||'').toLowerCase().split(/\s+/)).forEach(function(t){ if(t) mine[t]=1; });
@@ -333,7 +333,7 @@ function openDetail(id){
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
   pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e||'🖼️';
   pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
-  pic.src=thumb(s.u,900); pic.alt=s.n;
+  pic.src=thumb(s.u,720); pic.alt=s.n;
   document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
   relBase=relatedList(s);
   var RBATCH=18;
