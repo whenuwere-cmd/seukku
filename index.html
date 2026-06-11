@@ -226,7 +226,7 @@ function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"
 function thumb(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
 
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
-var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric'};
+var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric',heart:'Heart',star:'Star',chrome:'Chrome',ribbon:'Ribbon',retro:'Retro',beauty:'Beauty'};
 function catFromFile(path){
   var f=(path||'').split('/').pop();
   var t=(f.split('_')[0]||'').toLowerCase();
@@ -262,7 +262,7 @@ var STK=[
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
 
-var CHIPS=['HOT','NEW','Summer Vive','Mono','Text','Food','Electric','etc'];
+var CHIPS=['HOT','NEW','Heart','Star','Chrome','Ribbon','Food','Retro','Beauty','Summer Vive','Mono','Text','Electric','etc'];
 function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s){
