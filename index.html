@@ -222,8 +222,28 @@ var SB_BUCKET = "seukku";        // Storage 버킷 이름
 var sb=null;
 function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path; }
 
-/* 썸네일: wsrv.nl로 리사이즈+WebP 변환 (랜딩 최적화용). 복사는 항상 원본(s.u) 사용 */
-function thumb(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
+/* ===== 썸네일 전략 =====
+   1순위: 버킷에 미리 생성해둔 thumbs/{이름}-{폭}.webp (make-thumbs.mjs로 생성, 1년 캐시)
+   2순위: 썸네일이 아직 없으면 wsrv.nl 실시간 변환으로 폴백 (picErr가 처리)
+   복사용: copy/{이름}.png (1080px 경량 PNG) → 없으면 원본(s.u) */
+function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
+function baseName(p){ return p.replace(/\.[^.\/]+$/,''); }
+function thumbUrl(s,w){
+  if(s.p) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
+  return wsrv(s.u,w);
+}
+function copyUrl(s){ if(s.p) return publicUrl('copy/'+baseName(s.p)+'.png'); return s.u; }
+/* 이미지 에러 체인: 미리생성 썸네일 실패 → wsrv 실시간 변환 → 이모지 폴백 */
+function picErr(img){
+  if(!img.getAttribute('data-step') && img.getAttribute('data-orig')){
+    img.setAttribute('data-step','1');
+    img.removeAttribute('srcset');
+    img.src=wsrv(img.getAttribute('data-orig'), parseInt(img.getAttribute('data-w'))||220);
+    return;
+  }
+  img.style.display='none';
+  var fb=img.parentNode.querySelector('.fallback'); if(fb) fb.style.display='block';
+}
 
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
 var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric',heart:'Heart',star:'Star',chrome:'Chrome',ribbon:'Ribbon',retro:'Retro',beauty:'Beauty'};
@@ -267,7 +287,7 @@ function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s){
   return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
-    '<img class="pic" loading="lazy" decoding="async" src="'+thumb(s.u,220)+'" srcset="'+thumb(s.u,220)+' 1x, '+thumb(s.u,360)+' 2x" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
+    '<img class="pic" loading="lazy" decoding="async" data-orig="'+s.u+'" data-w="220" src="'+thumbUrl(s,220)+'" srcset="'+thumbUrl(s,220)+' 1x, '+thumbUrl(s,360)+' 2x" alt="'+s.n+'" onerror="picErr(this)">'+
     '<span class="fallback">'+(s.e||'🖼️')+'</span></div>';
 }
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
@@ -332,8 +352,10 @@ function openDetail(id){
   var s=findSticker(id); if(!s) return; curDetail=s; bumpCount(s);
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
   pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e||'🖼️';
-  pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
-  pic.src=thumb(s.u,720); pic.alt=s.n;
+  pic.removeAttribute('data-step'); pic.setAttribute('data-orig',s.u); pic.setAttribute('data-w','720');
+  pic.onerror=function(){ picErr(pic); };
+  pic.setAttribute('fetchpriority','high');
+  pic.src=thumbUrl(s,720); pic.alt=s.n;
   document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
   relBase=relatedList(s);
   var RBATCH=18;
@@ -356,10 +378,18 @@ scrollEl.addEventListener('scroll',function(){
 });
 
 function emojiPng(emoji){ return new Promise(function(res){ var sz=512,c=document.createElement('canvas'); c.width=sz;c.height=sz; var x=c.getContext('2d'); x.clearRect(0,0,sz,sz); x.font=Math.floor(sz*0.72)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(emoji||'🖼️',sz/2,sz/2+sz*0.04); c.toBlob(function(b){res(b);},'image/png'); }); }
+async function fetchPngBlob(url){
+  var r=await fetch(url); if(!r.ok) throw new Error('fetch '+r.status);
+  var blob=await r.blob();
+  if(blob.type!=='image/png'){ var bmp=await createImageBitmap(blob); var cv=document.createElement('canvas'); cv.width=bmp.width; cv.height=bmp.height; cv.getContext('2d').drawImage(bmp,0,0); blob=await new Promise(function(rs){cv.toBlob(rs,'image/png');}); }
+  return blob;
+}
 async function copySticker(s){
-  /* 1) 이미지 클립보드 복사 */
-  try{ var r=await fetch(s.u); var blob=await r.blob();
-    if(blob.type!=='image/png'){ var bmp=await createImageBitmap(blob); var cv=document.createElement('canvas'); cv.width=bmp.width; cv.height=bmp.height; cv.getContext('2d').drawImage(bmp,0,0); blob=await new Promise(function(rs){cv.toBlob(rs,'image/png');}); }
+  /* 1) 이미지 클립보드 복사: 경량 copy PNG → 원본 → 이모지 순 */
+  try{
+    var blob;
+    try{ blob=await fetchPngBlob(copyUrl(s)); }
+    catch(e){ blob=await fetchPngBlob(s.u); }
     await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('복사완료!');
   }catch(e){ try{ var b=await emojiPng(s.e); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); toast('복사완료!'); }catch(e2){ toast('복사완료!'); } }
   /* 2) 복사도 카운트 +1 */
@@ -380,7 +410,7 @@ async function loadSupabase(){
     if(res.error) throw res.error;
     STK=(res.data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''),
-               u:publicUrl(r.image_path), e:'🖼️',
+               u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, created:Date.parse(r.created_at)||r.id };
     });
     buildChips(); renderHome();
