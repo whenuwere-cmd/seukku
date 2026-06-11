@@ -458,19 +458,58 @@ async function fetchPngBlob(url){
   if(blob.type!=='image/png'){ var bmp=await createImageBitmap(blob); var cv=document.createElement('canvas'); cv.width=bmp.width; cv.height=bmp.height; cv.getContext('2d').drawImage(bmp,0,0); blob=await new Promise(function(rs){cv.toBlob(rs,'image/png');}); }
   return blob;
 }
+/* 이미지 클립보드 복사 지원 여부 (삼성 인터넷·일부 안드로이드 크롬은 미지원) */
+function canCopyImage(){
+  try{ return !!(navigator.clipboard && window.ClipboardItem && typeof navigator.clipboard.write==='function'); }
+  catch(e){ return false; }
+}
+/* 복사가 막힌 기기: Web Share(스토리에 바로 공유) → 안 되면 다운로드 */
+async function shareOrDownload(blob, s){
+  var fname=((s.n||'sticker').replace(/[^\w가-힣]+/g,'_'))+'.png';
+  var file=new File([blob], fname, {type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file]}); toast('공유 완료!'); return; }
+    catch(e){ if(e && e.name==='AbortError') return; }
+  }
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+  toast('이미지 저장 완료!');
+}
 async function copySticker(s){
-  /* 1) 이미지 클립보드 복사: 경량 copy PNG → 원본 → 이모지 순 */
+  var blob;
   try{
-    var blob;
     try{ blob=await fetchPngBlob(copyUrl(s)); }
     catch(e){ blob=await fetchPngBlob(s.u); }
-    await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('복사완료!');
-  }catch(e){ try{ var b=await emojiPng(s.e); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); toast('복사완료!'); }catch(e2){ toast('복사완료!'); } }
-  /* 2) 복사도 카운트 +1 */
+  }catch(e){ try{ blob=await emojiPng(s.e); }catch(e2){ blob=null; } }
+
+  if(blob && canCopyImage()){
+    /* 1순위: 이미지 클립보드 복사 (지원 기기) */
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      toast('복사완료!');
+    }catch(e){
+      /* 권한 거부·미지원으로 실패 → 공유/다운로드로 폴백 */
+      await shareOrDownload(blob, s);
+    }
+  }else if(blob){
+    /* 삼성 인터넷 등 이미지 복사 미지원 → 공유 시트 또는 저장 */
+    await shareOrDownload(blob, s);
+  }else{
+    toast('잠시 후 다시 시도해주세요');
+  }
   bumpCount(s);
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
+/* 이미지 복사 미지원 기기는 버튼 라벨을 '저장'으로 (Web Share 되면 '공유') */
+(function(){
+  if(!canCopyImage()){
+    var lbl=document.querySelector('#copyBtn .lbl');
+    if(lbl) lbl.textContent = (navigator.canShare ? '공유' : '저장');
+  }
+})();
 
 var tt=null;
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
