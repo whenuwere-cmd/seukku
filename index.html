@@ -177,6 +177,9 @@ var SB_BUCKET = "seukku";        // Storage 버킷 이름
 var sb=null;
 function publicUrl(path){ return SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path; }
 
+/* 썸네일: wsrv.nl로 리사이즈+WebP 변환 (랜딩 최적화용). 복사는 항상 원본(s.u) 사용 */
+function thumb(u,w){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q=80&output=webp&we&default='+encodeURIComponent(u); }
+
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
 var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric'};
 function catFromFile(path){
@@ -219,7 +222,7 @@ function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s){
   return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
-    '<img class="pic" src="'+s.u+'" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
+    '<img class="pic" loading="lazy" decoding="async" src="'+thumb(s.u,300)+'" srcset="'+thumb(s.u,300)+' 1x, '+thumb(s.u,600)+' 2x" alt="'+s.n+'" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fallback\').style.display=\'block\';">'+
     '<span class="fallback">'+(s.e||'🖼️')+'</span></div>';
 }
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
@@ -284,7 +287,7 @@ function openDetail(id){
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
   pic.style.display='block'; fb.style.display='none'; fb.textContent=s.e||'🖼️';
   pic.onerror=function(){ pic.style.display='none'; fb.style.display='block'; };
-  pic.src=s.u; pic.alt=s.n;
+  pic.src=thumb(s.u,900); pic.alt=s.n;
   document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
   relBase=relatedList(s);
   document.getElementById('relatedGrid').innerHTML=relBase.map(cardHtml).join('');
