@@ -100,7 +100,7 @@
       linear-gradient(45deg,transparent 75%,var(--chk) 75%),linear-gradient(-45deg,transparent 75%,var(--chk) 75%);
     background-size:18px 18px; background-position:0 0,0 9px,9px -9px,-9px 0; background-color:#fff; }
 
-  .home-top{ display:flex; align-items:center; justify-content:space-between; padding:18px var(--pad) 0; height:103px; }
+  .home-top{ display:flex; align-items:center; justify-content:space-between; padding:18px var(--pad) 0; min-height:103px; }
   .home-top.hide{ display:none; }
   .logo-blob{ position:relative; width:120px; height:71px; display:flex; align-items:center; justify-content:center; }
   .logo-blob .b{ position:absolute; background:var(--lime); border:2px solid #9fc04a; border-radius:50%; }
@@ -112,7 +112,8 @@
     border-radius:14px; padding:10px 12px; font-size:13px; font-weight:500; color:var(--ink2); cursor:pointer; }
   .btn-outline > svg:not(.sqbg){ width:18px; height:18px; }
   .btn-outline:active{ transform:scale(.97); }
-  .top-actions{ display:flex; align-items:stretch; gap:8px; }
+  .top-actions{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .top-actions-row{ display:flex; align-items:stretch; gap:8px; }
   .top-actions .btn-outline{ justify-content:center; }
 
   .search-mode{ display:none; align-items:center; gap:8px; padding:18px var(--pad) 0; }
@@ -208,10 +209,13 @@
 <path d="M30.435 44.875C28.855 44.875 27.595 44.405 26.655 43.465C25.715 42.525 25.245 41.29 25.245 39.76V39.31H27.945V39.925C27.945 40.595 28.165 41.14 28.605 41.56C29.055 41.97 29.655 42.175 30.405 42.175C31.125 42.175 31.695 41.965 32.115 41.545C32.535 41.125 32.745 40.525 32.745 39.745C32.745 39.255 32.655 38.875 32.475 38.605C32.305 38.335 32.04 38.125 31.68 37.975C31.33 37.825 30.89 37.695 30.36 37.585C29.34 37.355 28.445 37.11 27.675 36.85C26.915 36.59 26.32 36.175 25.89 35.605C25.46 35.025 25.245 34.165 25.245 33.025C25.245 31.335 25.705 30.04 26.625 29.14C27.555 28.23 28.78 27.775 30.3 27.775C31.89 27.775 33.145 28.24 34.065 29.17C34.985 30.1 35.445 31.335 35.445 32.875V33.31H32.745V32.725C32.745 32.035 32.53 31.49 32.1 31.09C31.67 30.68 31.085 30.475 30.345 30.475C29.615 30.475 29.03 30.685 28.59 31.105C28.16 31.515 27.945 32.115 27.945 32.905C27.945 33.385 28.035 33.76 28.215 34.03C28.395 34.3 28.665 34.51 29.025 34.66C29.385 34.8 29.83 34.93 30.36 35.05C31.36 35.26 32.24 35.5 33 35.77C33.76 36.03 34.355 36.45 34.785 37.03C35.225 37.6 35.445 38.465 35.445 39.625C35.445 41.305 34.99 42.6 34.08 43.51C33.17 44.42 31.955 44.875 30.435 44.875ZM41.6055 44.875C40.5755 44.875 39.6705 44.65 38.8905 44.2C38.1105 43.75 37.5005 43.12 37.0605 42.31C36.6305 41.5 36.4155 40.56 36.4155 39.49V33.145C36.4155 32.075 36.6305 31.135 37.0605 30.325C37.5005 29.515 38.1105 28.89 38.8905 28.45C39.6705 28 40.5755 27.775 41.6055 27.775C43.1655 27.775 44.4155 28.27 45.3555 29.26C46.2955 30.24 46.7655 31.535 46.7655 33.145V36.865H38.6655V34.315H44.0655V32.995C44.0655 32.235 43.8455 31.625 43.4055 31.165C42.9755 30.705 42.3755 30.475 41.6055 30.475C40.8455 30.475 40.2405 30.705 39.7905 31.165C39.3405 31.625 39.1155 32.235 39.1155 32.995V39.64C39.1155 40.39 39.3405 41 39.7905 41.47C40.2405 41.94 40.8455 42.175 41.6055 42.175C42.3755 42.175 42.9755 41.94 43.4055 41.47C43.8455 41 44.0655 40.39 44.0655 39.64V39.19H46.7655V39.49C46.7655 41.1 46.2955 42.4 45.3555 43.39C44.4155 44.38 43.1655 44.875 41.6055 44.875ZM52.5956 44.875C51.8056 44.875 51.0806 44.695 50.4206 44.335C49.7606 43.975 49.2306 43.415 48.8306 42.655C48.4406 41.885 48.2456 40.885 48.2456 39.655V28.15H50.9456V39.655C50.9456 40.405 51.1606 41.015 51.5906 41.485C52.0306 41.945 52.6106 42.175 53.3306 42.175C54.0806 42.175 54.6706 41.945 55.1006 41.485C55.5306 41.015 55.7456 40.405 55.7456 39.655V28.15H58.4456V44.5H55.7456V42.22L56.2106 42.82C55.8606 43.47 55.3806 43.975 54.7706 44.335C54.1606 44.695 53.4356 44.875 52.5956 44.875ZM68.7438 44.5L64.7538 35.98L63.0738 38.185V34.165L67.8288 28.135H70.6788L66.5238 33.595L71.5938 44.5H68.7438ZM60.6588 44.5V22H63.3588V44.5H60.6588ZM79.9223 44.5L75.9323 35.98L74.2523 38.185V34.165L79.0073 28.135H81.8573L77.7023 33.595L82.7723 44.5H79.9223ZM71.8373 44.5V22H74.5373V44.5H71.8373ZM87.1859 44.875C86.3959 44.875 85.6709 44.695 85.0109 44.335C84.3509 43.975 83.8209 43.415 83.4209 42.655C83.0309 41.885 82.8359 40.885 82.8359 39.655V28.15H85.5359V39.655C85.5359 40.405 85.7509 41.015 86.1809 41.485C86.6209 41.945 87.2009 42.175 87.9209 42.175C88.6709 42.175 89.2609 41.945 89.6909 41.485C90.1209 41.015 90.3359 40.405 90.3359 39.655V28.15H93.0359V44.5H90.3359V42.22L90.8009 42.82C90.4509 43.47 89.9709 43.975 89.3609 44.335C88.7509 44.695 88.0259 44.875 87.1859 44.875Z" fill="#1F2937"/>
 </svg></div>
         <div class="top-actions">
+          <div class="top-actions-row">
           <button class="btn-outline sq" data-r="14" data-fill="#ffffff" aria-label="검색" onclick="openSearch()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
           </button>
           <button class="btn-outline sq" data-r="14" data-fill="#ffffff" onclick="shareUrl()">공유하기</button>
+          </div>
+          <button class="btn-outline sq" data-r="14" data-fill="#ffffff" id="a2hsBtn" onclick="addToHome()">홈 화면에 추가하기</button>
         </div>
       </div>
       <div class="search-mode" id="searchMode">
@@ -378,6 +382,44 @@ function appendHome(){
 }
 
 function openSearch(){ document.getElementById('homeTop').classList.add('hide'); document.getElementById('searchMode').classList.add('open'); sq(); setTimeout(function(){document.getElementById('searchInput').focus();},40); }
+/* ===== 홈 화면에 추가 (A2HS) ===== */
+var deferredA2HS=null;
+window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredA2HS=e; });
+function isStandalone(){
+  return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+}
+if(isStandalone()){ var _ab=document.getElementById('a2hsBtn'); if(_ab) _ab.style.display='none'; }
+window.addEventListener('appinstalled',function(){
+  var b=document.getElementById('a2hsBtn'); if(b) b.style.display='none';
+  toast('홈 화면에 추가됐어요 🎉');
+});
+function addToHome(){
+  ga('a2hs_click',{});
+  if(isStandalone()){ toast('이미 홈 화면에서 보고 있어요!'); return; }
+  if(deferredA2HS){
+    deferredA2HS.prompt();
+    deferredA2HS.userChoice.then(function(r){ if(r&&r.outcome==='accepted'){ ga('a2hs_accept',{}); } deferredA2HS=null; });
+    return;
+  }
+  showA2HSGuide();
+}
+function showA2HSGuide(){
+  var old=document.getElementById('a2hsGuide'); if(old){ old.remove(); }
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var steps=isIOS
+    ? '<b>1.</b> 하단(또는 상단)의 <b>공유 버튼</b> <span style="display:inline-block;border:1.5px solid #1F2937;border-radius:6px;padding:0 6px;font-size:13px;">&#x2191;</span> 을 눌러요<br><b>2.</b> 메뉴에서 <b>\'홈 화면에 추가\'</b>를 선택해요'
+    : '<b>1.</b> 브라우저 메뉴 <b>&#8942;</b> 를 눌러요<br><b>2.</b> <b>\'앱 설치\'</b> 또는 <b>\'홈 화면에 추가\'</b>를 선택해요';
+  var ov=document.createElement('div');
+  ov.id='a2hsGuide';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(31,41,55,.45);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  ov.innerHTML='<div style="background:#fff;border:1px solid #1F2937;border-radius:22px 22px 0 0;padding:24px 22px 28px;max-width:430px;width:100%;font-family:inherit;">'
+    +'<div style="font-size:16px;font-weight:700;color:#1F2937;margin-bottom:10px;">홈 화면에 추가하기</div>'
+    +'<div style="font-size:14px;line-height:1.8;color:#374151;">'+steps+'</div>'
+    +'<button onclick="document.getElementById(\'a2hsGuide\').remove()" style="margin-top:18px;width:100%;background:#e7ffb3;border:1px solid #1F2937;border-radius:14px;padding:13px;font-size:14px;font-weight:600;color:#1F2937;cursor:pointer;font-family:inherit;">확인</button>'
+    +'</div>';
+  ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
 function shareUrl(){
   var url=location.href;
   ga('share',{ method:'url_copy' });
