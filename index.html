@@ -351,7 +351,7 @@ function selChip(c,el){ active=c; buildChips(); renderHome(); }
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
 function listFor(){
   var l=STK.slice();
-  if(active==='HOT') l.sort(function(a,b){return (b.copy_count||0)-(a.copy_count||0);});
+  if(active==='HOT') l.sort(function(a,b){return ((b.featured?1:0)-(a.featured?1:0)) || ((b.copy_count||0)-(a.copy_count||0));});
   else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
   else l=l.filter(function(s){return s.c===active;});
   return l;
@@ -526,7 +526,7 @@ async function loadSupabase(){
     STK=(res.data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
-               copy_count:r.copy_count||0, created:Date.parse(r.created_at)||r.id };
+               copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
     });
     buildChips(); renderHome();
   }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); }
