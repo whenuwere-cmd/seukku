@@ -255,8 +255,8 @@
   <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="안내 및 의견" onclick="toggleInfo()"><span class="lbl">💬</span></button>
   <div class="info-panel" id="infoPanel">
     <h3>스꾸 안내 🍀</h3>
-    <p>스꾸의 일부 스티커는 온라인에서 널리 공유되는 이미지를 포함하고 있어요. 스꾸는 비상업 서비스이며, 권리자 분의 요청이 있으면 해당 스티커를 바로 내릴게요. 삭제 요청·문의·원하는 스티커 신청 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
-    <textarea id="fbText" maxlength="1000" placeholder="삭제 요청 / 의견 / 갖고 싶은 스티커 등 무엇이든!"></textarea>
+    <p>마음껏 복사해서 스토리·메신저 꾸미기에 써주세요. 원하는 스티커·의견·오류 제보 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
+    <textarea id="fbText" maxlength="1000" placeholder="의견 / 오류 제보 / 갖고 싶은 스티커 등 무엇이든!"></textarea>
     <div class="info-row">
       <button class="info-send" onclick="sendFeedback()">보내기</button>
     </div>
@@ -532,11 +532,21 @@ function appendRelated(){
 var scrollEl=document.getElementById('scroll');
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
 function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')) ga('info_open',{}); }
+var W3F_KEY="";  // ← web3forms.com 에서 발급받은 Access Key 붙여넣기 (비우면 이메일 안 감, Supabase에만 저장)
 async function sendFeedback(){
   var ta=document.getElementById('fbText'); var msg=ta.value.trim();
   if(!msg){ toast('내용을 입력해주세요!'); return; }
   try{
     if(sb){ var res=await sb.from('seukku_feedback').insert({ message:msg }); if(res.error) throw res.error; }
+    if(W3F_KEY){
+      try{
+        await fetch('https://api.web3forms.com/submit',{
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+          body: JSON.stringify({ access_key:W3F_KEY, subject:'스꾸 새 문의', from_name:'스꾸 문의', message:msg })
+        });
+      }catch(e){}
+    }
     ta.value=''; document.getElementById('infoPanel').classList.remove('open');
     toast('전달됐어요! 고마워요 💚'); ga('feedback_send',{});
   }catch(e){ toast('전송 실패.. 잠시 후 다시!'); }
