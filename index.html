@@ -390,6 +390,7 @@ function isStandalone(){
 }
 if(isStandalone()){ var _ab=document.getElementById('a2hsBtn'); if(_ab) _ab.style.display='none'; }
 window.addEventListener('appinstalled',function(){
+  ga('a2hs_installed',{});
   var b=document.getElementById('a2hsBtn'); if(b) b.style.display='none';
   toast('홈 화면에 추가됐어요 🎉');
 });
@@ -404,6 +405,7 @@ function addToHome(){
   showA2HSGuide();
 }
 function showA2HSGuide(){
+  ga('a2hs_guide_shown',{ os: /iphone|ipad|ipod/i.test(navigator.userAgent) ? 'ios' : 'other' });
   var old=document.getElementById('a2hsGuide'); if(old){ old.remove(); }
   var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
   var steps=isIOS
