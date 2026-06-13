@@ -178,6 +178,9 @@
   .info-row{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
   .info-send{ background:var(--lime); border:1px solid var(--ink); border-radius:12px; padding:8px 14px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
   .info-send:active{ transform:scale(.96); }
+  .biz-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #f0f0ec; font-size:12px; color:#4b5563; }
+  .biz-copy{ flex:0 0 auto; background:var(--lime); border:1px solid var(--ink); border-radius:10px; padding:6px 11px; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .biz-copy:active{ transform:scale(.96); }
 
   .toast{ position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 20px); bottom:auto; transform:translateX(-50%) translateY(-16px);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
@@ -263,6 +266,7 @@
     <div class="info-row">
       <button class="info-send" onclick="sendFeedback()">보내기</button>
     </div>
+    <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
   </div>
   <div class="toast sq" data-r="14" data-fill="#e7ffb3" id="toast"><span class="lbl">복사완료!</span></div>
 </div>
@@ -625,6 +629,15 @@ document.getElementById('copyBtn').addEventListener('pointerdown',function(){ va
 })();
 
 var tt=null;
+function copyBizMail(){
+  var em='logorybusiness@gmail.com';
+  function done(){ toast('메일 주소 복사됨!'); }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(em).then(done, function(){ toast(em); }); }
+    else { var t=document.createElement('textarea'); t.value=em; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); done(); }
+  }catch(e){ toast(em); }
+  try{ ga('biz_mail_copy',{}); }catch(e){}
+}
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
