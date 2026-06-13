@@ -362,13 +362,13 @@ function buildChips(){
     return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selChip(\''+c+'\',this)"><span class="lbl">'+c+'</span></div>';
   }).join('');
 }
-function selChip(c,el){ active=c; buildChips(); renderHome(); }
+function selChip(c,el){ active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); }
 
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
 function listFor(){
   var l=STK.slice();
   if(active==='HOT'){
-    l.sort(function(a,b){return (b.copy_count||0)-(a.copy_count||0);});  // 클릭수(복사수) 높은 순
+    l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 6시간 복사 많은 순
   }
   else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
   else {
@@ -628,6 +628,17 @@ var tt=null;
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
+var HOT6={};
+async function fetchHot6(){
+  if(!sb) return;
+  try{
+    var r=await sb.rpc('hot_last_6h');
+    if(r.error) throw r.error;
+    HOT6={}; (r.data||[]).forEach(function(row){ HOT6[String(row.sticker_id)]=row.cnt; });
+    STK.forEach(function(s){ s.hot6=HOT6[String(s.id)]||0; });
+    if(active==='HOT') renderHome();
+  }catch(e){ console.warn('hot6 실패', e); }
+}
 async function loadSupabase(){
   if(!SB_URL || !SB_KEY) return;            // 미설정이면 더미 유지
   try{
@@ -640,7 +651,7 @@ async function loadSupabase(){
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
     });
-    buildChips(); renderHome();
+    buildChips(); renderHome(); fetchHot6();
   }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); }
 }
 
