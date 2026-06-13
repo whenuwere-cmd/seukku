@@ -692,5 +692,14 @@ window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
+<script>
+(function(){
+  function ev(n){ try{ gtag('event', n); }catch(e){} }
+  /* 설치 완료 (주로 안드로이드) */
+  window.addEventListener('appinstalled', function(){ ev('pwa_install'); });
+  /* 홈 화면 앱으로 실행됨 (iOS/안드 공통) */
+  try{ if((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true){ ev('pwa_launch'); } }catch(e){}
+})();
+</script>
 </body>
 </html>
