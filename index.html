@@ -532,7 +532,7 @@ function appendRelated(){
 var scrollEl=document.getElementById('scroll');
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
 function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')) ga('info_open',{}); }
-var W3F_KEY="";  // ← web3forms.com 에서 발급받은 Access Key 붙여넣기 (비우면 이메일 안 감, Supabase에만 저장)
+var W3F_KEY="8154e180-f78c-4492-b85b-84253c9b09ee";  // web3forms Access Key (이메일 알림)
 async function sendFeedback(){
   var ta=document.getElementById('fbText'); var msg=ta.value.trim();
   if(!msg){ toast('내용을 입력해주세요!'); return; }
