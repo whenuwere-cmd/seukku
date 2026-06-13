@@ -466,7 +466,18 @@ function show(v){ document.querySelectorAll('.view').forEach(function(x){x.class
 function goHome(){ show('home'); renderHome(); }
 
 var curDetail=null, relBase=[], relIdx=0;
-function bumpCount(s){ if(!s) return; s.copy_count=(s.copy_count||0)+1; if(sb){ try{ sb.rpc('increment_copy',{ p_id:s.id }).then(function(){},function(){}); }catch(e){} } }
+/* 복사/조회가 어디서 발생했는지: 검색중이면 search, 상세 안 더찾아보기면 related, 그 외 home */
+function copySource(){
+  try{ if(document.getElementById('searchMode').classList.contains('open')) return 'search'; }catch(e){}
+  return currentView==='detail' ? 'related' : 'home';
+}
+function bumpCount(s, source){
+  if(!s) return; s.copy_count=(s.copy_count||0)+1;
+  if(sb){
+    try{ sb.rpc('increment_copy',{ p_id:s.id }).then(function(){},function(){}); }catch(e){}
+    try{ sb.from('copy_events').insert({ sticker_id:s.id, source:source||'unknown' }).then(function(){},function(){}); }catch(e){}
+  }
+}
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
 function relatedList(s){
   var mine={}; ((s.kw||'')+' '+(s.tg||'')+' '+(s.n||'')).toLowerCase().split(/[\s,]+/).forEach(function(t){ if(t) mine[t]=1; });
@@ -480,7 +491,7 @@ function relatedList(s){
   return arr.map(function(o){ return o.x; });
 }
 function openDetail(id){
-  var s=findSticker(id); if(!s) return; curDetail=s; bumpCount(s);
+  var s=findSticker(id); if(!s) return; var src=copySource(); curDetail=s; bumpCount(s, src);
   if(!s._blob){ s._blob=(async function(){ try{return await fetchPngBlob(copyUrl(s));}catch(e){try{return await fetchPngBlob(s.u);}catch(e2){try{return await emojiPng(s.e);}catch(e3){return null;}}} })(); s._blob.then(function(b){ if(b) s._blobReady=b; }); }
   ga('sticker_view',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
@@ -556,7 +567,7 @@ async function shareOrDownload(blob, s){
   toast('이미지 저장 완료!');
 }
 function copySticker(s){
-  bumpCount(s);
+  bumpCount(s, 'copy');
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
   var ready=s._blobReady||null;                 // 이미 받아둔 PNG (제스처 내 즉시 사용 가능)
   var blobPromise=s._blob||(async function(){
