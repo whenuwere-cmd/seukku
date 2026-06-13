@@ -346,7 +346,7 @@ var STK=[
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
 
-var CHIPS=['HOT','NEW','Summer','Heart','Food','Retro','Mono','Text','Electric','etc'];
+var CHIPS=['HOT','NEW','Summer','Text','Heart','Food','Retro','Mono','Electric','etc'];
 function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s,eager){
@@ -595,6 +595,10 @@ var tt=null;
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
+var STK_CACHE_KEY='skk_stk_cache';
+function saveStkCache(){ try{ localStorage.setItem(STK_CACHE_KEY, JSON.stringify(STK.slice(0,300))); }catch(e){} }
+function loadStkCache(){ try{ var c=localStorage.getItem(STK_CACHE_KEY); if(c){ var a=JSON.parse(c); if(a&&a.length){ STK=a; return true; } } }catch(e){} return false; }
+
 async function loadSupabase(){
   if(!SB_URL || !SB_KEY){ renderHome(); return; }   // 미설정이면 인라인이라도 표시
   try{
@@ -607,12 +611,15 @@ async function loadSupabase(){
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
     });
-    buildChips(); renderHome();
+    buildChips(); renderHome(); saveStkCache();      // 최신으로 교체 + 다음 진입용 캐시 저장
   }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); renderHome(); }
 }
 
-/* 칩은 즉시 표시하되, 스티커 그리드는 Supabase 로드 후에만 그림 → 옛날 인라인 스티커 깜빡임 방지 */
-buildChips(); loadSupabase();
+/* 즉시 렌더: 직전 캐시가 있으면 그걸로 바로 그리고(깜빡임 없음), 없으면 인라인으로라도 즉시 표시.
+   그 후 loadSupabase가 백그라운드에서 최신으로 조용히 교체 (stale-while-revalidate) */
+loadStkCache();
+buildChips(); renderHome(); loadSupabase();
+
 
 </script>
 
