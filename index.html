@@ -296,7 +296,7 @@ function picErr(img){
 }
 
 /* 파일명 앞 단어 -> 카테고리 (food_milktea.png -> Food) */
-var CATMAP={summervive:'Summer Vive',summervibe:'Summer Vive',summer:'Summer Vive',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric',heart:'Heart',star:'Star',chrome:'Chrome',ribbon:'Ribbon',retro:'Retro',beauty:'Beauty'};
+var CATMAP={summervive:'Summer',summervibe:'Summer',summer:'Summer',mono:'Mono',text:'Text',food:'Food',electric:'Electric',electronic:'Electric',heart:'Heart',star:'Star',chrome:'Chrome',ribbon:'Ribbon',retro:'Retro',beauty:'Beauty'};
 function catFromFile(path){
   var f=(path||'').split('/').pop();
   var t=(f.split('_')[0]||'').toLowerCase();
@@ -314,9 +314,9 @@ var STK=[
  {u:A+"b060f72e-2914-4d14-aba8-09e983f77e79",n:"경악스런 하루",c:"Text",e:"💬"},
  {u:A+"8973dee8-8e1a-4e28-ac23-0723d2b66fbc",n:"세월아 네월아",c:"Text",e:"🏷️"},
  {u:A+"ced18c27-cbf7-47e7-9128-861d376cb0c0",n:"방울토마토",c:"Food",e:"🍅"},
- {u:A+"64a98fc3-2e03-48aa-937f-dfb8a0650d3c",n:"덥다 티셔츠",c:"Summer Vive",e:"👕"},
+ {u:A+"64a98fc3-2e03-48aa-937f-dfb8a0650d3c",n:"덥다 티셔츠",c:"Summer",e:"👕"},
  {u:A+"f8d9837b-5f03-4e38-8ae8-0fc774ebeca0",n:"블루 케이크",c:"Food",e:"🎂"},
- {u:A+"b6c972a9-7220-4d19-96b3-370a91691799",n:"블루 소다",c:"Summer Vive",e:"🥤"},
+ {u:A+"b6c972a9-7220-4d19-96b3-370a91691799",n:"블루 소다",c:"Summer",e:"🥤"},
  {u:A+"5f035950-d180-407d-9228-ea5677a821aa",n:"좋은 하루 보내세요",c:"Text",e:"💌"},
  {u:A+"1b711939-b549-4514-831e-13226c8caa93",n:"어느 날 오후",c:"Text",e:"🔖"},
  {u:A+"2a5c8138-4553-4359-9a1c-4c1f8c215c1c",n:"실버 백",c:"Mono",e:"🛍️"},
@@ -327,12 +327,12 @@ var STK=[
  {u:A+"646b1505-1e3a-4022-ad3a-327c0e254d37",n:"빈티지 리본",c:"Mono",e:"🎀"},
  {u:A+"c71c83ae-e0eb-44e0-9178-05e2d33705ac",n:"샤이니 오브제",c:"Electric",e:"💿"},
  {u:A+"4c3a4607-148a-4ce0-b69b-f56b03450f25",n:"레터링 스티커",c:"Text",e:"✏️"},
- {u:A+"a27a14a9-4210-4b68-86f4-f24f811f547a",n:"여름 무드",c:"Summer Vive",e:"🌊"},
- {u:A+"6cb9e693-9e4c-46a3-9e08-9b7043cf2dac",n:"데일리 포인트",c:"Summer Vive",e:"🐚"}
+ {u:A+"a27a14a9-4210-4b68-86f4-f24f811f547a",n:"여름 무드",c:"Summer",e:"🌊"},
+ {u:A+"6cb9e693-9e4c-46a3-9e08-9b7043cf2dac",n:"데일리 포인트",c:"Summer",e:"🐚"}
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
 
-var CHIPS=['HOT','NEW','Heart','Star','Chrome','Ribbon','Food','Retro','Beauty','Summer Vive','Mono','Text','Electric','etc'];
+var CHIPS=['HOT','NEW','Summer','Text','Food','Retro','Mono','Electric','etc'];
 function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s,eager){
