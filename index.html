@@ -346,7 +346,7 @@ var STK=[
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
 
-var CHIPS=['HOT','NEW','Heart','Star','Chrome','Ribbon','Food','Retro','Beauty','Summer Vive','Mono','Text','Electric','etc'];
+var CHIPS=['HOT','NEW','Summer','Heart','Food','Retro','Mono','Text','Electric','etc'];
 function pad(n){ return String(n).padStart(3,'0'); }
 
 function cardHtml(s,eager){
@@ -366,11 +366,18 @@ function buildChips(){
 }
 function selChip(c,el){ active=c; buildChips(); renderHome(); }
 
-/* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
+/* 칩별 목록: HOT=복사수순, NEW=최신순, Summer=여름 키워드, 나머지=카테고리 */
+var SUMMER_KW=['여름','summer','수박','시원','시원한','바다','해변','beach','수영','물놀이','파도','wave','소다','soda','아이스','ice','얼음','시원해','워터','water','수영장','pool','휴가','vacation','선글라스','sunglass','계곡','조개','shell','파라솔','튜브','빙수','음료','드링크','drink','쿨','cool','하와이','tropical','열대','써머','써니','sunny'];
 function listFor(){
   var l=STK.slice();
   if(active==='HOT') l.sort(function(a,b){return ((b.featured?1:0)-(a.featured?1:0)) || ((b.copy_count||0)-(a.copy_count||0));});
   else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
+  else if(active==='Summer'){
+    l=l.filter(function(s){
+      var hay=((s.n||'')+' '+(s.c||'')+' '+(s.kw||'')+' '+(s.tg||'')).toLowerCase();
+      return SUMMER_KW.some(function(k){ return hay.indexOf(k.toLowerCase())>=0; });
+    });
+  }
   else l=l.filter(function(s){return s.c===active;});
   return l;
 }
