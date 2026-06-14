@@ -613,7 +613,7 @@ function copySticker(s){
     var src = ready ? Promise.resolve(ready) : blobPromise;
     try{
       navigator.clipboard.write([ new ClipboardItem({ 'image/png': src }) ])
-        .then(function(){ toast('복사완료!'); })
+        .then(function(){ toast('복사완료!'); if(DBG) src.then(function(b){ alert('[복사 진단] 성공\n형식: '+((b&&b.type)||'?')+'\n용량: '+(b?Math.round(b.size/1024):0)+'KB'); }); })
         .catch(function(e){
           if(DBG) alert('[복사 진단] '+((e&&e.name)||'Error')+'\n'+((e&&e.message)||''));
           src.then(function(b){ if(b) shareOrDownload(b, s); });
