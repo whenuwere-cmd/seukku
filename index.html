@@ -601,33 +601,25 @@ async function shareOrDownload(blob, s){
   setTimeout(function(){ URL.revokeObjectURL(url); },4000);
   toast('이미지 저장 완료! 갤러리에서 불러와 써주세요');
 }
-var DBG=/[?&]debug=1/.test(location.search||"");  /* ?debug=1 일 때만 진단 팝업 */
 function copySticker(s){
   bumpCount(s, 'copy');
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
-  var ready=s._blobReady||null;                 // 이미 받아둔 PNG (제스처 내 즉시 사용 가능)
+  var ready=s._blobReady||null;                 // 미리 받아둔 PNG (제스처 내 즉시 사용)
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* ① 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) */
+  /* 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) — 저장/다운로드 폴백 없음 */
   if(canImageCopy()){
     var src = ready ? Promise.resolve(ready) : blobPromise;
     try{
       navigator.clipboard.write([ new ClipboardItem({ 'image/png': src }) ])
-        .then(function(){ toast('복사완료!'); if(DBG) src.then(function(b){ alert('[복사 진단] 성공\n형식: '+((b&&b.type)||'?')+'\n용량: '+(b?Math.round(b.size/1024):0)+'KB'); }); })
-        .catch(function(e){
-          if(DBG) alert('[복사 진단] '+((e&&e.name)||'Error')+'\n'+((e&&e.message)||''));
-          src.then(function(b){ if(b) shareOrDownload(b, s); });
-        });
+        .then(function(){ toast('복사완료!'); })
+        .catch(function(){ toast('복사가 안 됐어요. 한 번 더 눌러주세요'); });
     }catch(e){
-      if(DBG) alert('[복사 진단/예외] '+((e&&e.name)||'Error')+'\n'+((e&&e.message)||''));
-      src.then(function(b){ if(b) shareOrDownload(b, s); });
+      toast('복사가 안 됐어요. 한 번 더 눌러주세요');
     }
     return;
   }
-  /* ② 이미지 복사 API 자체가 없음 */
-  if(DBG) alert('[복사 진단] 이 브라우저는 이미지 클립보드 미지원 (ClipboardItem 없음)');
-  if(ready){ shareOrDownload(ready, s); }
-  else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } }); }
+  toast('이 브라우저는 이미지 복사를 지원하지 않아요');
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 document.getElementById('copyBtn').addEventListener('pointerdown',function(){ var s=curDetail; if(s && !s._blob){ s._blob=loadStickerBlob(s); s._blob.then(function(b){ if(b) s._blobReady=b; }); } },{passive:true});
