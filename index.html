@@ -178,6 +178,9 @@
   .info-row{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
   .info-send{ background:var(--lime); border:1px solid var(--ink); border-radius:12px; padding:8px 14px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
   .info-send:active{ transform:scale(.96); }
+  .biz-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #f0f0ec; font-size:12px; color:#4b5563; }
+  .biz-copy{ flex:0 0 auto; background:var(--lime); border:1px solid var(--ink); border-radius:10px; padding:6px 11px; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .biz-copy:active{ transform:scale(.96); }
 
   .toast{ position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 20px); bottom:auto; transform:translateX(-50%) translateY(-16px);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
@@ -263,6 +266,7 @@
     <div class="info-row">
       <button class="info-send" onclick="sendFeedback()">보내기</button>
     </div>
+    <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
   </div>
   <div class="toast sq" data-r="14" data-fill="#e7ffb3" id="toast"><span class="lbl">복사완료!</span></div>
 </div>
@@ -363,13 +367,13 @@ function buildChips(){
     return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selChip(\''+c+'\',this)"><span class="lbl">'+c+'</span></div>';
   }).join('');
 }
-function selChip(c,el){ active=c; buildChips(); renderHome(); }
+function selChip(c,el){ active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); }
 
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
 function listFor(){
   var l=STK.slice();
   if(active==='HOT'){
-    l.sort(function(a,b){return (b.copy_count||0)-(a.copy_count||0);});  // 클릭수(복사수) 높은 순
+    l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 6시간 복사 많은 순
   }
   else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
   else {
@@ -621,9 +625,29 @@ document.getElementById('copyBtn').addEventListener('pointerdown',function(){ va
 })();
 
 var tt=null;
+function copyBizMail(){
+  var em='logorybusiness@gmail.com';
+  function done(){ toast('메일 주소 복사됨!'); }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(em).then(done, function(){ toast(em); }); }
+    else { var t=document.createElement('textarea'); t.value=em; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); done(); }
+  }catch(e){ toast(em); }
+  try{ ga('biz_mail_copy',{}); }catch(e){}
+}
 function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
+var HOT6={};
+async function fetchHot6(){
+  if(!sb) return;
+  try{
+    var r=await sb.rpc('hot_last_6h');
+    if(r.error) throw r.error;
+    HOT6={}; (r.data||[]).forEach(function(row){ HOT6[String(row.sticker_id)]=row.cnt; });
+    STK.forEach(function(s){ s.hot6=HOT6[String(s.id)]||0; });
+    if(active==='HOT') renderHome();
+  }catch(e){ console.warn('hot6 실패', e); }
+}
 async function loadSupabase(){
   if(!SB_URL || !SB_KEY) return;            // 미설정이면 더미 유지
   try{
@@ -636,7 +660,7 @@ async function loadSupabase(){
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
     });
-    buildChips(); renderHome();
+    buildChips(); renderHome(); fetchHot6();
   }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); }
 }
 
@@ -688,5 +712,14 @@ window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
+<script>
+(function(){
+  function ev(n){ try{ gtag('event', n); }catch(e){} }
+  /* 설치 완료 (주로 안드로이드) */
+  window.addEventListener('appinstalled', function(){ ev('pwa_install'); });
+  /* 홈 화면 앱으로 실행됨 (iOS/안드 공통) */
+  try{ if((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true){ ev('pwa_launch'); } }catch(e){}
+})();
+</script>
 </body>
 </html>
