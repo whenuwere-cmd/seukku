@@ -568,20 +568,15 @@ function canCopyImage(){
 }
 /* 삼성 인터넷은 이미지 클립보드가 불안정 → 공유/저장으로 우회 */
 function isSamsung(){ try{ return /SamsungBrowser/i.test(navigator.userAgent||''); }catch(e){ return false; } }
-function canImageCopy(){ return canCopyImage() && !isSamsung(); }
+function canImageCopy(){ return canCopyImage(); }  /* 갤럭시(삼성)도 복사 시도 → 안 되면 자동 저장 */
 /* 복사가 막힌 기기: Web Share(스토리에 바로 공유) → 안 되면 다운로드 */
 async function shareOrDownload(blob, s){
   var fname=((s.n||'sticker').replace(/[^\w가-힣]+/g,'_'))+'.png';
-  var file=new File([blob], fname, {type:'image/png'});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share({files:[file]}); toast('공유 완료!'); return; }
-    catch(e){ if(e && e.name==='AbortError') return; }
-  }
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a'); a.href=url; a.download=fname;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); },4000);
-  toast('이미지 저장 완료!');
+  toast('이미지 저장 완료! 갤러리에서 불러와 써주세요');
 }
 function copySticker(s){
   bumpCount(s, 'copy');
