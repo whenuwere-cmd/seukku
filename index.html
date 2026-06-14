@@ -90,7 +90,7 @@
   .notice-bar{ background:#E7FFB3; overflow:hidden; border-bottom:1px solid #1F2937; }
   .notice-track{ display:inline-flex; white-space:nowrap; will-change:transform; animation:notice-scroll 22s linear infinite; }
   .notice-track:hover{ animation-play-state:paused; }
-  .notice-track span{ display:inline-block; padding:13px 0; padding-right:64px; font-size:13px; font-weight:600; color:#1F2937; letter-spacing:-.2px; }
+  .notice-track span{ display:inline-block; padding:13px 0; padding-right:30px; font-size:13px; font-weight:600; color:#1F2937; letter-spacing:-.2px; }
   @keyframes notice-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   @media (prefers-reduced-motion: reduce){ .notice-track{ animation:none; } }
   .scroll{ height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:96px; }
@@ -198,7 +198,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="notice-bar" role="status" aria-label="공지"><div class="notice-track"><span>스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span></div></div>
+  <div class="notice-bar" role="status" aria-label="공지"><div class="notice-track"><span>스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">갤럭시 오류는 빠르게 수정해볼게요 ㅠㅠ</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">갤럭시 오류는 빠르게 수정해볼게요 ㅠㅠ</span></div></div>
   <h1 class="sr-only">스꾸 seukku - 스티커 모음 사이트, 복사해서 바로 스티커 꾸미기</h1>
   <p class="sr-only">야구 스티커 모음, 야구 짤, 야구 밈, 야구 짤 모음, 야구 말풍선 짤을 복사해서 바로 쓰는 스꾸. ⚾️ 탭에서 야구 밈 스티커를 골라 카톡·스토리에 붙여넣으세요.</p>
   <noscript>
@@ -272,7 +272,7 @@
     <p>마음껏 복사해서 스토리·메신저 꾸미기에 써주세요. 원하는 스티커·의견·오류 제보 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
     <textarea id="fbText" maxlength="1000" placeholder="의견 / 오류 제보 / 갖고 싶은 스티커 등 무엇이든!"></textarea>
     <div class="info-row">
-      <button class="info-send" onclick="sendFeedback()">보내기</button>
+      <button class="info-send" id="fbSend" onclick="sendFeedback()">보내기</button>
     </div>
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
   </div>
@@ -547,25 +547,19 @@ function appendRelated(){
 
 var scrollEl=document.getElementById('scroll');
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
-function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')) ga('info_open',{}); }
+function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')){ var b=document.getElementById('fbSend'); if(b){ b.textContent='보내기'; b.disabled=false; } ga('info_open',{}); } }
 var W3F_KEY="8154e180-f78c-4492-b85b-84253c9b09ee";  // web3forms Access Key (이메일 알림)
-async function sendFeedback(){
+function sendFeedback(){
   var ta=document.getElementById('fbText'); var msg=ta.value.trim();
   if(!msg){ toast('내용을 입력해주세요!'); return; }
-  try{
-    if(sb){ var res=await sb.from('seukku_feedback').insert({ message:msg }); if(res.error) throw res.error; }
-    if(W3F_KEY){
-      try{
-        await fetch('https://api.web3forms.com/submit',{
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-          body: JSON.stringify({ access_key:W3F_KEY, subject:'스꾸 새 문의', from_name:'스꾸 문의', message:msg })
-        });
-      }catch(e){}
-    }
-    ta.value=''; document.getElementById('infoPanel').classList.remove('open');
-    toast('전달됐어요! 고마워요 💚'); ga('feedback_send',{});
-  }catch(e){ toast('전송 실패.. 잠시 후 다시!'); }
+  var btn=document.getElementById('fbSend');
+  if(btn){ btn.textContent='전송완료'; btn.disabled=true; }   // 즉시 반응
+  ga('feedback_send',{});
+  /* 전송은 백그라운드 (화면은 바로 반응) */
+  if(sb){ try{ sb.from('seukku_feedback').insert({ message:msg }).then(function(){},function(){}); }catch(e){} }
+  if(W3F_KEY){ try{ fetch('https://api.web3forms.com/submit',{ method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify({ access_key:W3F_KEY, subject:'스꾸 새 문의', from_name:'스꾸 문의', message:msg }) }).catch(function(){}); }catch(e){} }
+  /* 잠깐 '전송완료' 보여주고 닫기 */
+  setTimeout(function(){ ta.value=''; document.getElementById('infoPanel').classList.remove('open'); }, 700);
 }
 function goTop(){ scrollEl.scrollTo({top:0,behavior:'smooth'}); }
 scrollEl.addEventListener('scroll',function(){
