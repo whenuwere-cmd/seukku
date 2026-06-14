@@ -347,7 +347,7 @@ var STK=[
  {u:A+"a27a14a9-4210-4b68-86f4-f24f811f547a",n:"여름 무드",c:"Summer",e:"🌊"},
  {u:A+"6cb9e693-9e4c-46a3-9e08-9b7043cf2dac",n:"데일리 포인트",c:"Summer",e:"🐚"}
 ];
-STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; });
+STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; s.rnd=Math.random(); });
 
 var CHIPS=['HOT','NEW','Summer','emoji','⚾️','Text','Food','Retro','Mono','Electric','etc'];
 /* 칩별 ai_tags 확장 키워드 — 해당 카테고리 + 아래 키워드가 태그/이름/키워드에 있으면 같이 노출 */
@@ -394,9 +394,11 @@ function listFor(){
         for(var _i=0;_i<_ct.length;_i++){ if(hay.indexOf(_ct[_i])>=0) return true; }
         return false;
       });
-      l.sort(function(a,b){ return (b.c===active?1:0)-(a.c===active?1:0); }); // 정확 카테고리 먼저
+      // 정확 카테고리 먼저 + 그 안에서는 접속할 때마다 랜덤
+      l.sort(function(a,b){ var ex=(b.c===active?1:0)-(a.c===active?1:0); return ex!==0?ex:((a.rnd||0)-(b.rnd||0)); });
     } else {
       l=l.filter(function(s){return s.c===active;});
+      l.sort(function(a,b){ return (a.rnd||0)-(b.rnd||0); }); // 접속할 때마다 랜덤
     }
   }
   return l;
@@ -675,7 +677,7 @@ async function loadSupabase(){
     STK=(res.data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
-               copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
+               copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id, rnd:Math.random() };
     });
     buildChips(); renderHome(); fetchHot6();
   }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); buildChips(); renderHome(); }
