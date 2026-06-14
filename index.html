@@ -86,6 +86,13 @@
     background:#e6e6e6; color:var(--ink); display:flex; justify-content:center; -webkit-font-smoothing:antialiased; }
   #app{ width:100%; min-width:340px; max-width:500px; min-height:100vh; background:var(--bg);
     position:relative; overflow:hidden; box-shadow:0 0 50px rgba(0,0,0,.14); }
+  /* 상단 흐르는 띠배너(마퀴) */
+  .notice-bar{ background:#E7FFB3; overflow:hidden; border-bottom:1px solid #1F2937; }
+  .notice-track{ display:inline-flex; white-space:nowrap; will-change:transform; animation:notice-scroll 22s linear infinite; }
+  .notice-track:hover{ animation-play-state:paused; }
+  .notice-track span{ display:inline-block; padding:13px 0; padding-right:64px; font-size:13px; font-weight:600; color:#1F2937; letter-spacing:-.2px; }
+  @keyframes notice-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce){ .notice-track{ animation:none; } }
   .scroll{ height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:96px; }
   .view{ display:none; } .view.active{ display:block; animation:fade .28s ease; }
   @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
@@ -191,6 +198,7 @@
 </head>
 <body>
 <div id="app">
+  <div class="notice-bar" role="status" aria-label="공지"><div class="notice-track"><span>스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span></div></div>
   <h1 class="sr-only">스꾸 seukku - 스티커 모음 사이트, 복사해서 바로 스티커 꾸미기</h1>
   <p class="sr-only">야구 스티커 모음, 야구 짤, 야구 밈, 야구 짤 모음, 야구 말풍선 짤을 복사해서 바로 쓰는 스꾸. ⚾️ 탭에서 야구 밈 스티커를 골라 카톡·스토리에 붙여넣으세요.</p>
   <noscript>
