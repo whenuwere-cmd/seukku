@@ -453,7 +453,15 @@ function showA2HSGuide(){
   document.body.appendChild(ov);
 }
 function shareUrl(){
-  var url=location.href;
+  var url=location.origin+location.pathname;
+  /* iOS·안드로이드: 네이티브 공유 시트(링크복사·공유대상 등) */
+  if(navigator.share){
+    ga('share',{ method:'web_share' });
+    navigator.share({ title:'스꾸 seukku', text:'저장 없이 복사해서 바로 쓰는 스티커 모음, 스꾸!', url:url })
+      .then(function(){},function(e){ /* 사용자가 취소하면 무시 */ });
+    return;
+  }
+  /* 데스크탑 등 미지원: 링크 복사로 폴백 */
   ga('share',{ method:'url_copy' });
   function done(){ toast('URL복사 완료!'); }
   if(navigator.clipboard && navigator.clipboard.writeText){
