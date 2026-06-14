@@ -607,17 +607,26 @@ function copySticker(s){
   var ready=s._blobReady||null;                 // 이미 받아둔 PNG (제스처 내 즉시 사용 가능)
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* ① 이미지 클립보드 복사 (지원 기기, 삼성 제외) */
+  /* ① 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) */
   if(canImageCopy()){
-    var item = ready ? new ClipboardItem({ 'image/png': ready }) : new ClipboardItem({ 'image/png': blobPromise });
-    navigator.clipboard.write([ item ])
-      .then(function(){ toast('복사완료!'); })
-      .catch(function(){ if(ready) shareOrDownload(ready, s); else blobPromise.then(function(b){ if(b) shareOrDownload(b, s); else toast('잠시 후 다시 시도해주세요'); }); });
+    var src = ready ? Promise.resolve(ready) : blobPromise;
+    try{
+      navigator.clipboard.write([ new ClipboardItem({ 'image/png': src }) ])
+        .then(function(){ toast('복사완료!'); })
+        .catch(function(e){
+          alert('[복사 진단] '+((e&&e.name)||'Error')+'\n'+((e&&e.message)||'')); // 임시 진단
+          src.then(function(b){ if(b) shareOrDownload(b, s); });
+        });
+    }catch(e){
+      alert('[복사 진단/예외] '+((e&&e.name)||'Error')+'\n'+((e&&e.message)||'')); // 임시 진단
+      src.then(function(b){ if(b) shareOrDownload(b, s); });
+    }
     return;
   }
-  /* ② 복사 미지원(삼성 인터넷 등) → 공유/저장. 제스처 유지 위해 준비된 blob은 즉시 실행 */
+  /* ② 이미지 복사 API 자체가 없음 */
+  alert('[복사 진단] 이 브라우저는 이미지 클립보드 미지원 (ClipboardItem 없음)'); // 임시 진단
   if(ready){ shareOrDownload(ready, s); }
-  else{ toast('준비 중이에요, 한 번 더 눌러주세요'); blobPromise.then(function(b){ if(b) s._blobReady=b; }); }
+  else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } }); }
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 document.getElementById('copyBtn').addEventListener('pointerdown',function(){ var s=curDetail; if(s && !s._blob){ s._blob=loadStickerBlob(s); s._blob.then(function(b){ if(b) s._blobReady=b; }); } },{passive:true});
