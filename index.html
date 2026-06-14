@@ -609,11 +609,11 @@ function copySticker(s){
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) — 저장 폴백 없음 */
+  /* 준비된 blob이 있으면 blob 자체를 넣음(안드로이드 WebView 호환↑), 없으면 Promise(아이폰 제스처 유지) */
   if(canImageCopy()){
-    var src = ready ? Promise.resolve(ready) : blobPromise;
+    var item = ready ? new ClipboardItem({ 'image/png': ready }) : new ClipboardItem({ 'image/png': blobPromise });
     try{
-      navigator.clipboard.write([ new ClipboardItem({ 'image/png': src }) ])
+      navigator.clipboard.write([ item ])
         .then(function(){ toast('복사완료!'); })
         .catch(function(){ toast('복사가 안 됐어요. 한 번 더 눌러주세요'); });
     }catch(e){
