@@ -189,11 +189,12 @@
   .biz-copy{ flex:0 0 auto; background:var(--lime); border:1px solid var(--ink); border-radius:10px; padding:6px 11px; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
   .biz-copy:active{ transform:scale(.96); }
 
-  .toast{ position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 20px); bottom:auto; transform:translateX(-50%) translateY(-16px);
+  .toast{ position:absolute; left:50%; top:22%; bottom:auto; transform:translate(-50%,-50%) scale(.92);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
     font-size:14px; font-weight:600; opacity:0; transition:opacity .1s,transform .1s; pointer-events:none; z-index:50; }
   .toast .lbl{ position:relative; z-index:2; }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  .toast.high{ top:22%; }
 </style>
 </head>
 <body>
@@ -555,6 +556,7 @@ function sendFeedback(){
   var btn=document.getElementById('fbSend');
   if(btn){ btn.textContent='전송완료'; btn.disabled=true; }   // 즉시 반응
   ga('feedback_send',{});
+  toast('전달됐어요! 고마워요 💚','high');
   /* 전송은 백그라운드 (화면은 바로 반응) */
   if(sb){ try{ sb.from('seukku_feedback').insert({ message:msg }).then(function(){},function(){}); }catch(e){} }
   if(W3F_KEY){ try{ fetch('https://api.web3forms.com/submit',{ method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify({ access_key:W3F_KEY, subject:'스꾸 새 문의', from_name:'스꾸 문의', message:msg }) }).catch(function(){}); }catch(e){} }
@@ -604,10 +606,10 @@ async function shareOrDownload(blob, s){
 function copySticker(s){
   bumpCount(s, 'copy');
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
-  var ready=s._blobReady||null;                 // 미리 받아둔 PNG (제스처 내 즉시 사용)
+  var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) — 저장/다운로드 폴백 없음 */
+  /* 이미지 클립보드 복사 (Promise 형태 → iOS·크롬 모두 지원) — 저장 폴백 없음 */
   if(canImageCopy()){
     var src = ready ? Promise.resolve(ready) : blobPromise;
     try{
@@ -645,14 +647,14 @@ document.getElementById('copyBtn').addEventListener('pointerdown',function(){ va
 var tt=null;
 function copyBizMail(){
   var em='logorybusiness@gmail.com';
-  function done(){ toast('메일 주소 복사됨!'); }
+  function done(){ toast('메일 주소 복사됨!','high'); }
   try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(em).then(done, function(){ toast(em); }); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(em).then(done, function(){ toast(em,'high'); }); }
     else { var t=document.createElement('textarea'); t.value=em; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); done(); }
-  }catch(e){ toast(em); }
+  }catch(e){ toast(em,'high'); }
   try{ ga('biz_mail_copy',{}); }catch(e){}
 }
-function toast(m){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
+function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
 var HOT6={};
@@ -679,10 +681,10 @@ async function loadSupabase(){
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id };
     });
     buildChips(); renderHome(); fetchHot6();
-  }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); }
+  }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); buildChips(); renderHome(); }
 }
 
-buildChips(); renderHome(); loadSupabase();
+buildChips(); loadSupabase();   /* 초기엔 안 그림 → DB 데이터 오면 그림 (옛 스티커 깜빡임 방지) */
 </script>
 
 <script type="module">
