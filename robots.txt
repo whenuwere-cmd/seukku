@@ -4,7 +4,4 @@ Allow: /
 User-agent: Yeti
 Allow: /
 
-User-agent: Googlebot
-Allow: /
-
 Sitemap: https://seukku.seukku.workers.dev/sitemap.xml
