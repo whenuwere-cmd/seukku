@@ -199,7 +199,8 @@
   .toast{ position:absolute; left:50%; top:22%; bottom:auto; transform:translate(-50%,-50%) scale(.92);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
     font-size:14px; font-weight:600; opacity:0; transition:opacity .1s,transform .1s; pointer-events:none; z-index:50;
-    text-align:center; white-space:pre-line; line-height:1.5; }
+    text-align:center; white-space:pre-line; line-height:1.5;
+    width:max-content; max-width:calc(100% - 24px); word-break:keep-all; box-sizing:border-box; }
   .toast .lbl{ position:relative; z-index:2; }
   .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   .toast.high{ top:22%; }
