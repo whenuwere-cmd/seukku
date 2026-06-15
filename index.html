@@ -148,6 +148,9 @@
   .chip:active{ transform:scale(.96); }
 
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
+  .rc-empty{ grid-column:1/-1; text-align:center; padding:56px 16px 34px; color:var(--ink2); line-height:1.85; }
+  .rc-empty .big{ font-size:42px; display:block; margin-bottom:12px; }
+  .rc-empty .sub{ font-size:13px; color:#9ca3af; display:block; margin-top:4px; }
   .stk{ aspect-ratio:1/1; border:1px solid var(--ink); border-radius:24px; overflow:hidden; cursor:pointer;
     display:flex; align-items:center; justify-content:center; }
   .stk:active{ transform:scale(.95); }
@@ -195,7 +198,8 @@
 
   .toast{ position:absolute; left:50%; top:22%; bottom:auto; transform:translate(-50%,-50%) scale(.92);
     background:var(--lime); border:1px solid var(--ink); color:var(--ink2); padding:11px 20px; border-radius:14px;
-    font-size:14px; font-weight:600; opacity:0; transition:opacity .1s,transform .1s; pointer-events:none; z-index:50; }
+    font-size:14px; font-weight:600; opacity:0; transition:opacity .1s,transform .1s; pointer-events:none; z-index:50;
+    text-align:center; white-space:pre-line; line-height:1.5; }
   .toast .lbl{ position:relative; z-index:2; }
   .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   .toast.high{ top:22%; }
@@ -203,7 +207,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="notice-bar" role="status" aria-label="공지"><div class="notice-track"><span>스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span><span aria-hidden="true">스티커 복사 오류를 수정했어요. 불편을 드려 죄송해요! 🍀</span></div></div>
+  <div class="notice-bar" role="status" aria-label="공지"><div class="notice-track"><span>🍀 NEW! 복사한 스티커가 [최근사용] 탭에 자동으로 저장돼요</span><span aria-hidden="true">🍀 NEW! 복사한 스티커가 [최근사용] 탭에 자동으로 저장돼요</span><span aria-hidden="true">🍀 NEW! 복사한 스티커가 [최근사용] 탭에 자동으로 저장돼요</span><span aria-hidden="true">🍀 NEW! 복사한 스티커가 [최근사용] 탭에 자동으로 저장돼요</span></div></div>
   <h1 class="sr-only">스꾸 seukku - 스티커 모음 사이트, 복사해서 바로 스티커 꾸미기</h1>
   <p class="sr-only">야구 스티커 모음, 야구 짤, 야구 밈, 야구 짤 모음, 야구 말풍선 짤을 복사해서 바로 쓰는 스꾸. ⚾️ 탭에서 야구 밈 스티커를 골라 카톡·스토리에 붙여넣으세요.</p>
   <noscript>
@@ -353,7 +357,8 @@ var STK=[
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; s.rnd=Math.random(); });
 
-var CHIPS=['HOT','NEW','Summer','emoji','⚾️','Text','Food','Retro','Mono','Electric','etc'];
+var CHIPS=['HOT','NEW','최근','Summer','emoji','⚾️','Text','Food','Retro','Mono','Electric','etc'];
+var CHIP_LABEL={ '최근':'✨ 최근사용' }; // 내부 키는 그대로, 화면에 보이는 글자만 교체
 /* 칩별 ai_tags 확장 키워드 — 해당 카테고리 + 아래 키워드가 태그/이름/키워드에 있으면 같이 노출 */
 var CHIP_TAGS={
   'Summer':['여름','써머','summer','바다','beach','비치','시원','휴가','바캉스','vacation','조개','소라','트로피컬','tropical','선글라스','sunglasses','수박','아이스','얼음','ice','파란','블루','blue','청량','워터','water','수영','해변','금붕어','물고기','fish','꽃','flower'],
@@ -365,6 +370,19 @@ var CHIP_TAGS={
 };
 function pad(n){ return String(n).padStart(3,'0'); }
 
+/* ===== 최근 사용 (로그인 없이 localStorage 자동 기록) ===== */
+var RECENT_MAX=30;
+var RECENT=(function(){ try{ return (JSON.parse(localStorage.getItem('seukku_recent')||'[]')||[]).map(String); }catch(e){ return []; } })();
+function pushRecent(id){
+  id=String(id);
+  var i=RECENT.indexOf(id); if(i>=0) RECENT.splice(i,1); // 이미 있으면 맨 앞으로
+  RECENT.unshift(id);
+  if(RECENT.length>RECENT_MAX) RECENT=RECENT.slice(0,RECENT_MAX);
+  try{ localStorage.setItem('seukku_recent', JSON.stringify(RECENT)); }catch(e){}
+  buildChips();                       // 첫 복사 시 '최근' 칩이 나타나도록
+  if(active==='최근') renderHome();
+}
+
 function cardHtml(s,eager){
   var ld=eager?'loading="eager" fetchpriority="high"':'loading="lazy"';
   return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
@@ -375,15 +393,21 @@ function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) wi
 
 var active='HOT';
 function buildChips(){
-  document.getElementById('chips').innerHTML=CHIPS.map(function(c){
+  var list=CHIPS.filter(function(c){ return c!=='최근' || RECENT.length>0; }); // 복사 기록 있을 때만 '최근' 노출
+  document.getElementById('chips').innerHTML=list.map(function(c){
     var on=(c===active);
-    return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selChip(\''+c+'\',this)"><span class="lbl">'+c+'</span></div>';
+    return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selChip(\''+c+'\',this)"><span class="lbl">'+(CHIP_LABEL[c]||c)+'</span></div>';
   }).join('');
 }
 function selChip(c,el){ active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); }
 
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
 function listFor(){
+  if(active==='최근'){
+    var map={}; STK.forEach(function(s){ map[String(s.id)]=s; });
+    var rl=[]; RECENT.forEach(function(id){ if(map[id]) rl.push(map[id]); }); // 최근 복사순(최신이 앞)
+    return rl;
+  }
   var l=STK.slice();
   if(active==='HOT'){
     l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 6시간 복사 많은 순
@@ -418,12 +442,22 @@ function renderHome(){
     l.sort(function(a,b){ return (b.copy_count||0)-(a.copy_count||0); });
   } else { l=listFor(); }
   homeBase=l;
+  if(!q && active==='최근' && l.length===0){
+    document.getElementById('homeGrid').innerHTML='<div class="rc-empty"><span class="big">🕘</span>아직 사용한 스티커가 없어요<span class="sub">복사한 스티커가 여기에 자동으로 모여요</span></div>';
+    homeIdx=0; return;
+  }
   var BATCH=24;
   document.getElementById('homeGrid').innerHTML=l.slice(0,BATCH).map(function(s,i){ return cardHtml(s, i<6); }).join('');
   homeIdx=Math.min(BATCH,l.length); sq();
 }
 function appendHome(){
   if(!homeBase.length) return;
+  if(active==='최근'){ // 최근은 유한 목록 → 끝나면 반복 없이 멈춤
+    if(homeIdx>=homeBase.length) return;
+    var end=Math.min(homeIdx+9, homeBase.length), h='';
+    for(;homeIdx<end;homeIdx++){ h+=cardHtml(homeBase[homeIdx]); }
+    document.getElementById('homeGrid').insertAdjacentHTML('beforeend',h); sq(); return;
+  }
   var html=''; for(var i=0;i<9;i++){ html+=cardHtml(homeBase[homeIdx%homeBase.length]); homeIdx++; }
   document.getElementById('homeGrid').insertAdjacentHTML('beforeend',html); sq();
 }
@@ -612,6 +646,7 @@ async function shareOrDownload(blob, s){
 }
 function copySticker(s){
   bumpCount(s, 'copy');
+  pushRecent(s.id);
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
@@ -627,7 +662,7 @@ function copySticker(s){
     var item = ready ? new ClipboardItem({ 'image/png': ready }) : new ClipboardItem({ 'image/png': blobPromise });
     try{
       navigator.clipboard.write([ item ])
-        .then(function(){ toast('복사완료!'); })
+        .then(function(){ toast('복사 완료!\n최근 사용 탭에도 쏙 넣어뒀어요.'); })
         .catch(function(){ toast('복사가 안 됐어요. 한 번 더 눌러주세요'); });
     }catch(e){
       toast('복사가 안 됐어요. 한 번 더 눌러주세요');
