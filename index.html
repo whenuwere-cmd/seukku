@@ -374,6 +374,8 @@ function pad(n){ return String(n).padStart(3,'0'); }
 /* ===== 최근 사용 (로그인 없이 localStorage 자동 기록) ===== */
 var RECENT_MAX=30;
 var RECENT=(function(){ try{ return (JSON.parse(localStorage.getItem('seukku_recent')||'[]')||[]).map(String); }catch(e){ return []; } })();
+/* 익명 기기 ID (PII 아님, 유저당 지표 산출용) */
+var CID=(function(){ try{ var k='seukku_cid', v=localStorage.getItem(k); if(!v){ v=Date.now().toString(36)+Math.random().toString(36).slice(2,10); localStorage.setItem(k,v); } return v; }catch(e){ return null; } })();
 function pushRecent(id){
   id=String(id);
   var i=RECENT.indexOf(id); if(i>=0) RECENT.splice(i,1); // 이미 있으면 맨 앞으로
@@ -544,7 +546,7 @@ function bumpCount(s, source){
   if(!s) return; s.copy_count=(s.copy_count||0)+1;
   if(sb){
     try{ sb.rpc('increment_copy',{ p_id:s.id }).then(function(){},function(){}); }catch(e){}
-    try{ sb.from('copy_events').insert({ sticker_id:s.id, source:source||'unknown' }).then(function(){},function(){}); }catch(e){}
+    try{ sb.from('copy_events').insert({ sticker_id:s.id, source:source||'unknown', cid:CID }).then(function(){},function(){}); }catch(e){}
   }
 }
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
