@@ -413,7 +413,7 @@ function listFor(){
   }
   var l=STK.slice();
   if(active==='HOT'){
-    l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 6시간 복사 많은 순
+    l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 3시간 복사 많은 순
   }
   else if(active==='NEW') l.sort(function(a,b){return (b.created||b.id)-(a.created||a.id);});
   else {
