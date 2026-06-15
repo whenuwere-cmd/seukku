@@ -110,6 +110,7 @@
       linear-gradient(45deg,var(--chk) 25%,transparent 25%),linear-gradient(-45deg,var(--chk) 25%,transparent 25%),
       linear-gradient(45deg,transparent 75%,var(--chk) 75%),linear-gradient(-45deg,transparent 75%,var(--chk) 75%);
     background-size:18px 18px; background-position:0 0,0 9px,9px -9px,-9px 0; background-color:#fff; }
+  .chk.dark{ --chk:#333; background-color:#222; }
 
   .home-top{ display:flex; align-items:center; justify-content:space-between; padding:18px var(--pad) 0; min-height:103px; }
   .home-top.hide{ display:none; }
@@ -390,7 +391,7 @@ function pushRecent(id){
 
 function cardHtml(s,eager){
   var ld=eager?'loading="eager" fetchpriority="high"':'loading="lazy"';
-  return '<div class="stk chk sq" data-r="24" data-fill="checker" onclick="openDetail(\''+s.id+'\')">'+
+  return '<div class="stk chk sq'+(s.dark?' dark':'')+'" data-r="24" data-fill="'+(s.dark?'checker-dark':'checker')+'" onclick="openDetail(\''+s.id+'\')">'+
     '<img class="pic" '+ld+' decoding="async" data-orig="'+s.u+'" data-w="220" src="'+thumbUrl(s,220)+'" srcset="'+thumbUrl(s,220)+' 1x, '+thumbUrl(s,360)+' 2x" alt="'+s.n+'" onerror="picErr(this)">'+
     '<span class="fallback">'+(s.e||'🖼️')+'</span></div>';
 }
@@ -581,7 +582,11 @@ function openDetail(id){
   relBase=relatedList(s);
   var RBATCH=18;
   document.getElementById('relatedGrid').innerHTML=relBase.slice(0,RBATCH).map(function(s){ return cardHtml(s); }).join('');
-  relIdx=Math.min(RBATCH,relBase.length); show('detail');
+  var hero=document.getElementById('hero');
+  hero.classList.toggle('dark', !!s.dark);
+  hero.setAttribute('data-fill', s.dark ? 'checker-dark' : 'checker');
+  var _hb=hero.querySelector(':scope > svg.sqbg'); if(_hb) _hb.remove();
+  relIdx=Math.min(RBATCH,relBase.length); show('detail'); applyAllSquircles();
   /* 다음 클릭 대비: 상위 관련 스티커 720을 미리 받아둠 */
   setTimeout(function(){ if(curDetail===s){ relBase.slice(0,4).forEach(function(x){ var im=new Image(); im.src=thumbUrl(x,720); }); } },600);
 }
@@ -719,7 +724,7 @@ async function loadSupabase(){
     var res=await sb.from('stickers').select('*').order('created_at',{ascending:false});
     if(res.error) throw res.error;
     STK=(res.data||[]).map(function(r){
-      return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''),
+      return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''), dark:(r.dark_bg===true),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id, rnd:Math.random() };
     });
@@ -733,14 +738,15 @@ buildChips(); loadSupabase();   /* 초기엔 안 그림 → DB 데이터 오면 
 <script type="module">
 import { getSvgPath } from "https://esm.sh/figma-squircle@0.3.1";
 var NS="http://www.w3.org/2000/svg", uid=0;
-function buildPattern(svg,id){
+function buildPattern(svg,id,dark){
+  var base=dark?'#222222':'#ffffff', sqc=dark?'#333333':'#f3f3f3';
   var defs=document.createElementNS(NS,'defs');
   var pat=document.createElementNS(NS,'pattern');
   pat.setAttribute('id',id); pat.setAttribute('width','18'); pat.setAttribute('height','18'); pat.setAttribute('patternUnits','userSpaceOnUse');
   function rect(x,y,w,h,f){ var r=document.createElementNS(NS,'rect'); r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',w); r.setAttribute('height',h); r.setAttribute('fill',f); return r; }
-  pat.appendChild(rect(0,0,18,18,'#ffffff'));
-  pat.appendChild(rect(0,0,9,9,'#f3f3f3'));
-  pat.appendChild(rect(9,9,9,9,'#f3f3f3'));
+  pat.appendChild(rect(0,0,18,18,base));
+  pat.appendChild(rect(0,0,9,9,sqc));
+  pat.appendChild(rect(9,9,9,9,sqc));
   defs.appendChild(pat); svg.appendChild(defs);
 }
 function apply(){
@@ -756,14 +762,14 @@ function apply(){
     if(!svg){
       el._id=++uid;
       svg=document.createElementNS(NS,'svg'); svg.setAttribute('class','sqbg'); svg.setAttribute('preserveAspectRatio','none'); svg.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
-      if(fillVal==='checker') buildPattern(svg,'chk'+el._id);
+      if(fillVal==='checker'||fillVal==='checker-dark') buildPattern(svg,'chk'+el._id, fillVal==='checker-dark');
       var fp=document.createElementNS(NS,'path'); fp.setAttribute('class','fp'); svg.appendChild(fp);
       var g=document.createElementNS(NS,'g'); var sp=document.createElementNS(NS,'path'); sp.setAttribute('class','sp'); g.appendChild(sp); svg.appendChild(g);
       el.appendChild(svg);
     }
     svg.setAttribute('viewBox','0 0 '+w+' '+h);
     var fp=svg.querySelector('.fp'); fp.setAttribute('d',full);
-    fp.setAttribute('fill', fillVal==='checker' ? ('url(#chk'+el._id+')') : fillVal);
+    fp.setAttribute('fill', (fillVal==='checker'||fillVal==='checker-dark') ? ('url(#chk'+el._id+')') : fillVal);
     var g=svg.querySelector('g'); g.setAttribute('transform','translate('+(sw/2)+','+(sw/2)+')');
     var sp=svg.querySelector('.sp'); sp.setAttribute('d',ins); sp.setAttribute('fill','none');
     sp.setAttribute('stroke', el.getAttribute('data-stroke')||'#1f2937'); sp.setAttribute('stroke-width', String(sw));
