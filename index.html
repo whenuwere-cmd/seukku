@@ -790,5 +790,22 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
   try{ if((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true){ ev('pwa_launch'); } }catch(e){}
 })();
 </script>
+<script>
+/* 사이트 설정(띠배너·문의 문구) 적용 — 관리자에서 바꾸면 여기 반영 */
+(function(){
+  fetch(SB_URL+'/rest/v1/site_settings?select=key,value',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}})
+    .then(function(r){ return r.ok?r.json():[]; })
+    .then(function(rows){
+      var map={}; (rows||[]).forEach(function(x){ map[x.key]=x.value||''; });
+      if(map.banner_text){
+        document.querySelectorAll('.notice-track span').forEach(function(s){ s.textContent=map.banner_text; });
+      }
+      if(map.contact_text){
+        var p=document.querySelector('#infoPanel p');
+        if(p){ p.style.whiteSpace='pre-line'; p.textContent=map.contact_text; }
+      }
+    }).catch(function(){});
+})();
+</script>
 </body>
 </html>
