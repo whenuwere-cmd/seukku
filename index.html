@@ -424,7 +424,9 @@ function buildChips(){
 function selChip(c,el){ active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); }
 
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
-function listFor(){
+function splitCats(c){ return String(c||'').split(',').map(function(x){return x.trim();}).filter(Boolean); }
+function hasCat(s,cat){ return splitCats(s.c).indexOf(cat)>=0; }
+  function listFor(){
   if(active==='최근'){
     var map={}; STK.forEach(function(s){ map[String(s.id)]=s; });
     var rl=[]; RECENT.forEach(function(id){ if(map[id]) rl.push(map[id]); }); // 최근 복사순(최신이 앞)
@@ -439,15 +441,15 @@ function listFor(){
     var _ct=CHIP_TAGS[active];
     if(_ct){
       l=l.filter(function(s){
-        if(s.c===active) return true;
+        if(hasCat(s,active)) return true;
         var hay=((s.tg||'')+' '+(s.kw||'')+' '+(s.n||'')).toLowerCase();
         for(var _i=0;_i<_ct.length;_i++){ if(hay.indexOf(_ct[_i])>=0) return true; }
         return false;
       });
       // 정확 카테고리 먼저 + 그 안에서는 접속할 때마다 랜덤
-      l.sort(function(a,b){ var ex=(b.c===active?1:0)-(a.c===active?1:0); return ex!==0?ex:((a.rnd||0)-(b.rnd||0)); });
+      l.sort(function(a,b){ var ex=(hasCat(b,active)?1:0)-(hasCat(a,active)?1:0); return ex!==0?ex:((a.rnd||0)-(b.rnd||0)); });
     } else {
-      l=l.filter(function(s){return s.c===active;});
+      l=l.filter(function(s){return hasCat(s,active);});
       l.sort(function(a,b){ return (a.rnd||0)-(b.rnd||0); }); // 접속할 때마다 랜덤
     }
   }
@@ -871,6 +873,10 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
     .then(function(r){ return r.ok?r.json():[]; })
     .then(function(rows){
       var map={}; (rows||[]).forEach(function(x){ map[x.key]=x.value||''; });
+      if(map.category_order){
+        var _ord=map.category_order.split(',').map(function(x){return x.trim();}).filter(Boolean);
+        if(_ord.length){ CHIPS=['HOT','NEW','최근'].concat(_ord); buildChips(); }
+      }
       if(map.banner_text){
         document.querySelectorAll('.notice-track span').forEach(function(s){ s.textContent=map.banner_text; });
       }
