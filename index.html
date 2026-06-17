@@ -200,10 +200,6 @@
   .copy-btn .lbl{ position:relative; z-index:2; }
   .copy-btn:active{ transform:scale(.97); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
-  /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
-  .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
-  .ad-fit{ width:100%; overflow:hidden; }
-  .ad-fit .kakao_ad_area{ display:block; transform-origin:0 0; }
 
   .fab{ position:absolute; right:16px; bottom:24px; width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:40;
@@ -300,7 +296,6 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="ad-bar"><div class="ad-fit" id="adHome"></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
     </section>
@@ -317,7 +312,6 @@
           <button class="copy-btn sq" data-r="14" data-fill="#e7ffb3" id="copyBtn"><span class="lbl">복사</span></button>
         </div>
       </div>
-      <div class="ad-bar"><div class="ad-fit" id="adDetail"></div></div>
       <div class="explore-head">더 찾아보기</div>
       <div class="grid" id="relatedGrid"></div>
     </section>
@@ -722,7 +716,6 @@ function openDetail(id, opts){ opts=opts||{};
   hero.setAttribute('data-fill', s.dark ? 'checker-dark' : 'checker');
   var _hb=hero.querySelector(':scope > svg.sqbg'); if(_hb) _hb.remove();
   relIdx=Math.min(RBATCH,relBase.length); show('detail'); applyAllSquircles();
-                              loadAd('adDetail');
   var _slug=stickerSlug(s);
   if(opts.push!==false){ try{ history.pushState({view:'detail',slug:_slug},'','/s/'+encodeURIComponent(_slug)); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/s/'+encodeURIComponent(_slug),(s.n||'스티커')+' · 스꾸'); }
@@ -837,7 +830,6 @@ function copySticker(s){
   bumpCount(s, 'copy');
   pushRecent(s.id);
   ga('sticker_copy',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
-  try{ skkuMaybeInstall(); }catch(e){}
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
@@ -882,36 +874,7 @@ function copyBizMail(){
   }catch(e){ toast(em,'high'); }
   try{ ga('biz_mail_copy',{}); }catch(e){}
 }
-function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }/* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
-function fitAd(box){
-  if(!box) return;
-  var ins=box.querySelector('.kakao_ad_area'); if(!ins) return;
-  if(!ins.querySelector('iframe')){ box.style.height='0'; return; }  // 미충전이면 공백 0
-  var s=box.clientWidth/320;
-  ins.style.display='block';
-  ins.style.transformOrigin='0 0';
-  ins.style.transform='scale('+s+')';
-  ins.style.visibility='visible';
-  box.style.height=Math.round(50*s)+'px';
-}
-function fitAllAds(){ document.querySelectorAll('.ad-fit').forEach(fitAd); }
-window.addEventListener('resize', fitAllAds);
-function loadAd(boxId){
-  var box=document.getElementById(boxId); if(!box) return;
-  box.innerHTML=''; box.style.height='0';
-  var ins=document.createElement('ins');
-  ins.className='kakao_ad_area';
-  ins.style.display='none';
-  ins.style.visibility='hidden';
-  ins.setAttribute('data-ad-unit','DAN-pfxYtNSw6RUVV4JH');
-  ins.setAttribute('data-ad-width','320');
-  ins.setAttribute('data-ad-height','50');
-  box.appendChild(ins);
-  var sc=document.createElement('script');
-  sc.type='text/javascript'; sc.src='//t1.kakaocdn.net/kas/static/ba.min.js'; sc.async=true;
-  box.appendChild(sc);
-  var n=0, iv=setInterval(function(){ fitAd(box); if(++n>40) clearInterval(iv); },300);
-}
+function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ===== Supabase에서 실제 스티커 불러오기 ===== */
 var HOT6={};
@@ -943,7 +906,7 @@ async function loadSupabase(){
 }
 
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAdPopup(); });
-buildChips(); loadSupabase(); loadAd('adHome');   /* 초기엔 안 그림 → DB 데이터 오면 그림 (옛 스티커 깜빡임 방지) */
+buildChips(); loadSupabase();   /* 초기엔 안 그림 → DB 데이터 오면 그림 (옛 스티커 깜빡임 방지) */
 </script>
 
 <script type="module">
@@ -1009,89 +972,7 @@ function handleInitialRoute(){
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
 </script>
-<script>
-/* ===== 첫 복사 설치 팝업 + 웹 푸시 (스꾸) — 기존 .sq/applyAllSquircles/addToHome 재사용 ===== */
-(function(){
-  /* ---- 첫 복사 설치 팝업 ---- */
-  function popOk(){
-    if(isStandalone()) return false;
-    if(document.getElementById('skkuInstallPop')) return false;
-    try{ if(localStorage.getItem('seukku_installed')==='1') return false; }catch(e){}
-    try{ var s=JSON.parse(localStorage.getItem('seukku_install_pop')||'{}'); if(s.dismissedAt && Date.now()-s.dismissedAt < 3*864e5) return false; }catch(e){}
-    return true;
-  }
-  function showInstallPop(){
-    if(!popOk()) return;
-    var ov=document.createElement('div');
-    ov.id='skkuInstallPop';
-    ov.style.cssText='position:fixed;inset:0;background:rgba(31,41,55,.45);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
-    ov.innerHTML=''
-      +'<div class="sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" style="margin:0 12px 12px;max-width:430px;width:100%;padding:24px 22px 20px;text-align:center;">'
-      +'<img src="/skku-bell.svg" alt="" style="width:34px;height:34px;display:block;margin:0 auto 8px;">'
-      +'<div style="font-size:16px;font-weight:700;color:#1F2937;line-height:1.45;margin-bottom:8px;">홈 화면에 추가하면<br>새 스티커 출시 알림을 받을 수 있어요!</div>'
-      +'<div style="font-size:13px;color:#6B7280;line-height:1.5;margin-bottom:18px;">한번만 추가해두면<br>신상 스티커 소식을 바로 받아요</div>'
-      +'<button class="sq" data-r="14" data-fill="#e7ffb3" data-stroke="#1f2937" id="skkuPopAdd" style="width:100%;padding:14px;font-size:15px;font-weight:700;color:#1F2937;cursor:pointer;"><span style="position:relative;z-index:2;">홈 화면에 추가하기</span></button>'
-      +'<button id="skkuPopLater" style="width:100%;background:none;border:0;padding:12px;margin-top:4px;font-size:13px;color:#9aa68a;cursor:pointer;">3일간 보지 않기</button>'
-      +'</div>';
-    document.getElementById('app').appendChild(ov);
-    if(window.applyAllSquircles) window.applyAllSquircles();   /* 기존 스퀴클 시스템 그대로 적용 */
-    function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }
-    function dismiss(){ try{ localStorage.setItem('seukku_install_pop', JSON.stringify({dismissedAt:Date.now()})); }catch(e){} close(); }
-    ov.addEventListener('click',function(e){ if(e.target===ov) dismiss(); });
-    document.getElementById('skkuPopLater').onclick=dismiss;
-    document.getElementById('skkuPopAdd').onclick=function(){ try{ localStorage.setItem('seukku_installed','1'); }catch(e){} close(); if(typeof addToHome==='function') addToHome(); };  /* 기존 설치 로직 재사용 */
-  }
-  window.skkuMaybeInstall=function(){
-    var n=0; try{ n=(parseInt(localStorage.getItem('seukku_install_n')||'0',10)||0)+1; localStorage.setItem('seukku_install_n',String(n)); }catch(e){}
-    if(n<=3 && popOk()) setTimeout(function(){ if(popOk()) showInstallPop(); },1200);
-  };
-
-  /* ---- 웹 푸시 (VAPID 키 넣기 전엔 자동 비활성) ---- */
-  var VAPID_PUBLIC='PASTE_YOUR_VAPID_PUBLIC_KEY_HERE'; /* ★ npx web-push generate-vapid-keys 의 Public Key 붙여넣기 */
-  function pushReady(){ return ('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window); }
-  function pIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent||''); }
-  function u8(b){ var p='='.repeat((4-b.length%4)%4); var s=(b+p).replace(/-/g,'+').replace(/_/g,'/'); var r=atob(s); var a=new Uint8Array(r.length); for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i); return a; }
-  function saveSub(sub){ var j=sub.toJSON(); try{ fetch(SB_URL+'/rest/v1/push_subscriptions',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates'},body:JSON.stringify({endpoint:sub.endpoint,p256dh:j.keys&&j.keys.p256dh,auth:j.keys&&j.keys.auth,cid:(typeof CID!=='undefined'?CID:null),ua:(navigator.userAgent||'').slice(0,180)})}).catch(function(){}); }catch(e){} }
-  window.skkuAskPush=async function(){
-    if(!pushReady()||VAPID_PUBLIC.indexOf('PASTE_')===0) return;
-    if(pIOS() && !isStandalone()) return;                 /* iOS는 홈화면 추가(설치) 후에만 가능 */
-    if(Notification.permission==='denied') return;
-    try{
-      var reg=await navigator.serviceWorker.ready;
-      var perm=Notification.permission;
-      if(perm==='default') perm=await Notification.requestPermission();
-      if(perm!=='granted'){ ga('push_denied'); return; }
-      var sub=await reg.pushManager.getSubscription();
-      if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUBLIC)});
-      saveSub(sub); ga('push_subscribed');
-    }catch(e){}
-  };
-  function pushBanner(){
-    if(VAPID_PUBLIC.indexOf('PASTE_')===0) return;        /* 키 없으면 배너 숨김 */
-    if(!pushReady()||!isStandalone()||Notification.permission!=='default') return;
-    try{ if(JSON.parse(localStorage.getItem('seukku_push')||'{}').bannerDismissed) return; }catch(e){}
-    if(document.getElementById('skkuPushBar')) return;
-    var bar=document.createElement('div');
-    bar.id='skkuPushBar'; bar.className='sq';
-    bar.setAttribute('data-r','16'); bar.setAttribute('data-fill','#ffffff'); bar.setAttribute('data-stroke','#1f2937');
-    bar.style.cssText='position:fixed;left:12px;right:12px;bottom:14px;z-index:9998;padding:12px 14px;display:flex;gap:10px;align-items:center;max-width:430px;margin:0 auto;';
-    bar.innerHTML=''
-      +'<img src="/skku-bell.svg" alt="" style="width:22px;height:22px;display:block;">'
-      +'<div style="flex:1;position:relative;z-index:2;font-size:13px;font-weight:600;color:#1F2937;line-height:1.4;">새 스티커 나오면 알림 받기</div>'
-      +'<button class="sq" data-r="10" data-fill="#e7ffb3" data-stroke="#1f2937" id="skkuPushOn" style="padding:8px 12px;font-size:13px;font-weight:700;color:#1F2937;cursor:pointer;"><span style="position:relative;z-index:2;">켜기</span></button>'
-      +'<button id="skkuPushNo" aria-label="닫기" style="position:relative;z-index:2;border:0;background:none;color:#9aa68a;cursor:pointer;padding:4px;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
-    document.getElementById('app').appendChild(bar);
-    if(window.applyAllSquircles) window.applyAllSquircles();
-    bar.querySelector('#skkuPushOn').onclick=function(){ window.skkuAskPush(); bar.remove(); };
-    bar.querySelector('#skkuPushNo').onclick=function(){ try{ localStorage.setItem('seukku_push',JSON.stringify({bannerDismissed:1})); }catch(e){} bar.remove(); };
-  }
-  window.addEventListener('appinstalled',function(){ try{ localStorage.setItem('seukku_installed','1'); }catch(e){} var _p=document.getElementById('skkuInstallPop'); if(_p&&_p.parentNode) _p.parentNode.removeChild(_p); setTimeout(window.skkuAskPush,1200); });
-  window.addEventListener('load',function(){
-    if(isStandalone() && window.Notification && Notification.permission==='granted'){ window.skkuAskPush(); }
-    else { setTimeout(pushBanner,2500); }
-  });
-})();
-</script><script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
 <script>
 (function(){
   function ev(n){ try{ gtag('event', n); }catch(e){} }
