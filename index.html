@@ -149,35 +149,35 @@
   .chip:active{ transform:scale(.96); }
 
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
-  .adcard{ grid-column:span 2; position:relative; display:flex; align-items:center; gap:11px; padding:11px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
-  .adcard:active{ transform:scale(.98); }
-  .adcard .adinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .adcard .adbrand{ font-size:11px; font-weight:700; color:#9ca3af; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .adcard .adname{ font-size:12.5px; font-weight:600; line-height:1.35; color:var(--ink); letter-spacing:-.3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .adcard .addiscrow{ display:flex; align-items:center; gap:4px; margin-top:5px; }
-  .adcard .addisc{ font-size:12px; font-weight:700; color:var(--ink); white-space:nowrap; }
-  .adcard .adorig{ font-size:12px; font-weight:500; color:#b0b6bf; text-decoration:line-through; white-space:nowrap; }
-  .adcard .adrow{ display:flex; align-items:center; gap:8px; margin-top:1px; }
-  .adcard .adprice{ font-size:18px; font-weight:700; color:var(--ink); white-space:nowrap; letter-spacing:-.3px; }
-  .adcard .adwon{ font-size:12px; font-weight:600; margin-left:1px; }
-  .adcard .adbadge{ font-size:9px; font-weight:800; color:#9ca3af; border:1px solid var(--line); border-radius:5px; padding:1px 5px; letter-spacing:.5px; flex:none; }
-  .adcard .adthumb{ position:relative; height:100%; max-height:120px; aspect-ratio:1; width:auto; flex:none; align-self:stretch; }
-  .adcard .adthumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
-  .ad-disclosure{ font-size:11px; line-height:1.6; color:#9ca3af; margin-top:12px; }
+  .pkcard{ grid-column:span 2; position:relative; display:flex; align-items:center; gap:11px; padding:11px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
+  .pkcard:active{ transform:scale(.98); }
+  .pkcard .pkinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .pkcard .pkbrand{ font-size:11px; font-weight:700; color:#9ca3af; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pkcard .pkname{ font-size:12.5px; font-weight:600; line-height:1.35; color:var(--ink); letter-spacing:-.3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .pkcard .pkdiscrow{ display:flex; align-items:center; gap:4px; margin-top:5px; }
+  .pkcard .pkdisc{ font-size:12px; font-weight:700; color:var(--ink); white-space:nowrap; }
+  .pkcard .pkorig{ font-size:12px; font-weight:500; color:#b0b6bf; text-decoration:line-through; white-space:nowrap; }
+  .pkcard .pkrow{ display:flex; align-items:center; gap:8px; margin-top:1px; }
+  .pkcard .pkprice{ font-size:18px; font-weight:700; color:var(--ink); white-space:nowrap; letter-spacing:-.3px; }
+  .pkcard .pkwon{ font-size:12px; font-weight:600; margin-left:1px; }
+  .pkcard .pktag{ font-size:9px; font-weight:800; color:#9ca3af; border:1px solid var(--line); border-radius:5px; padding:1px 5px; letter-spacing:.5px; flex:none; }
+  .pkcard .pkthumb{ position:relative; height:100%; max-height:120px; aspect-ratio:1; width:auto; flex:none; align-self:stretch; }
+  .pkcard .pkthumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
+  .pk-disclosure{ font-size:11px; line-height:1.6; color:#9ca3af; margin-top:12px; }
   /* ===== 광고 팝업 ===== */
-  .ad-modal{ position:absolute; inset:0; background:rgba(31,41,55,.45); z-index:120; display:none; align-items:center; justify-content:center; padding:22px; }
-  .ad-modal.open{ display:flex; animation:fade .2s ease; }
-  .ad-sheet{ position:relative; width:100%; max-width:360px; padding:18px; box-sizing:border-box; }
-  .ad-x{ position:absolute; top:-8px; right:0; transform:translateY(-100%); z-index:5; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; padding:0; }
-  .ad-x svg{ width:20px; height:20px; position:relative; z-index:2; }
-  .ad-x:active{ transform:translateY(-100%) scale(.95); }
-  .ad-sheet .ad-pop{ grid-column:auto; aspect-ratio:2.1 / 1; cursor:default; margin-top:6px; }
-  .ad-sheet .ad-pop:active{ transform:none; }
-  .ad-sheet .ad-pop .adthumb{ max-height:none; }
-  .ad-disc{ font-size:11.5px; line-height:1.7; color:#8a909a; margin:14px 2px 16px; letter-spacing:-.2px; }
-  .ad-buy{ display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; padding:15px; color:var(--ink); text-decoration:none; }
-  .ad-buy .lbl{ position:relative; z-index:2; font-size:15px; font-weight:700; letter-spacing:-.3px; }
-  .ad-buy:active{ transform:scale(.98); }
+  .pk-modal{ position:absolute; inset:0; background:rgba(31,41,55,.45); z-index:120; display:none; align-items:center; justify-content:center; padding:22px; }
+  .pk-modal.open{ display:flex; animation:fade .2s ease; }
+  .pk-sheet{ position:relative; width:100%; max-width:360px; padding:18px; box-sizing:border-box; }
+  .pk-x{ position:absolute; top:-8px; right:0; transform:translateY(-100%); z-index:5; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; padding:0; }
+  .pk-x svg{ width:20px; height:20px; position:relative; z-index:2; }
+  .pk-x:active{ transform:translateY(-100%) scale(.95); }
+  .pk-sheet .pk-pop{ grid-column:auto; aspect-ratio:2.1 / 1; cursor:default; margin-top:6px; }
+  .pk-sheet .pk-pop:active{ transform:none; }
+  .pk-sheet .pk-pop .pkthumb{ max-height:none; }
+  .pk-note{ font-size:11.5px; line-height:1.7; color:#8a909a; margin:14px 2px 16px; letter-spacing:-.2px; }
+  .pk-buy{ display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; padding:15px; color:var(--ink); text-decoration:none; }
+  .pk-buy .lbl{ position:relative; z-index:2; font-size:15px; font-weight:700; letter-spacing:-.3px; }
+  .pk-buy:active{ transform:scale(.98); }
   .rc-empty{ grid-column:1/-1; text-align:center; padding:56px 16px 34px; color:var(--ink2); line-height:1.85; }
   .rc-empty .big{ font-size:42px; display:block; margin-bottom:12px; }
   .rc-empty .sub{ font-size:13px; color:#9ca3af; display:block; margin-top:4px; }
@@ -333,13 +333,13 @@
       <button class="info-send" id="fbSend" onclick="sendFeedback()">보내기</button>
     </div>
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
-    <div class="ad-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
+    <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
   </div>
   <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
-  <div class="ad-modal" id="adModal" onclick="if(event.target===this)closeAdPopup()">
-    <div class="ad-sheet sq" id="adSheet" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
-      <button class="ad-x sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" onclick="closeAdPopup()" aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
-      <div id="adSheetBody"></div>
+  <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
+    <div class="pk-sheet sq" id="pkSheet" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
+      <button class="pk-x sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" onclick="closeAdPopup()" aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
+      <div id="pkSheetBody"></div>
     </div>
   </div>
 </div>
@@ -453,7 +453,7 @@ function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) wi
 var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=18, AD_FIRST=6;   /* 첫 광고는 스티커 AD_FIRST개 뒤, 이후 AD_EVERY개마다(줄 첫 칸에서만) */
 function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function adNum(v){ var n=parseInt(String(v==null?'':v).replace(/[^0-9]/g,''),10); return isFinite(n)?n:0; }
-function adWon(v){ return esc(v).replace(/원\s*$/,'<span class="adwon">원</span>'); }
+function adWon(v){ return esc(v).replace(/원\s*$/,'<span class="pkwon">원</span>'); }
 function shuffleAds(){
   var pool=[];
   ADS.forEach(function(a){ var w=Math.max(0,Math.min(10,parseInt(a.weight,10)||0)); for(var k=0;k<=w;k++) pool.push(a); });
@@ -465,15 +465,15 @@ var AD_DISCLOSURE_DEFAULT='이 광고는 제휴 마케팅의 일환으로, 구�
 function adInner(ad){
   var pn=adNum(ad.price), opn=adNum(ad.original_price), pct=0;
   if(opn>pn && pn>0) pct=Math.round((1-pn/opn)*100);
-  var disc = pct>0 ? '<div class="addiscrow"><span class="addisc">'+pct+'%</span><span class="adorig">'+esc(ad.original_price||'')+'</span></div>' : '';
-  return '<div class="adinfo"><div class="adbrand">'+esc(ad.brand)+'</div><div class="adname">'+esc(ad.product_name)+'</div>'+
+  var disc = pct>0 ? '<div class="pkdiscrow"><span class="pkdisc">'+pct+'%</span><span class="pkorig">'+esc(ad.original_price||'')+'</span></div>' : '';
+  return '<div class="pkinfo"><div class="pkbrand">'+esc(ad.brand)+'</div><div class="pkname">'+esc(ad.product_name)+'</div>'+
     disc +
-    '<div class="adrow"><span class="adprice">'+adWon(ad.price||'')+'</span><span class="adbadge">AD</span></div></div>'+
-    '<span class="adthumb sq" data-r="16" data-fill="#f6f6f6" data-stroke="#1f2937"><img loading="lazy" decoding="async" src="'+esc(ad.thumbnail_url)+'" alt="'+esc(ad.brand)+'" onerror="this.style.visibility=\'hidden\'"></span>';
+    '<div class="pkrow"><span class="pkprice">'+adWon(ad.price||'')+'</span><span class="pktag">AD</span></div></div>'+
+    '<span class="pkthumb sq" data-r="16" data-fill="#f6f6f6" data-stroke="#1f2937"><img loading="lazy" decoding="async" src="'+esc(ad.thumbnail_url)+'" alt="'+esc(ad.brand)+'" onerror="this.style.visibility=\'hidden\'"></span>';
 }
 function adCardHtml(ad){
   if(!ad) return '';
-  return '<div class="adcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
+  return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
@@ -481,14 +481,14 @@ function openAdPopup(id){
   if(!ad) return;
   try{ ga('ad_open',{ad_id:String(id)}); }catch(e){}
   var disc=esc(ad.disclosure||AD_DISCLOSURE_DEFAULT);
-  document.getElementById('adSheetBody').innerHTML=
-    '<div class="adcard sq ad-pop" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937">'+adInner(ad)+'</div>'+
-    '<div class="ad-disc">'+disc+'</div>'+
-    '<a class="ad-buy sq" data-r="14" data-fill="#e7ffb3" data-stroke="#1f2937" href="'+esc(ad.link_url)+'" target="_blank" rel="nofollow sponsored noopener" onclick="adClick('+ad.id+')"><span class="lbl">구매하러 가기</span></a>';
-  document.getElementById('adModal').classList.add('open');
+  document.getElementById('pkSheetBody').innerHTML=
+    '<div class="pkcard sq pk-pop" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937">'+adInner(ad)+'</div>'+
+    '<div class="pk-note">'+disc+'</div>'+
+    '<a class="pk-buy sq" data-r="14" data-fill="#e7ffb3" data-stroke="#1f2937" href="'+esc(ad.link_url)+'" target="_blank" rel="nofollow sponsored noopener" onclick="adClick('+ad.id+')"><span class="lbl">구매하러 가기</span></a>';
+  document.getElementById('pkModal').classList.add('open');
   sq();
 }
-function closeAdPopup(){ document.getElementById('adModal').classList.remove('open'); }
+function closeAdPopup(){ document.getElementById('pkModal').classList.remove('open'); }
 /* 스티커 배열 → 카드 HTML. st={cells,sinceAd,side,eager} 상태를 배치 간에 이어받음.
    광고(2칸)는 줄 첫 칸일 때만 넣되 side로 좌/우 번갈아(지그재그) → 빈 칸 없음
    side 0 = [광고2칸][스티커] · side 1 = [스티커][광고2칸] */
@@ -946,7 +946,7 @@ function apply(){
     var g=svg.querySelector('g'); g.setAttribute('transform','translate('+(sw/2)+','+(sw/2)+')');
     var sp=svg.querySelector('.sp'); sp.setAttribute('d',ins); sp.setAttribute('fill','none');
     sp.setAttribute('stroke', el.getAttribute('data-stroke')||'#1f2937'); sp.setAttribute('stroke-width', String(sw));
-    if(el.classList.contains('adthumb')){           // 광고 썸네일: 사진을 스쿼클로 꽉 채우고 스트로크는 위에
+    if(el.classList.contains('pkthumb')){           // 광고 썸네일: 사진을 스쿼클로 꽉 채우고 스트로크는 위에
       fp.setAttribute('fill','none');
       svg.style.zIndex='3';
       var _im=el.querySelector(':scope > img');
