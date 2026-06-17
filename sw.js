@@ -1,4 +1,4 @@
-const CACHE='seukku-v2';
+const CACHE='seukku-v3';
 
 self.addEventListener('install', e=>{
   // index.html을 미리 캐싱하지 않음 → 배포 직후 옛날 HTML이 먼저 뜨는 깜빡임 방지
