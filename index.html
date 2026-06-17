@@ -303,8 +303,6 @@
       <div class="ad-bar"><div class="ad-fit" id="adHome"></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
-      <div class="chips" id="chips"></div>
-      <div class="grid" id="homeGrid"></div>
     </section>
 
     <section class="view" id="view-detail">
@@ -320,8 +318,6 @@
         </div>
       </div>
       <div class="ad-bar"><div class="ad-fit" id="adDetail"></div></div>
-      <div class="explore-head">더 찾아보기</div>
-      <div class="grid" id="relatedGrid"></div>
       <div class="explore-head">더 찾아보기</div>
       <div class="grid" id="relatedGrid"></div>
     </section>
@@ -1020,6 +1016,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
   function popOk(){
     if(isStandalone()) return false;
     if(document.getElementById('skkuInstallPop')) return false;
+    try{ if(localStorage.getItem('seukku_installed')==='1') return false; }catch(e){}
     try{ var s=JSON.parse(localStorage.getItem('seukku_install_pop')||'{}'); if(s.dismissedAt && Date.now()-s.dismissedAt < 3*864e5) return false; }catch(e){}
     return true;
   }
@@ -1042,7 +1039,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
     function dismiss(){ try{ localStorage.setItem('seukku_install_pop', JSON.stringify({dismissedAt:Date.now()})); }catch(e){} close(); }
     ov.addEventListener('click',function(e){ if(e.target===ov) dismiss(); });
     document.getElementById('skkuPopLater').onclick=dismiss;
-    document.getElementById('skkuPopAdd').onclick=function(){ close(); if(typeof addToHome==='function') addToHome(); };  /* 기존 설치 로직 재사용 */
+    document.getElementById('skkuPopAdd').onclick=function(){ try{ localStorage.setItem('seukku_installed','1'); }catch(e){} close(); if(typeof addToHome==='function') addToHome(); };  /* 기존 설치 로직 재사용 */
   }
   window.skkuMaybeInstall=function(){
     var n=0; try{ n=(parseInt(localStorage.getItem('seukku_install_n')||'0',10)||0)+1; localStorage.setItem('seukku_install_n',String(n)); }catch(e){}
@@ -1088,7 +1085,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
     bar.querySelector('#skkuPushOn').onclick=function(){ window.skkuAskPush(); bar.remove(); };
     bar.querySelector('#skkuPushNo').onclick=function(){ try{ localStorage.setItem('seukku_push',JSON.stringify({bannerDismissed:1})); }catch(e){} bar.remove(); };
   }
-  window.addEventListener('appinstalled',function(){ setTimeout(window.skkuAskPush,1200); });
+  window.addEventListener('appinstalled',function(){ try{ localStorage.setItem('seukku_installed','1'); }catch(e){} var _p=document.getElementById('skkuInstallPop'); if(_p&&_p.parentNode) _p.parentNode.removeChild(_p); setTimeout(window.skkuAskPush,1200); });
   window.addEventListener('load',function(){
     if(isStandalone() && window.Notification && Notification.permission==='granted'){ window.skkuAskPush(); }
     else { setTimeout(pushBanner,2500); }
