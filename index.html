@@ -149,17 +149,17 @@
   .chip:active{ transform:scale(.96); }
 
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
-  .pkcard{ grid-column:span 2; position:relative; display:flex; align-items:center; gap:11px; padding:11px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
+  .pkcard{ grid-column:span 2; min-height:0; position:relative; display:flex; align-items:center; gap:11px; padding:10px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
   .pkcard:active{ transform:scale(.98); }
   .pkcard .pkinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
   .pkcard .pkbrand{ font-size:11px; font-weight:700; color:#9ca3af; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .pkcard .pkname{ font-size:12.5px; font-weight:600; line-height:1.35; color:var(--ink); letter-spacing:-.3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .pkcard .pkname{ font-size:12.5px; font-weight:600; line-height:1.35; color:var(--ink); letter-spacing:-.3px; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
   .pkcard .pkdiscrow{ display:flex; align-items:center; gap:4px; margin-top:5px; }
   .pkcard .pkdisc{ font-size:12px; font-weight:700; color:var(--ink); white-space:nowrap; }
   .pkcard .pkorig{ font-size:12px; font-weight:500; color:#b0b6bf; text-decoration:line-through; white-space:nowrap; }
   .pkcard .pkrow{ display:flex; align-items:center; gap:8px; margin-top:1px; }
-  .pkcard .pkprice{ font-size:18px; font-weight:700; color:var(--ink); white-space:nowrap; letter-spacing:-.3px; }
-  .pkcard .pkwon{ font-size:12px; font-weight:600; margin-left:1px; }
+  .pkcard .pkprice{ font-size:15px; font-weight:700; color:var(--ink); white-space:nowrap; letter-spacing:-.3px; }
+  .pkcard .pkwon{ font-size:11px; font-weight:600; margin-left:1px; }
   .pkcard .pktag{ font-size:9px; font-weight:800; color:#9ca3af; border:1px solid var(--line); border-radius:5px; padding:1px 5px; letter-spacing:.5px; flex:none; }
   .pkcard .pkthumb{ position:relative; height:100%; max-height:120px; aspect-ratio:1; width:auto; flex:none; align-self:stretch; }
   .pkcard .pkthumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
@@ -171,9 +171,10 @@
   .pk-x{ position:absolute; top:-8px; right:0; transform:translateY(-100%); z-index:5; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; padding:0; }
   .pk-x svg{ width:20px; height:20px; position:relative; z-index:2; }
   .pk-x:active{ transform:translateY(-100%) scale(.95); }
-  .pk-sheet .pk-pop{ grid-column:auto; aspect-ratio:2.1 / 1; cursor:default; margin-top:6px; }
+  .pk-sheet .pk-pop{ grid-column:auto; cursor:default; margin-top:6px; }
   .pk-sheet .pk-pop:active{ transform:none; }
-  .pk-sheet .pk-pop .pkthumb{ max-height:none; }
+  .pk-sheet .pk-pop .pkthumb{ width:44%; height:auto; max-height:none; aspect-ratio:1; align-self:center; }
+  .pk-sheet .pk-pop .pkname{ -webkit-line-clamp:2; }
   .pk-note{ font-size:11.5px; line-height:1.7; color:#8a909a; margin:14px 2px 16px; letter-spacing:-.2px; }
   .pk-buy{ display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; padding:15px; color:var(--ink); text-decoration:none; }
   .pk-buy .lbl{ position:relative; z-index:2; font-size:15px; font-weight:700; letter-spacing:-.3px; }
@@ -453,7 +454,7 @@ function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) wi
 var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=18, AD_FIRST=6;   /* 첫 광고는 스티커 AD_FIRST개 뒤, 이후 AD_EVERY개마다(줄 첫 칸에서만) */
 function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function adNum(v){ var n=parseInt(String(v==null?'':v).replace(/[^0-9]/g,''),10); return isFinite(n)?n:0; }
-function adWon(v){ return esc(v).replace(/원\s*$/,'<span class="pkwon">원</span>'); }
+function adWon(v){ var s=esc(v||''); if(!s) return ''; return /원\s*$/.test(s) ? s.replace(/원\s*$/,'<span class="pkwon">원</span>') : s+'<span class="pkwon">원</span>'; }
 function shuffleAds(){
   var pool=[];
   ADS.forEach(function(a){ var w=Math.max(0,Math.min(10,parseInt(a.weight,10)||0)); for(var k=0;k<=w;k++) pool.push(a); });
@@ -461,7 +462,7 @@ function shuffleAds(){
   AD_POOL=pool; adRR=0;
 }
 function nextAd(){ if(!AD_POOL.length) return null; var a=AD_POOL[adRR%AD_POOL.length]; adRR++; return a; }
-var AD_DISCLOSURE_DEFAULT='이 광고는 제휴 마케팅의 일환으로, 구매 시 게시자가 일정액의 수수료를 제공받을 수 있습니다.';
+var AD_DISCLOSURE_DEFAULT='이 포스팅은 오늘의집 큐레이터 활동의 일환으로, 구매시 이에 따른 일정액의 수수료를 제공받습니다.';
 function adInner(ad){
   var pn=adNum(ad.price), opn=adNum(ad.original_price), pct=0;
   if(opn>pn && pn>0) pct=Math.round((1-pn/opn)*100);
