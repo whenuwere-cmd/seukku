@@ -1049,7 +1049,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
   };
 
   /* ---- 웹 푸시 (VAPID 키 넣기 전엔 자동 비활성) ---- */
-  var VAPID_PUBLIC='PASTE_YOUR_VAPID_PUBLIC_KEY_HERE'; /* ★ npx web-push generate-vapid-keys 의 Public Key 붙여넣기 */
+  var VAPID_PUBLIC='BNL-SUpfREhGifVOjzDZZ8ICM7K-vwT0Ty4daZbcWnrW1ZFtbC9U9YBwnNmOysOH5Ble1HWLMq_qzAVPDt1jlZw'; /* VAPID Public Key */
   function pushReady(){ return ('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window); }
   function pIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent||''); }
   function u8(b){ var p='='.repeat((4-b.length%4)%4); var s=(b+p).replace(/-/g,'+').replace(/_/g,'/'); var r=atob(s); var a=new Uint8Array(r.length); for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i); return a; }
