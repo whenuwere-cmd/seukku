@@ -39,3 +39,33 @@ self.addEventListener('fetch', e=>{
     }).catch(()=>caches.match(e.request))
   );
 });
+
+/* ===== ↓↓↓ 웹 푸시 (추가) ↓↓↓ ===== */
+self.addEventListener('push', function(event){
+  var data={};
+  try{ data = event.data ? event.data.json() : {}; }catch(e){}
+  var title = data.title || '스꾸 새 스티커 🆕';
+  var options = {
+    body: data.body || '새 스티커가 올라왔어요!',
+    icon: data.icon || '/icon-192.png',
+    badge: '/favicon-32x32.png',
+    image: data.image || undefined,
+    data: { url: data.url || '/' },
+    tag: data.tag || 'skku-new',
+    renotify: true
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function(event){
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil((async function(){
+    var all = await self.clients.matchAll({ type:'window', includeUncontrolled:true });
+    for (var i=0;i<all.length;i++){
+      var c=all[i];
+      if('focus' in c){ try{ await c.navigate(url); }catch(e){} return c.focus(); }
+    }
+    if(self.clients.openWindow) return self.clients.openWindow(url);
+  })());
+});
