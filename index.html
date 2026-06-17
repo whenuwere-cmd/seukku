@@ -88,7 +88,7 @@
   html,body{ height:100%; }
   body{ font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
     background:#e6e6e6; color:var(--ink); display:flex; justify-content:center; -webkit-font-smoothing:antialiased; }
-  #app{ width:100%; min-width:340px; max-width:500px; min-height:100vh; background:var(--bg);
+  #app{ width:100%; min-width:340px; max-width:500px; min-height:100vh; min-height:100dvh; background:var(--bg);
     position:relative; overflow:hidden; box-shadow:0 0 50px rgba(0,0,0,.14); }
   /* 상단 흐르는 띠배너(마퀴) */
   .notice-bar{ background:#E7FFB3; overflow:hidden; border-bottom:1px solid #1F2937; }
@@ -97,7 +97,7 @@
   .notice-track span{ display:inline-block; padding:13px 0; padding-right:30px; font-size:13px; font-weight:600; color:#1F2937; letter-spacing:-.2px; }
   @keyframes notice-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   @media (prefers-reduced-motion: reduce){ .notice-track{ animation:none; } }
-  .scroll{ height:100vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:96px; }
+  .scroll{ height:100vh; height:100dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
   .view{ display:none; } .view.active{ display:block; animation:fade .28s ease; }
   @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 
@@ -205,13 +205,13 @@
   .ad-fit{ width:100%; overflow:hidden; }
   .ad-fit .kakao_ad_area{ display:block; transform-origin:0 0; }
 
-  .fab{ position:absolute; right:16px; bottom:24px; width:52px; height:52px; display:flex; align-items:center; justify-content:center;
+  .fab{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:40;
     opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s; }
   .fab.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
   .fab > svg:not(.sqbg){ width:22px; height:22px; color:var(--ink); }
   .fab:active{ transform:scale(.94); }
-  #topBtn{ bottom:86px; }
+  #topBtn{ bottom:calc(86px + env(safe-area-inset-bottom)); }
   /* 당겨서 새로고침 인디케이터 (홈화면 추가/인앱 standalone 전용) */
   #ptr{ position:fixed; top:0; left:50%; z-index:60; width:40px; height:40px; border-radius:50%;
     background:#fff; border:1px solid var(--ink); box-shadow:0 3px 10px rgba(0,0,0,.12);
@@ -221,10 +221,10 @@
   #ptr.ready svg{ transform:rotate(180deg); }
   #ptr.spin svg{ animation:ptrspin .6s linear infinite; transition:none; }
   @keyframes ptrspin{ to{ transform:rotate(360deg); } }
-  .fab-chat{ position:absolute; right:16px; bottom:24px; width:52px; height:52px; display:flex; align-items:center; justify-content:center;
+  .fab-chat{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; }
   .fab-chat:active{ transform:scale(.94); }
-  .info-panel{ position:absolute; right:16px; bottom:86px; width:calc(100% - 32px); max-width:340px; background:#fff;
+  .info-panel{ position:absolute; right:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:340px; background:#fff;
     border:1px solid var(--ink); border-radius:18px; padding:16px; z-index:60; display:none;
     box-shadow:0 8px 24px rgba(31,41,55,.16); }
   .info-panel.open{ display:block; }
@@ -1072,20 +1072,25 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
     if(VAPID_PUBLIC.indexOf('PASTE_')===0) return;        /* 키 없으면 배너 숨김 */
     if(!pushReady()||!isStandalone()||Notification.permission!=='default') return;
     try{ if(JSON.parse(localStorage.getItem('seukku_push')||'{}').bannerDismissed) return; }catch(e){}
-    if(document.getElementById('skkuPushBar')) return;
-    var bar=document.createElement('div');
-    bar.id='skkuPushBar'; bar.className='sq';
-    bar.setAttribute('data-r','16'); bar.setAttribute('data-fill','#ffffff'); bar.setAttribute('data-stroke','#1f2937');
-    bar.style.cssText='position:fixed;left:12px;right:12px;bottom:14px;z-index:9998;padding:12px 14px;display:flex;gap:10px;align-items:center;max-width:430px;margin:0 auto;';
-    bar.innerHTML=''
-      +'<img src="/skku-bell.svg" alt="" style="width:22px;height:22px;display:block;">'
-      +'<div style="flex:1;position:relative;z-index:2;font-size:13px;font-weight:600;color:#1F2937;line-height:1.4;">새 스티커 나오면 알림 받기</div>'
-      +'<button class="sq" data-r="10" data-fill="#e7ffb3" data-stroke="#1f2937" id="skkuPushOn" style="padding:8px 12px;font-size:13px;font-weight:700;color:#1F2937;cursor:pointer;"><span style="position:relative;z-index:2;">켜기</span></button>'
-      +'<button id="skkuPushNo" aria-label="닫기" style="position:relative;z-index:2;border:0;background:none;color:#9aa68a;cursor:pointer;padding:4px;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
-    document.getElementById('app').appendChild(bar);
+    if(document.getElementById('skkuPushPop')) return;
+    var ov=document.createElement('div');
+    ov.id='skkuPushPop';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(31,41,55,.45);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    ov.innerHTML=''
+      +'<div class="sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" style="margin:0 24px;max-width:320px;width:100%;padding:26px 22px 18px;text-align:center;">'
+      +'<svg viewBox="0 0 302 287" style="width:36px;height:auto;display:block;margin:0 auto 10px;" xmlns="http://www.w3.org/2000/svg"><path d="M160.129 146.459C347.957 207.224 272.729 310.333 156.643 151.234C272.729 310.333 151 349.717 151 153.058C151 349.717 29.2811 310.333 145.357 151.234C29.2811 310.333 -45.9571 207.224 141.871 146.459C-45.9571 207.224 -45.9571 79.7421 141.871 140.549C-45.9571 79.7734 29.2811 -23.3358 145.357 135.774C29.2811 -23.3358 151 -62.7197 151 133.95C151 -62.7197 272.729 -23.3358 156.643 135.774C272.729 -23.3358 347.957 79.7734 160.129 140.549C347.957 79.7734 347.957 207.224 160.129 146.459Z" fill="#DCFF50" stroke="#1F2937" stroke-width="2"/></svg>'
+      +'<div style="font-size:17px;font-weight:700;color:#1F2937;line-height:1.45;margin-bottom:8px;">새 스티커 나오면<br>알림 받기</div>'
+      +'<div style="font-size:13px;color:#6B7280;line-height:1.5;margin-bottom:18px;">신상 스티커가 올라오면<br>바로 알려드릴게요</div>'
+      +'<button class="sq" data-r="14" data-fill="#e7ffb3" data-stroke="#1f2937" id="skkuPushOn" style="width:100%;padding:14px;font-size:15px;font-weight:700;color:#1F2937;cursor:pointer;"><span style="position:relative;z-index:2;">알림 켜기</span></button>'
+      +'<button id="skkuPushNo" style="width:100%;background:none;border:0;padding:12px;margin-top:4px;font-size:13px;color:#9aa68a;cursor:pointer;">다음에 할게요</button>'
+      +'</div>';
+    document.getElementById('app').appendChild(ov);
     if(window.applyAllSquircles) window.applyAllSquircles();
-    bar.querySelector('#skkuPushOn').onclick=function(){ window.skkuAskPush(); bar.remove(); };
-    bar.querySelector('#skkuPushNo').onclick=function(){ try{ localStorage.setItem('seukku_push',JSON.stringify({bannerDismissed:1})); }catch(e){} bar.remove(); };
+    function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }
+    function dismiss(){ try{ localStorage.setItem('seukku_push',JSON.stringify({bannerDismissed:1})); }catch(e){} close(); }
+    ov.addEventListener('click',function(e){ if(e.target===ov) dismiss(); });
+    document.getElementById('skkuPushNo').onclick=dismiss;
+    document.getElementById('skkuPushOn').onclick=function(){ window.skkuAskPush(); close(); };
   }
   window.addEventListener('appinstalled',function(){ try{ localStorage.setItem('seukku_installed','1'); }catch(e){} var _p=document.getElementById('skkuInstallPop'); if(_p&&_p.parentNode) _p.parentNode.removeChild(_p); setTimeout(window.skkuAskPush,1200); });
   window.addEventListener('load',function(){
