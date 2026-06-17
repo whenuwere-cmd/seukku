@@ -1,4 +1,4 @@
-const CACHE='seukku-v4';   /* ★ v3 → v4 로 올림: activate에서 깨진 HTML 들어있던 옛 캐시를 통째로 삭제 */
+const CACHE='seukku-v5';   /* v4 → v5: fetch 핸들러가 외부(광고 등) 요청을 가로채지 않도록 수정 */
 self.addEventListener('install', e=>{
   // index.html을 미리 캐싱하지 않음 → 배포 직후 옛날 HTML이 먼저 뜨는 깜빡임 방지
   self.skipWaiting();
@@ -9,6 +9,9 @@ self.addEventListener('activate', e=>{
 });
 self.addEventListener('fetch', e=>{
   if(e.request.method!=='GET') return;
+  // ★ 외부(크로스 오리진) 요청 — 카카오 광고·외부 스크립트·추적 등 — SW가 가로채지 않고 그대로 통과
+  //   (광고 요청을 SW가 프록시하면 자격증명/iframe 로딩이 깨져 광고가 안 뜸)
+  if(e.request.url.indexOf(location.origin)!==0) return;
   // HTML 문서(페이지 진입/새로고침)는 항상 네트워크 우선 → 늘 최신 화면
   var isDoc = e.request.mode==='navigate' ||
               (e.request.headers.get('accept')||'').indexOf('text/html')>-1;
