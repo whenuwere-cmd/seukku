@@ -207,7 +207,7 @@
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
   .ad-fit{ width:100%; overflow:hidden; }
-  .ad-fit .kakao_ad_area{ display:block; transform-origin:0 0; }
+  .ad-fit .kakao_ad_area{ display:block; width:320px; margin:0 auto; transform-origin:50% 0; }
 
   .fab{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:40;
@@ -914,11 +914,12 @@ function fitAd(box){
   var ins=box.querySelector('.kakao_ad_area'); if(!ins) return;
   if(!ins.querySelector('iframe')){ box.style.height='0'; return; }  // 미충전이면 공백 0
   var w=box.clientWidth;
-  var s=Math.min(1, w/320);                      // 확대 금지(원본 320 유지) → 우측 짤림·흐림 방지, 좁을 때만 축소
-  var tx=Math.max(0, Math.round((w-320*s)/2));   // 가운데 정렬 (우측이 컨테이너를 넘지 않음)
+  var s=Math.min(1, w/320);                 // 확대 금지, 320보다 좁을 때만 축소
   ins.style.display='block';
-  ins.style.transformOrigin='0 0';
-  ins.style.transform='translateX('+tx+'px) scale('+s+')';
+  ins.style.width='320px';                  // 광고영역을 창작물(320)에 맞춤 → 빈 박스 제거
+  ins.style.margin='0 auto';                // 가운데 정렬
+  ins.style.transformOrigin='50% 0';
+  ins.style.transform=(s<1?'scale('+s+')':'none');
   ins.style.visibility='visible';
   box.style.height=Math.round(50*s)+'px';
 }
