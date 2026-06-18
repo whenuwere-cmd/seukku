@@ -867,14 +867,18 @@ function copySticker(s){
   }
   /* 아이폰·데스크탑: 클립보드 복사 (준비된 blob이면 blob 자체, 아니면 Promise) */
   if(canImageCopy()){
-    /* image/png(이미지 편집기용) + text/html(<img> URL · 블로그/리치에디터용) + text/plain(URL) 동시 제공.
-       윈도우는 클립보드 PNG의 투명/붙여넣기가 잘 깨져서 → 블로그엔 URL <img>로 붙게 해 우회 */
+    /* iOS(인스타 스토리 등)는 이미지만 → 클립보드 URL 텍스트가 붙는 문제 방지.
+       데스크탑(맥/윈도우, 블로그·리치에디터)만 text/html(<img> URL) 추가 → 윈도우 투명/붙여넣기 우회.
+       text/plain(URL)은 인스타가 텍스트로 집어가서 제외. */
     var pngVal = ready ? ready : blobPromise;
-    var altSafe = String(s.n||'스티커').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    var htmlBlob = new Blob(['<img src="'+s.u+'" alt="'+altSafe+'">'], { type:'text/html' });
-    var txtBlob  = new Blob([s.u], { type:'text/plain' });
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+    var dict = { 'image/png': pngVal };
+    if(!isIOS){
+      var altSafe = String(s.n||'스티커').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      dict['text/html'] = new Blob(['<img src="'+s.u+'" alt="'+altSafe+'">'], { type:'text/html' });
+    }
     var item;
-    try{ item = new ClipboardItem({ 'image/png': pngVal, 'text/html': htmlBlob, 'text/plain': txtBlob }); }
+    try{ item = new ClipboardItem(dict); }
     catch(e){ item = new ClipboardItem({ 'image/png': pngVal }); }   /* 다중 타입 미지원 구형이면 이미지만 */
     try{
       navigator.clipboard.write([ item ])
