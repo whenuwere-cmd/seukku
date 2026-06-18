@@ -26,9 +26,9 @@ async function handleStickerOG(request, env, slug, url) {
   // 1) index.html 원본(정적 에셋) 가져오기
   const assetRes = await env.ASSETS.fetch(new Request(url.origin + "/index.html", request));
 
-  // 2) 슬러그로 스티커 조회 (Supabase REST) — 정확 일치만 채택
-  let sticker = null;
   try {
+    // 2) 슬러그로 스티커 조회 (Supabase REST) — 정확 일치만 채택
+    let sticker = null;
     const q = `${SB_URL}/rest/v1/stickers?select=name,image_path,category` +
               `&image_path=ilike.*${encodeURIComponent(slug)}*&limit=10`;
     const r = await fetch(q, { headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY } });
@@ -39,32 +39,33 @@ async function handleStickerOG(request, env, slug, url) {
         return seg === slug;
       });
     }
-  } catch (e) { /* 조회 실패 시 기본 OG로 폴백 */ }
 
-  // 못 찾으면 원본 그대로 반환 (= 사이트 기본 OG)
-  if (!sticker) return assetRes;
+    // 못 찾으면 원본 그대로 반환 (= 사이트 기본 OG)
+    if (!sticker) return assetRes;
 
-  const name    = sticker.name || slug;
-  const title   = `${name} · 스꾸 seukku`;
-  const desc    = `${name} 스티커를 스꾸에서 저장 없이 바로 복사하세요. 인스타 스토리·카톡 꾸미기용 무료 스티커.`;
-  const img     = `${R2_BASE}/${sticker.image_path}`;
-  const pageUrl = `${SITE}/s/${encodeURIComponent(slug)}`;
+    const name    = sticker.name || slug;
+    const title   = `${name} · 스꾸 seukku`;
+    const desc    = `${name} 스티커를 스꾸에서 저장 없이 바로 복사하세요. 인스타 스토리·카톡 꾸미기용 무료 스티커.`;
+    const img     = `${R2_BASE}/${sticker.image_path}`;
+    const pageUrl = `${SITE}/s/${encodeURIComponent(slug)}`;
 
-  // 3) HTMLRewriter로 head 태그 교체 (없는 셀렉터는 그냥 무시됨 → 안전)
-  return new HTMLRewriter()
-    .on("title",                            { element(el){ el.setInnerContent(title); } })
-    .on('meta[property="og:title"]',        { element(el){ el.setAttribute("content", title); } })
-    .on('meta[property="og:description"]',  { element(el){ el.setAttribute("content", desc); } })
-    .on('meta[property="og:image"]',        { element(el){ el.setAttribute("content", img); } })
-    .on('meta[property="og:url"]',          { element(el){ el.setAttribute("content", pageUrl); } })
-    .on('meta[property="og:type"]',         { element(el){ el.setAttribute("content", "article"); } })
-    .on('meta[name="twitter:title"]',       { element(el){ el.setAttribute("content", title); } })
-    .on('meta[name="twitter:description"]', { element(el){ el.setAttribute("content", desc); } })
-    .on('meta[name="twitter:image"]',       { element(el){ el.setAttribute("content", img); } })
-    .on('meta[name="description"]',         { element(el){ el.setAttribute("content", desc); } })
-    .on('link[rel="canonical"]',            { element(el){ el.setAttribute("href", pageUrl); } })
-    .transform(new Response(assetRes.body, {
-      status: assetRes.status,
-      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" }
-    }));
+    // 3) HTMLRewriter로 head 태그 교체
+    //    ★ 원본 응답(assetRes)을 그대로 transform → 헤더·인코딩 보존 (본문 깨짐/흰 화면 방지)
+    return new HTMLRewriter()
+      .on("title",                            { element(el){ el.setInnerContent(title); } })
+      .on('meta[property="og:title"]',        { element(el){ el.setAttribute("content", title); } })
+      .on('meta[property="og:description"]',  { element(el){ el.setAttribute("content", desc); } })
+      .on('meta[property="og:image"]',        { element(el){ el.setAttribute("content", img); } })
+      .on('meta[property="og:url"]',          { element(el){ el.setAttribute("content", pageUrl); } })
+      .on('meta[property="og:type"]',         { element(el){ el.setAttribute("content", "article"); } })
+      .on('meta[name="twitter:title"]',       { element(el){ el.setAttribute("content", title); } })
+      .on('meta[name="twitter:description"]', { element(el){ el.setAttribute("content", desc); } })
+      .on('meta[name="twitter:image"]',       { element(el){ el.setAttribute("content", img); } })
+      .on('meta[name="description"]',         { element(el){ el.setAttribute("content", desc); } })
+      .on('link[rel="canonical"]',            { element(el){ el.setAttribute("href", pageUrl); } })
+      .transform(assetRes);
+  } catch (e) {
+    // OG 주입 중 무슨 일이 있어도 페이지는 무조건 뜨게 (원본 index.html 반환)
+    return assetRes;
+  }
 }
