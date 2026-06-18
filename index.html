@@ -969,19 +969,26 @@ async function fetchHot6(){
 }
 async function loadSupabase(){
   if(!SB_URL || !SB_KEY) return;            // 미설정이면 더미 유지
+  var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
+  // 1) 스티커 데이터: 외부 라이브러리(esm.sh) 없이 직접 REST → 다음카페/인앱 브라우저에서도 확실히 로드
   try{
-    var mod=await import("https://esm.sh/@supabase/supabase-js@2");
-    sb=mod.createClient(SB_URL,SB_KEY);
-    var res=await sb.from('stickers').select('*').order('created_at',{ascending:false});
-    if(res.error) throw res.error;
-    STK=(res.data||[]).map(function(r){
+    var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&limit=5000',{headers:H});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    var data=await res.json();
+    STK=(data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''), dark:(r.dark_bg===true),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id, rnd:Math.random() };
     });
-    try{ var ar=await sb.from('ads').select('*'); if(!ar.error){ ADS=(ar.data||[]); shuffleAds(); } }catch(e){ console.warn('ads 불러오기 실패', e); }
-    buildChips(); renderHome(); fetchHot6(); if(window.handleInitialRoute)window.handleInitialRoute();
-  }catch(e){ console.warn('Supabase 불러오기 실패 → 더미 사용', e); buildChips(); renderHome(); }
+    try{ var ar=await fetch(SB_URL+'/rest/v1/ads?select=*',{headers:H}); if(ar.ok){ ADS=(await ar.json())||[]; shuffleAds(); } }catch(e){ console.warn('ads 불러오기 실패', e); }
+    buildChips(); renderHome(); if(window.handleInitialRoute)window.handleInitialRoute();
+  }catch(e){ console.warn('스티커 로드 실패 → 더미 사용', e); buildChips(); renderHome(); }
+  // 2) 집계/쓰기용 클라이언트(복사수·피드백·인기순 hot6)는 백그라운드 best-effort — 실패해도 화면엔 영향 없음
+  try{
+    var mod=await import("https://esm.sh/@supabase/supabase-js@2");
+    sb=mod.createClient(SB_URL,SB_KEY);
+    fetchHot6();
+  }catch(e){ console.warn('sb 클라이언트 로드 실패(집계 기능만 제한)', e); }
 }
 
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAdPopup(); });
