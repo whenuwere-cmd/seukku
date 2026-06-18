@@ -205,8 +205,8 @@
     padding:12px 24px; font-size:15px; font-weight:600; color:var(--ink2); cursor:pointer; }
   .copy-btn .lbl{ position:relative; z-index:2; }
   .copy-btn:active{ transform:scale(.97); }
-  .detail-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
-  .share-btn{ flex:0 0 auto; width:48px; height:48px; display:flex; align-items:center; justify-content:center;
+  .detail-actions{ display:flex; align-items:stretch; gap:8px; flex:0 0 auto; }
+  .share-btn{ flex:0 0 auto; width:48px; display:flex; align-items:center; justify-content:center;
     background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; }
   .share-btn > svg:not(.sqbg){ width:20px; height:20px; }
   .share-btn:active{ transform:scale(.95); }
@@ -721,7 +721,7 @@ function bumpCount(s, source){
 function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===String(id)) return STK[i]; return null; }
 /* ===== Lever 1: 스티커 라우팅 (/s/{slug}) ===== */
 function stickerSlug(s){ return s && s.p ? baseName(s.p).split('/').pop() : String(s&&s.id||''); }
-function findBySlug(slug){ for(var i=0;i<STK.length;i++){ if(stickerSlug(STK[i])===slug) return STK[i]; } return null; }
+function findBySlug(slug){ var t=slug; try{ t=slug.normalize('NFC'); }catch(e){} for(var i=0;i<STK.length;i++){ var ss=stickerSlug(STK[i]); try{ ss=ss.normalize('NFC'); }catch(e){} if(ss===t) return STK[i]; } return null; }
 function sendPageView(path, title){ try{ gtag('event','page_view',{ page_location:location.origin+path, page_title:title||document.title }); }catch(e){} }
 function relatedList(s){
   var mine={}; ((s.kw||'')+' '+(s.tg||'')+' '+(s.n||'')).toLowerCase().split(/[\s,]+/).forEach(function(t){ if(t) mine[t]=1; });
@@ -1039,7 +1039,8 @@ async function loadSupabase(){
                copy_count:r.copy_count||0, featured:!!r.featured, created:Date.parse(r.created_at)||r.id, rnd:Math.random() };
     });
     try{ var ar=await fetch(SB_URL+'/rest/v1/ads?select=*',{headers:H}); if(ar.ok){ ADS=(await ar.json())||[]; shuffleAds(); } }catch(e){ console.warn('ads 불러오기 실패', e); }
-    buildChips(); renderHome(); if(window.handleInitialRoute)window.handleInitialRoute();
+    buildChips(); renderHome();
+    (function _route(n){ n=n||0; if(window.handleInitialRoute){ window.handleInitialRoute(); } else if(n<150){ setTimeout(function(){ _route(n+1); }, 30); } })();
   }catch(e){ console.warn('스티커 로드 실패 → 더미 사용', e); buildChips(); renderHome(); }
   // 2) 집계/쓰기용 클라이언트(복사수·피드백·인기순 hot6)는 백그라운드 best-effort — 실패해도 화면엔 영향 없음
   try{
