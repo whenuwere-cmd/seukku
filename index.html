@@ -205,6 +205,11 @@
     padding:12px 24px; font-size:15px; font-weight:600; color:var(--ink2); cursor:pointer; }
   .copy-btn .lbl{ position:relative; z-index:2; }
   .copy-btn:active{ transform:scale(.97); }
+  .detail-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .share-btn{ flex:0 0 auto; width:48px; height:48px; display:flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; }
+  .share-btn > svg:not(.sqbg){ width:20px; height:20px; }
+  .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
@@ -320,7 +325,12 @@
         <div class="hero chk sq" data-r="28" data-fill="checker" id="hero"><img class="pic" id="heroPic" alt=""><span class="fallback" id="heroFb">🍓</span></div>
         <div class="detail-row">
           <div class="name" id="detailName">스티커_001</div>
-          <button class="copy-btn sq" data-r="14" data-fill="#e7ffb3" id="copyBtn"><span class="lbl">복사</span></button>
+          <div class="detail-actions">
+            <button class="share-btn sq" data-r="14" data-fill="#ffffff" id="shareStickerBtn" aria-label="이 스티커 공유하기" onclick="shareSticker()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M8.7 10.7l6.6 -3.4"/><path d="M8.7 13.3l6.6 3.4"/></svg>
+            </button>
+            <button class="copy-btn sq" data-r="14" data-fill="#e7ffb3" id="copyBtn"><span class="lbl">복사</span></button>
+          </div>
         </div>
       </div>
       <div class="ad-bar"><div class="ad-fit" id="adDetail"></div></div>
@@ -659,6 +669,25 @@ function shareUrl(){
   } else { legacyCopy(url); done(); }
 }
 function legacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){} }
+/* ===== 스티커 딥링크 공유 (/s/{slug} → 받은 사람이 그 스티커로 바로 진입) ===== */
+function shareSticker(){
+  var s=curDetail; if(!s) return;
+  var slug=stickerSlug(s);
+  var url=location.origin+'/s/'+encodeURIComponent(slug);
+  var text=(s.n||'스티커')+' 스티커, 스꾸에서 바로 복사하세요!';
+  /* iOS·안드로이드: 네이티브 공유 시트(카톡·인스타·링크복사 등) */
+  if(navigator.share){
+    ga('share',{ method:'web_share', sticker_id:String(s.id), sticker_name:(s.n||'') });
+    navigator.share({ title:'스꾸 seukku', text:text, url:url }).then(function(){},function(){ /* 취소 무시 */ });
+    return;
+  }
+  /* 데스크탑 등 미지원: 링크 복사로 폴백 */
+  ga('share',{ method:'url_copy', sticker_id:String(s.id), sticker_name:(s.n||'') });
+  function done(){ toast('스티커 링크 복사 완료!'); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done, function(){ legacyCopy(url); done(); });
+  } else { legacyCopy(url); done(); }
+}
 function closeSearch(){ var i=document.getElementById('searchInput'); i.value=''; document.getElementById('searchMode').classList.remove('open'); document.getElementById('homeTop').classList.remove('hide'); renderHome(); }
 document.getElementById('searchInput').addEventListener('input',renderHome);
 /* 검색어 수집: 입력 멈추고 1.2초 뒤, 2글자 이상일 때만 */
