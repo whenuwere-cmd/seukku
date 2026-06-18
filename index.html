@@ -668,7 +668,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(function(){ if(v==='home') ensureHomeAd(); fitAllAds(); },60); }
+function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
