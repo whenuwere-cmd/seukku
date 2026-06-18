@@ -6,7 +6,11 @@
     "directory": ".",
     "binding": "ASSETS",
     // 자산에 없는 경로(/s/{slug} 새로고침·딥링크)는 index.html 반환 → 흰 화면(빈 404) 방지.
-    // compatibility_date가 2025-04-01 미만이라 /s/ 진입은 여전히 worker를 거쳐 OG가 주입됨.
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // ★ 추가: 정적 파일이 있어도 worker를 먼저 실행한다.
+    //   - workers.dev → seukku.cc 301 리다이렉트가 홈·정적 경로에서도 동작
+    //   - /sitemap.xml 동적 생성이 옛 정적 sitemap.xml 파일에 가려지지 않음
+    //   - worker는 해당 없는 요청을 env.ASSETS.fetch 로 그대로 넘기므로 정적 서빙은 정상
+    "run_worker_first": true
   }
 }
