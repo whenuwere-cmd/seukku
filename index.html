@@ -910,26 +910,30 @@ function copyBizMail(){
 function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 /* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
 function fitAd(box){
-  if(!box) return;
-  var ins=box.querySelector('.kakao_ad_area'); if(!ins) return;
+  if(!box) return false;
+  var ins=box.querySelector('.kakao_ad_area'); if(!ins) return false;
   var iframe=ins.querySelector('iframe');
-  if(!iframe){ box.style.height='0'; return; }     // 미충전이면 공백 0
+  if(!iframe){ if(box.dataset.adLoading!=='1') box.style.height='0'; return false; }  // 로딩 중이면 높이 유지(리로드 점프 방지)
   var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||50;
-  if(adW<10) return;                                // 소재 폭 아직 측정 전 → 다음 틱에
+  if(adW<10) return false;                           // 소재 폭 아직 측정 전 → 다음 틱에
   var w=box.clientWidth;
-  var s=w/adW;                                      // 소재 실제 폭 기준 → 콘텐츠 폭에 꽉(양옆 마진 동일), 넓은 네이티브는 s≈1이라 안 짤림
+  var s=w/adW;                                       // 소재 실제 폭 기준 → 콘텐츠 폭에 꽉(양옆 마진 동일), 넓은 네이티브는 s≈1이라 안 짤림
   ins.style.display='block';
   ins.style.transformOrigin='0 0';
   ins.style.transform='scale('+s+')';
   ins.style.visibility='visible';
   box.style.height=Math.round(adH*s)+'px';
+  return true;
 }
 function fitAllAds(){ document.querySelectorAll('.ad-fit').forEach(fitAd); }
 window.addEventListener('resize', fitAllAds);
 function loadAd(boxId, unit){
   var box=document.getElementById(boxId); if(!box) return;
   unit=unit||'DAN-vEdvkJkvdKRPfiGR';                         /* 기본=스꾸 스티커 상세 단위 */
-  box.innerHTML=''; box.style.height='0';
+  var keepH = box.querySelector('iframe') ? box.style.height : '';  // 기존 광고가 있던 슬롯이면 높이 유지 → 리로드 시 접힘/점프 방지
+  box.innerHTML='';
+  box.style.height = keepH || '0';
+  box.dataset.adLoading='1';
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
   ins.style.display='none';
@@ -940,7 +944,10 @@ function loadAd(boxId, unit){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
   box.appendChild(sc);
-  var n=0, iv=setInterval(function(){ fitAd(box); if(++n>40) clearInterval(iv); },300);
+  var n=0, iv=setInterval(function(){
+    if(fitAd(box)){ box.dataset.adLoading=''; clearInterval(iv); return; }   // 새 광고 떴음 → 종료
+    if(++n>40){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.height='0'; clearInterval(iv); }  // 끝까지 안 차면 그때 접기
+  },300);
 }
 /* 홈 복귀 시: 광고가 살아있으면 재측정만, 죽었으면(상세 갔다 오며 카카오가 iframe 내림) 새로 로드 */
 function ensureHomeAd(){
