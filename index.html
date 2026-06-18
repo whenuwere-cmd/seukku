@@ -164,6 +164,8 @@
   .pkcard .pkthumb{ position:relative; height:100%; max-height:120px; aspect-ratio:1; width:auto; flex:none; align-self:stretch; }
   .pkcard .pkthumb img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
   .pk-disclosure{ font-size:11px; line-height:1.6; color:#9ca3af; margin-top:12px; }
+  .pk-privacy{ display:inline-block; margin-top:7px; font-size:11px; line-height:1.6; color:#9ca3af; text-decoration:underline; text-underline-offset:2px; }
+  .pk-privacy:active{ opacity:.6; }
   /* ===== 광고 팝업 ===== */
   .pk-modal{ position:absolute; inset:0; background:rgba(31,41,55,.45); z-index:120; display:none; align-items:center; justify-content:center; padding:22px; }
   .pk-modal.open{ display:flex; animation:fade .2s ease; }
@@ -345,6 +347,7 @@
     </div>
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
     <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
+    <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
   </div>
   <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
   <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
