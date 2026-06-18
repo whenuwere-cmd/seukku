@@ -668,7 +668,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(fitAllAds,60); }
+function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(function(){ if(v==='home') ensureHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
@@ -926,13 +926,14 @@ function fitAd(box){
 }
 function fitAllAds(){ document.querySelectorAll('.ad-fit').forEach(fitAd); }
 window.addEventListener('resize', fitAllAds);
-function loadAd(boxId){
+function loadAd(boxId, unit){
   var box=document.getElementById(boxId); if(!box) return;
+  unit=unit||'DAN-vEdvkJkvdKRPfiGR';                         /* 기본=스꾸 스티커 상세 단위 */
   box.innerHTML=''; box.style.height='0';
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
   ins.style.display='none';
-  ins.setAttribute('data-ad-unit','DAN-vEdvkJkvdKRPfiGR');  /* 스꾸 스티커 상세 전용 광고단위 (홈과 분리 → 충돌 방지) */
+  ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','320');
   ins.setAttribute('data-ad-height','50');
   box.appendChild(ins);
@@ -940,6 +941,13 @@ function loadAd(boxId){
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
   box.appendChild(sc);
   var n=0, iv=setInterval(function(){ fitAd(box); if(++n>40) clearInterval(iv); },300);
+}
+/* 홈 복귀 시: 광고가 살아있으면 재측정만, 죽었으면(상세 갔다 오며 카카오가 iframe 내림) 새로 로드 */
+function ensureHomeAd(){
+  var box=document.getElementById('adHome'); if(!box) return;
+  var f=box.querySelector('iframe');
+  if(f && f.offsetWidth>10){ fitAd(box); return; }
+  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');
 }
 /* 홈 광고는 정적 ins로 이미 심어둠 → 스크립트가 렌더하면 비율만 맞춰줌(다시 안 지움) */
 function startHomeAd(){
