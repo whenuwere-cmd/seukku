@@ -29,8 +29,8 @@ export default {
     if (m && request.method === "GET") {
       return handleStickerOG(request, env, decodeURIComponent(m[1]), url);
     }
-    // 그 외는 정적 에셋. HTML 응답이면 네이버 소유확인 메타를 <head>에 주입.
-    //   (네이버 서치어드바이저 소유확인용 — 확인되면 빼도 무방하지만 둬도 무해)
+    // 그 외는 정적 에셋. HTML 응답이면 소유확인 메타들을 <head>에 주입.
+    //   (네이버 서치어드바이저 + 구글 애드센스 소유확인용)
     const assetResp = await env.ASSETS.fetch(request);
     const ctype = assetResp.headers.get("content-type") || "";
     if (ctype.includes("text/html")) {
@@ -39,6 +39,10 @@ export default {
           element(el) {
             el.append(
               '<meta name="naver-site-verification" content="02908478ae1d8a10018e4ce1314cbda1db0aa4ca">',
+              { html: true }
+            );
+            el.append(
+              '<meta name="google-adsense-account" content="ca-pub-6105869234292363">',
               { html: true }
             );
           }
