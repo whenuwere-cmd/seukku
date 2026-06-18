@@ -4,15 +4,22 @@
  * 서버단에서 index.html <head> 에 박아 반환한다. (카톡·네이버·페북 미리보기용)
  * 그 외 모든 요청은 정적 에셋(ASSETS)으로 그대로 넘긴다.
  */
-
 const SB_URL  = "https://ttdvoyzzpqufyiaetvxy.supabase.co";
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZHZveXp6cHF1ZnlpYWV0dnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTA4NzAsImV4cCI6MjA5NjQ2Njg3MH0.ij7Ok1enQKrxXxndv8CL8iu3WwXmlomsBL92lrzNz0c"; // anon (공개용)
 const R2_BASE = "https://pub-bb9fc97b95e344769253b627a8327e4f.r2.dev";
-const SITE    = "https://seukku.seukku.workers.dev"; // ★ seukku.com 붙으면 여기 교체
+const SITE    = "https://seukku.cc"; // ★ 변경: 새 커스텀 도메인 (OG og:url / canonical 에 사용)
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // ★ 추가: 옛 도메인(*.workers.dev)으로 들어온 요청은 seukku.cc 로 영구(301) 이동
+    //   - 단톡방에 퍼진 옛 링크 + 검색엔진 색인을 새 도메인으로 넘긴다 (path·쿼리 그대로 유지)
+    //   - seukku.cc 자체 요청은 통과시켜 무한 리다이렉트를 막는다
+    if (url.hostname.endsWith(".workers.dev")) {
+      return Response.redirect("https://seukku.cc" + url.pathname + url.search, 301);
+    }
+
     const m = url.pathname.match(/^\/s\/([^\/]+)\/?$/);
     if (m && request.method === "GET") {
       return handleStickerOG(request, env, decodeURIComponent(m[1]), url);
@@ -25,7 +32,6 @@ export default {
 async function handleStickerOG(request, env, slug, url) {
   // 1) index.html 원본(정적 에셋) 가져오기
   const assetRes = await env.ASSETS.fetch(new Request(url.origin + "/index.html", request));
-
   try {
     // 2) 슬러그로 스티커 조회 (Supabase REST) — 정확 일치만 채택
     let sticker = null;
@@ -39,16 +45,13 @@ async function handleStickerOG(request, env, slug, url) {
         return seg === slug;
       });
     }
-
     // 못 찾으면 원본 그대로 반환 (= 사이트 기본 OG)
     if (!sticker) return assetRes;
-
     const name    = sticker.name || slug;
     const title   = `${name} · 스꾸 seukku`;
     const desc    = `${name} 스티커를 스꾸에서 저장 없이 바로 복사하세요. 인스타 스토리·카톡 꾸미기용 무료 스티커.`;
     const img     = `${R2_BASE}/${sticker.image_path}`;
     const pageUrl = `${SITE}/s/${encodeURIComponent(slug)}`;
-
     // 3) HTMLRewriter로 head 태그 교체
     //    ★ 원본 응답(assetRes)을 그대로 transform → 헤더·인코딩 보존 (본문 깨짐/흰 화면 방지)
     return new HTMLRewriter()
