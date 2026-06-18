@@ -531,7 +531,7 @@ function buildChips(){
     return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selChip(\''+c+'\',this)"><span class="lbl">'+(CHIP_LABEL[c]||c)+'</span></div>';
   }).join('');
 }
-function selChip(c,el){ active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); }
+function selChip(c,el){ var changed=(active!==c); active=c; buildChips(); renderHome(); if(c==='HOT') fetchHot6(); if(changed) refreshHomeAd(); }
 
 /* 칩별 목록: HOT=복사수순, NEW=최신순, 나머지=카테고리 */
 function splitCats(c){ return String(c||'').split(',').map(function(x){return x.trim();}).filter(Boolean); }
@@ -949,7 +949,14 @@ function ensureHomeAd(){
   if(f && f.offsetWidth>10){ fitAd(box); return; }
   loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');
 }
-/* 홈 광고는 정적 ins로 이미 심어둠 → 스크립트가 렌더하면 비율만 맞춰줌(다시 안 지움) */
+/* 카테고리 전환(=가상 페이지뷰) 시 상단 배너를 새로 호출 → 노출 증가. 사용자 액션에만, 연타는 디바운스 */
+var _lastAdRefresh=0;
+function refreshHomeAd(){
+  var now=Date.now();
+  if(now-_lastAdRefresh < 700) return;     // 너무 빠른 연타는 무시(불필요 요청·정책 안전)
+  _lastAdRefresh=now;
+  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');  // ins 새로 생성 → 새 광고 요청 = 새 노출
+}
 function startHomeAd(){
   var box=document.getElementById('adHome'); if(!box) return;
   var n=0, iv=setInterval(function(){ fitAd(box); if(++n>60) clearInterval(iv); },300);
