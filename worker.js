@@ -20,6 +20,11 @@ export default {
       return Response.redirect("https://seukku.cc" + url.pathname + url.search, 301);
     }
 
+    // ★ 추가: 사이트맵 동적 생성 (Supabase 스티커 목록 → 홈 + /s/{slug})
+    if (url.pathname === "/sitemap.xml") {
+      return handleSitemap();
+    }
+
     const m = url.pathname.match(/^\/s\/([^\/]+)\/?$/);
     if (m && request.method === "GET") {
       return handleStickerOG(request, env, decodeURIComponent(m[1]), url);
@@ -71,4 +76,36 @@ async function handleStickerOG(request, env, slug, url) {
     // OG 주입 중 무슨 일이 있어도 페이지는 무조건 뜨게 (원본 index.html 반환)
     return assetRes;
   }
+}
+
+// ★ 추가: 사이트맵(/sitemap.xml) 동적 생성
+//   Supabase stickers 테이블에서 전체 목록을 읽어 홈 + 각 스티커 딥링크(/s/{slug})를 XML로 반환.
+//   스티커가 추가돼도 자동 반영되므로 별도 파일 관리가 필요 없다.
+async function handleSitemap() {
+  const locs = [SITE + "/"];
+  try {
+    const q = `${SB_URL}/rest/v1/stickers?select=image_path&limit=5000`;
+    const r = await fetch(q, { headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY } });
+    if (r.ok) {
+      const rows = await r.json();
+      const seen = new Set();
+      for (const row of (rows || [])) {
+        if (!row.image_path) continue;
+        const slug = String(row.image_path).split("/").pop().replace(/\.[^.\/]+$/, "");
+        if (!slug || seen.has(slug)) continue;
+        seen.add(slug);
+        locs.push(`${SITE}/s/${encodeURIComponent(slug)}`);
+      }
+    }
+  } catch (e) { /* 실패해도 최소 홈은 반환 */ }
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    locs.map(function (u) { return `  <url><loc>${u}</loc></url>`; }).join("\n") +
+    `\n</urlset>\n`;
+  return new Response(xml, {
+    headers: {
+      "content-type": "application/xml; charset=utf-8",
+      "cache-control": "public, max-age=3600"
+    }
+  });
 }
