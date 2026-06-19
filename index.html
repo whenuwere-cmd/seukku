@@ -722,6 +722,8 @@ function findSticker(id){ for(var i=0;i<STK.length;i++) if(String(STK[i].id)===S
 /* ===== Lever 1: 스티커 라우팅 (/s/{slug}) ===== */
 function stickerSlug(s){ return s && s.p ? baseName(s.p).split('/').pop() : String(s&&s.id||''); }
 function findBySlug(slug){ var t=slug; try{ t=slug.normalize('NFC'); }catch(e){} for(var i=0;i<STK.length;i++){ var ss=stickerSlug(STK[i]); try{ ss=ss.normalize('NFC'); }catch(e){} if(ss===t) return STK[i]; } return null; }
+/* ===== 딥링크 진입 처리 (esm.sh 의존 X — 즉시 정의되도록 첫 script에 둠) ===== */
+function handleInitialRoute(){ var m=location.pathname.match(new RegExp('^/s/([^/]+)')); if(!m) return; var s=findBySlug(decodeURIComponent(m[1])); if(s){ openDetail(s.id,{push:false, pageview:false}); try{ history.replaceState({view:'detail',slug:stickerSlug(s)},'',location.pathname); }catch(e){} } }
 function sendPageView(path, title){ try{ gtag('event','page_view',{ page_location:location.origin+path, page_title:title||document.title }); }catch(e){} }
 function relatedList(s){
   var mine={}; ((s.kw||'')+' '+(s.tg||'')+' '+(s.n||'')).toLowerCase().split(/[\s,]+/).forEach(function(t){ if(t) mine[t]=1; });
@@ -757,7 +759,7 @@ function openDetail(id, opts){ opts=opts||{};
   hero.classList.toggle('dark', !!s.dark);
   hero.setAttribute('data-fill', s.dark ? 'checker-dark' : 'checker');
   var _hb=hero.querySelector(':scope > svg.sqbg'); if(_hb) _hb.remove();
-  relIdx=Math.min(RBATCH,relBase.length); show('detail'); applyAllSquircles();
+  relIdx=Math.min(RBATCH,relBase.length); show('detail'); if(window.applyAllSquircles) applyAllSquircles();
                               loadAd('adDetail');
   var _slug=stickerSlug(s);
   if(opts.push!==false){ try{ history.pushState({view:'detail',slug:_slug},'','/s/'+encodeURIComponent(_slug)); }catch(e){} }
@@ -1040,7 +1042,7 @@ async function loadSupabase(){
     });
     try{ var ar=await fetch(SB_URL+'/rest/v1/ads?select=*',{headers:H}); if(ar.ok){ ADS=(await ar.json())||[]; shuffleAds(); } }catch(e){ console.warn('ads 불러오기 실패', e); }
     buildChips(); renderHome();
-    (function _route(n){ n=n||0; if(window.handleInitialRoute){ window.handleInitialRoute(); } else if(n<150){ setTimeout(function(){ _route(n+1); }, 30); } })();
+    handleInitialRoute();
   }catch(e){ console.warn('스티커 로드 실패 → 더미 사용', e); buildChips(); renderHome(); }
   // 2) 집계/쓰기용 클라이언트(복사수·피드백·인기순 hot6)는 백그라운드 best-effort — 실패해도 화면엔 영향 없음
   try{
@@ -1108,16 +1110,6 @@ window.addEventListener('popstate', function(e){
   if(st.view==='detail' && st.slug){ var s=findBySlug(st.slug); if(s){ openDetail(s.id,{push:false}); return; } }
   if(currentView!=='home') goHome({push:false});
 });
-function handleInitialRoute(){
-  var _dbg=/[?&]debug/.test(location.search);
-  var m=location.pathname.match(/^\/s\/([^\/]+)/);
-  if(_dbg){ try{ var _sl=m?decodeURIComponent(m[1]):''; var _s2=_sl?findBySlug(_sl):null; alert('🔍 라우팅 진단\npath = '+location.pathname+'\nslug 추출 = '+(_sl||'(없음)')+'\nSTK 로드 = '+STK.length+'개\n매칭 = '+(_s2?'성공':'실패')); }catch(e){} }
-  if(!m) return;
-  var s=findBySlug(decodeURIComponent(m[1]));
-  if(s){ openDetail(s.id,{push:false, pageview:false}); /* 진입 PV는 gtag config가 이미 전송 → 중복 방지 */
-         try{ history.replaceState({view:'detail',slug:stickerSlug(s)},'',location.pathname); }catch(e){} }
-}
-window.handleInitialRoute=handleInitialRoute;
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
 </script>
