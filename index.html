@@ -241,8 +241,8 @@
   .info-panel.open{ display:block; }
   .info-panel h3{ margin:0 0 8px; font-size:14px; color:var(--ink); }
   .info-panel p{ margin:0 0 12px; font-size:12px; line-height:1.65; color:#4b5563; }
-  .info-panel textarea{ width:100%; box-sizing:border-box; height:72px; resize:none; border:1px solid #e5e7eb; border-radius:12px;
-    padding:10px; font-size:13px; font-family:inherit; outline:none; }
+  .info-panel textarea{ width:100%; box-sizing:border-box; height:84px; resize:none; border:1px solid #e5e7eb; border-radius:12px;
+    padding:10px; font-size:13px; line-height:1.7; font-family:inherit; outline:none; }
   .info-panel textarea:focus{ border-color:var(--ink); }
   .info-row{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
   .info-send{ background:var(--lime); border:1px solid var(--ink); border-radius:12px; padding:8px 14px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
@@ -351,7 +351,7 @@
   <div class="info-panel sq" id="infoPanel" data-r="18" data-fill="#ffffff" data-stroke="#1f2937">
     <h3>스꾸 안내 🍀</h3>
     <p>마음껏 복사해서 스토리·메신저 꾸미기에 써주세요. 원하는 스티커·의견·오류 제보 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
-    <textarea id="fbText" maxlength="1000" placeholder="의견 / 오류 제보 / 갖고 싶은 스티커 등 무엇이든!"></textarea>
+    <textarea id="fbText" maxlength="1000" placeholder="의견 / 오류 제보 / 갖고싶은 스티커 / 개발자에게 응원 한마디 등 무엇이든!"></textarea>
     <div class="info-row">
       <button class="info-send" id="fbSend" onclick="sendFeedback()">보내기</button>
     </div>
