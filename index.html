@@ -1109,12 +1109,13 @@ window.addEventListener('popstate', function(e){
   if(currentView!=='home') goHome({push:false});
 });
 function handleInitialRoute(){
-  var m=location.pathname.match(/^\/s\/([^\/]+)/); if(!m) return;
-  var _slug=decodeURIComponent(m[1]);
-  var s=findBySlug(_slug);
+  var _dbg=/[?&]debug/.test(location.search);
+  var m=location.pathname.match(/^\/s\/([^\/]+)/);
+  if(_dbg){ try{ var _sl=m?decodeURIComponent(m[1]):''; var _s2=_sl?findBySlug(_sl):null; alert('🔍 라우팅 진단\npath = '+location.pathname+'\nslug 추출 = '+(_sl||'(없음)')+'\nSTK 로드 = '+STK.length+'개\n매칭 = '+(_s2?'성공':'실패')); }catch(e){} }
+  if(!m) return;
+  var s=findBySlug(decodeURIComponent(m[1]));
   if(s){ openDetail(s.id,{push:false, pageview:false}); /* 진입 PV는 gtag config가 이미 전송 → 중복 방지 */
          try{ history.replaceState({view:'detail',slug:stickerSlug(s)},'',location.pathname); }catch(e){} }
-  else if(/[?&]debug/.test(location.search)){ try{ var _key=_slug.split(/[_\-]/)[0]; var _hits=STK.filter(function(x){return stickerSlug(x).indexOf(_key)>=0;}).map(function(x){return stickerSlug(x);}).slice(0,5); alert('🔍 스꾸 디버그\nslug = '+_slug+'\nSTK 로드 = '+STK.length+'개\n"'+_key+'" 포함 = '+(_hits.join(', ')||'(없음)')); }catch(e){} }
 }
 window.handleInitialRoute=handleInitialRoute;
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
