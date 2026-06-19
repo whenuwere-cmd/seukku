@@ -737,7 +737,7 @@ function relatedList(s){
   return arr.map(function(o){ return o.x; });
 }
 function openDetail(id, opts){ opts=opts||{};
-  var s=findSticker(id); if(!s) return; var src=copySource(); curDetail=s; bumpCount(s, src);
+  var s=findSticker(id); if(!s) return; curDetail=s;   /* 상세 열기는 카운트 X (실제 복사만 집계 → HOT=복사순) */
   if(!s._blob){ s._blob=loadStickerBlob(s); s._blob.then(function(b){ if(b) s._blobReady=b; }); }
   ga('sticker_view',{ sticker_id:String(s.id), sticker_name:(s.n||''), category:(s.c||'') });
   var pic=document.getElementById('heroPic'), fb=document.getElementById('heroFb');
@@ -923,7 +923,10 @@ function copySticker(s){
     }
     return;
   }
-  toast('이 브라우저는 이미지 복사를 지원하지 않아요');
+  /* 클립보드 이미지 복사가 막힌 기기(구형 iOS·잠금모드·인앱 웹뷰·비보안 등)
+     → 막다른 메시지 대신 공유/저장으로 우회 (안드로이드와 동일 폴백) */
+  if(ready){ shareOrDownload(ready, s); }
+  else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
 }
 document.getElementById('copyBtn').onclick=function(){ if(curDetail) copySticker(curDetail); };
 document.getElementById('copyBtn').addEventListener('pointerdown',function(){ var s=curDetail; if(s && !s._blob){ s._blob=loadStickerBlob(s); s._blob.then(function(b){ if(b) s._blobReady=b; }); } },{passive:true});
