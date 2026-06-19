@@ -1110,9 +1110,11 @@ window.addEventListener('popstate', function(e){
 });
 function handleInitialRoute(){
   var m=location.pathname.match(/^\/s\/([^\/]+)/); if(!m) return;
-  var s=findBySlug(decodeURIComponent(m[1]));
+  var _slug=decodeURIComponent(m[1]);
+  var s=findBySlug(_slug);
   if(s){ openDetail(s.id,{push:false, pageview:false}); /* 진입 PV는 gtag config가 이미 전송 → 중복 방지 */
          try{ history.replaceState({view:'detail',slug:stickerSlug(s)},'',location.pathname); }catch(e){} }
+  else if(/[?&]debug/.test(location.search)){ try{ var _key=_slug.split(/[_\-]/)[0]; var _hits=STK.filter(function(x){return stickerSlug(x).indexOf(_key)>=0;}).map(function(x){return stickerSlug(x);}).slice(0,5); alert('🔍 스꾸 디버그\nslug = '+_slug+'\nSTK 로드 = '+STK.length+'개\n"'+_key+'" 포함 = '+(_hits.join(', ')||'(없음)')); }catch(e){} }
 }
 window.handleInitialRoute=handleInitialRoute;
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
