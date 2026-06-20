@@ -1010,6 +1010,7 @@ function canCopyImage(){
 /* 삼성 인터넷은 이미지 클립보드가 불안정 → 공유/저장으로 우회 */
 function isSamsung(){ try{ return /SamsungBrowser/i.test(navigator.userAgent||''); }catch(e){ return false; } }
 function isAndroid(){ try{ return /Android/i.test(navigator.userAgent||''); }catch(e){ return false; } }
+function isIPadOS(){ try{ return /iPad/i.test(navigator.userAgent||'') || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }catch(e){ return false; } }
 function canImageCopy(){ return canCopyImage(); }  /* 갤럭시(삼성)도 복사 시도 → 안 되면 자동 저장 */
 /* 복사가 막힌 기기: Web Share(스토리에 바로 공유) → 안 되면 다운로드 */
 async function shareOrDownload(blob, s){
@@ -1042,8 +1043,8 @@ function copySticker(s){
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* 갤럭시(안드로이드): 클립보드가 불안정해서 → 공유 시트(저장/인스타 스토리/카톡)로 */
-  if(isAndroid()){
+  /* 갤럭시(안드로이드)·아이패드: 클립보드가 굿노트 등에서 URL로 둔갑 → 공유 시트(굿노트/저장/인스타 스토리/카톡)로 */
+  if(isAndroid() || isIPadOS()){
     if(ready){ shareOrDownload(ready, s); }
     else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
     return;
@@ -1084,7 +1085,7 @@ document.getElementById('copyBtn').addEventListener('pointerdown',function(){ va
 (function(){
   var lbl=document.querySelector('#copyBtn .lbl');
   if(!lbl) return;
-  if(isAndroid()){ lbl.textContent='공유'; }
+  if(isAndroid() || isIPadOS()){ lbl.textContent='공유'; }
   else if(!canImageCopy()){ lbl.textContent = (navigator.canShare ? '공유' : '저장'); }
 })();
 /* 저장 정책: 갤럭시·안드로이드는 기존 유지 / 아이폰·데스크탑만 저장 막기(우클릭·드래그 차단) */
@@ -1314,7 +1315,7 @@ async function loadSupabase(){
   var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
   // 1) 스티커 데이터: 외부 라이브러리(esm.sh) 없이 직접 REST → 다음카페/인앱 브라우저에서도 확실히 로드
   try{
-var data=[];
+    var data=[];
     for(var _off=0; _off<6000; _off+=1000){
       var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&offset='+_off+'&limit=1000',{headers:H});
       if(!res.ok) throw new Error('HTTP '+res.status);
