@@ -245,6 +245,14 @@
   .fab-chat{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; color:var(--ink); }
   .fab-chat:active{ transform:scale(.94); }
+  .skku-spark{ position:absolute; pointer-events:none; z-index:2;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 43 43'><path d='M21.5 0C23.1964 0.000175122 24.7137 1.04515 25.3232 2.62402L25.3252 2.62598L28.8711 11.8467C29.0707 12.3644 29.3773 12.8361 29.7695 13.2285C30.1606 13.6197 30.6288 13.9251 31.1445 14.125L40.3691 17.6729H40.3672C41.1412 17.9695 41.8076 18.4929 42.2773 19.1758C42.7471 19.8589 43 20.669 43 21.498C43 22.3271 42.7471 23.1372 42.2773 23.8203C41.8077 24.503 41.1409 25.0247 40.3672 25.3213L40.3691 25.3232L31.1465 28.8711C30.6295 29.0696 30.1593 29.3741 29.7676 29.7656C29.3758 30.1571 29.0699 30.6276 28.8711 31.1445L25.3252 40.3691C25.0284 41.1417 24.504 41.8063 23.8223 42.2754C23.1393 42.7451 22.3289 42.998 21.5 42.998C20.6709 42.998 19.8609 42.7452 19.1777 42.2754C18.495 41.8058 17.9695 41.1409 17.6729 40.3672V40.3652L14.127 31.1465V31.1445C13.9285 30.6275 13.6239 30.1574 13.2324 29.7656C12.8409 29.3739 12.3704 29.0699 11.8535 28.8711L2.62891 25.3232V25.3213C1.8566 25.0245 1.1917 24.5019 0.722656 23.8203C0.252906 23.1372 0.0000297111 22.3271 0 21.498C0 20.669 0.252879 19.8589 0.722656 19.1758C1.19185 18.4939 1.85623 17.9696 2.62891 17.6729L11.8516 14.125H11.8535C12.3701 13.9266 12.839 13.6215 13.2305 13.2305C13.6222 12.839 13.9281 12.3684 14.127 11.8516L17.6748 2.62598L17.6768 2.62207C17.9753 1.85218 18.4992 1.19033 19.1797 0.722656C19.8607 0.254968 20.668 0.00223934 21.4941 0H21.5Z' fill='%231f2937'/></svg>") center/contain no-repeat;
+    animation:skkuTwinkle 1.6s ease-in-out infinite; }
+  .skku-spark.s1{ width:16px; height:16px; top:6px; right:6px; animation-duration:1.6s; animation-delay:0s; }
+  .skku-spark.s3{ width:12px; height:12px; bottom:8px; left:8px; animation-duration:1.9s; animation-delay:.7s; }
+  .fab-chat.wall-open .skku-spark{ opacity:0; transition:opacity .2s; }
+  @keyframes skkuTwinkle{ 0%,100%{ transform:scale(.4); opacity:.6; } 50%{ transform:scale(1); opacity:1; } }
+  @media (prefers-reduced-motion:reduce){ .skku-spark{ animation:none; transform:scale(.8); } }
   .info-panel{ position:absolute; left:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:340px; background:#fff;
     border:1px solid var(--ink); border-radius:18px; padding:16px; z-index:60; display:none;
     box-shadow:0 8px 24px rgba(31,41,55,.16); }
@@ -388,7 +396,7 @@
   <button class="fab sq" data-r="14" data-fill="#ffffff" id="topBtn" aria-label="맨 위로" onclick="goTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
-  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="방명록" onclick="toggleWall()"><span class="lbl">💬</span></button>
+  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="방명록" onclick="toggleWall()"><span class="lbl">💬</span><span class="skku-spark s1"></span><span class="skku-spark s3"></span></button>
   <button class="fab-mail sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" id="mailBtn" aria-label="의견·오류제보" onclick="toggleInfo()"><span>안내</span></button>
   <div class="info-panel sq" id="infoPanel" data-r="18" data-fill="#ffffff" data-stroke="#1f2937">
     <h3>스꾸 안내 🍀</h3>
@@ -932,6 +940,7 @@ function postWall(){
 function toggleWall(){
   var p=document.getElementById('wallPanel'), open=p.classList.toggle('open');
   var cb=document.querySelector('#chatBtn .lbl'); if(cb) cb.textContent=open?'✕':'💬';
+  var cbn=document.getElementById('chatBtn'); if(cbn) cbn.classList.toggle('wall-open', open);
   if(open){
     sq();
     if(!WALL_LOADED) loadWall(); else renderWall();
