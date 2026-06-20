@@ -149,6 +149,16 @@
   .chip:active{ transform:scale(.96); }
 
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
+  /* ── 특수문자 탭 ── */
+  .deco-chip{ flex:0 0 auto; border:1px solid #e5e7eb; background:#fff; border-radius:12px; padding:6px 8px; font-size:12px; color:#1f2937; letter-spacing:-.24px; line-height:1.6; cursor:pointer; white-space:nowrap; }
+  .deco-chip.active{ background:#e7ffb3; border-color:#1f2937; }
+  .deco-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:16px var(--pad) 140px; }
+  .deco-card{ min-height:80px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; background:#fff; border:1px solid #1f2937; border-radius:24px; font-size:13px; color:#2d3643; line-height:1.55; word-break:break-word; cursor:pointer; -webkit-user-select:none; user-select:none; transition:transform .08s ease, background .15s ease; }
+  .deco-card:active{ transform:scale(.96); background:#f6f6f6; }
+  .deco-toggle{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:60; display:flex; gap:8px; align-items:center; background:#fff; border:1px solid #1f2937; border-radius:999px; padding:8px 12px; box-shadow:0 6px 22px rgba(0,0,0,.14); }
+  .deco-toggle.hidden{ display:none; }
+  .deco-seg{ border:1px solid transparent; background:none; padding:10px 14px; border-radius:999px; font-family:inherit; font-size:13px; font-weight:500; color:#2d3643; letter-spacing:-.13px; line-height:18px; white-space:nowrap; cursor:pointer; }
+  .deco-seg.active{ background:#e7ffb3; border-color:#1f2937; }
   .pkcard{ grid-column:span 2; min-height:0; position:relative; display:flex; align-items:center; gap:11px; padding:10px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
   .pkcard:active{ transform:scale(.98); }
   .pkcard .pkinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
@@ -314,6 +324,12 @@
       <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-pfxYtNSw6RUVV4JH" data-ad-width="320" data-ad-height="50"></ins></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
+      <div class="chips" id="decoChips" style="display:none">
+        <div class="deco-chip active" onclick="selDecoChip('hot',this)">HOT ☀︎ ⋆⁺</div>
+        <div class="deco-chip" onclick="selDecoChip('new',this)">NEW ✧･ﾟ</div>
+        <div class="deco-chip" onclick="selDecoChip('line',this)">구분선 ≈</div>
+      </div>
+      <div class="deco-grid" id="decoGrid" style="display:none"></div>
     </section>
 
     <section class="view" id="view-detail">
@@ -358,6 +374,10 @@
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
     <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
     <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
+  </div>
+  <div class="deco-toggle" id="decoToggle">
+    <button class="deco-seg active" id="segSticker" onclick="setMode('sticker')">스티커</button>
+    <button class="deco-seg" id="segDeco" onclick="setMode('deco')">특수문자₊⊹</button>
   </div>
   <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
   <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
@@ -700,7 +720,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
+function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
@@ -957,6 +977,93 @@ function copyBizMail(){
   try{ ga('biz_mail_copy',{}); }catch(e){}
 }
 function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
+
+/* ───────── 특수문자 탭 ───────── */
+var decoMode=false, decoCat='hot';
+var DECO={
+  hot:[
+    '⋆⁺₊⋆ ☀︎ ⋆⁺₊⋆',
+    '⁺˚⋆。°✩₊',
+    '˚ ✦ . ⁺ . ✦ ˚ . ⁺ ✦',
+    '⋆｡˚ ✦ ˚｡⋆',
+    '✦ ˚ · . ☽ . · ˚ ✦',
+    '｡ﾟ☁︎｡ﾟ☂︎｡ﾟ☔︎',
+    '☀︎ ⋆｡˚ ☁︎ ˚｡⋆',
+    '⋆˙⟡♡⟡˙⋆',
+    '✩₊˚.⋆☾⋆⁺₊✧',
+    '.ೋ˚ ☀ ˚ೋ.',
+    '⊹ ࣪ ˖ ⋆ ˖ ࣪ ⊹',
+    '☼ ☽ ✧ ☆ ✦ ☆ ✧ ☽ ☼'
+  ],
+  'new':[
+    '✧･ﾟ: *✧･ﾟ:*',
+    '·˚ ༘₊· ͟͟͞͞꒰➳',
+    '⊹ ࣪ ˖ ♡ ˖ ࣪ ⊹',
+    '* ✧⁺˚ ⋆｡˚',
+    '₊˚⊹♡',
+    '⋆˚࿔ ｡𖦹°‧★',
+    '˚｡⋆୨୧˚',
+    '. ݁₊ ⊹ . ݁˖ . ݁',
+    '✦ ｡ﾟ⋆ ｡ﾟ✦',
+    '꒰ঌ ໒꒱',
+    '₍ᐢ. .ᐢ₎ ♡',
+    '☆.｡.:*・°'
+  ],
+  line:[
+    '≈≈≈≈≈≈≈≈≈',
+    '┈┈┈┈┈┈┈┈',
+    '⋆ ─────── ⋆',
+    '· · ─ ··✧·· ─ · ·',
+    '─━─━─━─━─━─',
+    '✦ ⋆ ───── ⋆ ✦',
+    '˗ˏˋ ───── ˎˊ˗',
+    '•°•°•°•°•°•°•',
+    '─♡─♡─♡─♡─',
+    '═══════',
+    '⊹ ⋆ ⊹ ⋆ ⊹ ⋆ ⊹',
+    '. ˚ ⋆｡˚ ⋆ ˚｡⋆ ˚ .'
+  ]
+};
+function decoEsc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function renderDeco(){
+  var arr=DECO[decoCat]||[];
+  document.getElementById('decoGrid').innerHTML=arr.map(function(t){
+    var e=decoEsc(t);
+    return '<div class="deco-card" role="button" tabindex="0" data-t="'+e+'" onclick="copyDeco(this)">'+e+'</div>';
+  }).join('');
+}
+function selDecoChip(cat,el){
+  decoCat=cat;
+  var cs=document.querySelectorAll('#decoChips .deco-chip');
+  Array.prototype.forEach.call(cs,function(x){ x.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  renderDeco();
+  document.getElementById('scroll').scrollTop=0;
+}
+function decoLegacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='-9999px'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){} }
+function copyDeco(el){
+  var t=(el.getAttribute('data-t')||el.textContent||'').trim();
+  function done(){ toast('복사완료!'); try{ if(window.ga) ga('deco_copy',{ deco_text:t, deco_cat:decoCat }); }catch(e){} }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done, function(){ decoLegacyCopy(t); done(); });
+  } else { decoLegacyCopy(t); done(); }
+}
+function applyMode(){
+  var onHome=(currentView!=='detail');
+  var tg=document.getElementById('decoToggle'); if(tg) tg.classList.toggle('hidden', !onHome);
+  var s1=document.getElementById('segSticker'), s2=document.getElementById('segDeco');
+  if(s1) s1.classList.toggle('active', !decoMode);
+  if(s2) s2.classList.toggle('active', decoMode);
+  ['chips','homeGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? 'none' : ''; });
+  ['decoChips','decoGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? '' : 'none'; });
+}
+function setMode(m){
+  decoMode=(m==='deco');
+  if(decoMode && !document.getElementById('decoGrid').innerHTML) renderDeco();
+  applyMode();
+  document.getElementById('scroll').scrollTop=0;
+}
+try{ renderDeco(); applyMode(); }catch(e){}
 /* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
 function fitAd(box){
   if(!box) return false;
