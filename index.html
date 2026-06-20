@@ -445,7 +445,7 @@ function publicUrl(path){ return R2_BASE ? (R2_BASE+"/"+path) : (SB_URL+"/storag
    1순위: 버킷에 미리 생성해둔 thumbs/{이름}-{폭}.webp (make-thumbs.mjs로 생성, 1년 캐시)
    2순위: 썸네일이 아직 없으면 wsrv.nl 실시간 변환으로 폴백 (picErr가 처리)
    복사용: copy/{이름}.png (1080px 경량 PNG) → 없으면 원본(s.u) */
-function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
+function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url=ssl:'+u.replace(/^https?:\/\//,'')+'&w='+w+'&q='+(q||62)+'&fit=contain&output=webp'; }
 function baseName(p){ return p.replace(/\.[^.\/]+$/,''); }
 function thumbUrl(s,w){
   if(s.p) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
