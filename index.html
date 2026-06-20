@@ -305,6 +305,30 @@
   .toast .lbl{ position:relative; z-index:2; }
   .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   .toast.high{ top:22%; }
+
+  /* ===== 공지(스꾸 로고 진입) 배지 + 팝업 ===== */
+  .logo-blob{ cursor:pointer; }
+  .notice-badge{ position:absolute; top:-5px; right:-9px; min-width:26px; height:26px; padding:0 6px; box-sizing:border-box;
+    background:#ff4136; color:#fff; font-size:14px; font-weight:700; line-height:1; border-radius:13px;
+    display:none; align-items:center; justify-content:center; border:2px solid var(--ink); z-index:6; }
+  .notice-badge.show{ display:flex; }
+  .nt-modal{ position:absolute; inset:0; background:rgba(31,41,55,.45); z-index:130; display:none; align-items:center; justify-content:center; padding:22px; }
+  .nt-modal.open{ display:flex; animation:fade .2s ease; }
+  .nt-sheet{ position:relative; width:100%; max-width:380px; max-height:74vh; display:flex; flex-direction:column; padding:0; overflow:hidden; box-sizing:border-box; }
+  .nt-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 18px 14px; border-bottom:1px solid var(--ink); }
+  .nt-head h3{ font-size:16px; font-weight:800; color:var(--ink); }
+  .nt-x{ flex:0 0 auto; width:32px; height:32px; border:1px solid var(--ink); border-radius:50%; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; position:relative; z-index:2; }
+  .nt-x svg{ width:18px; height:18px; }
+  .nt-x:active{ transform:scale(.95); }
+  .nt-list{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:6px 16px 16px; }
+  .nt-empty{ text-align:center; color:#9ca3af; font-size:13px; line-height:1.8; padding:40px 8px; }
+  .nt-item{ padding:16px 2px; border-bottom:1px solid #f0f0ec; }
+  .nt-item:last-child{ border-bottom:none; }
+  .nt-item-top{ display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+  .nt-date{ font-size:11.5px; font-weight:600; color:#9ca3af; }
+  .nt-new{ font-size:10px; font-weight:800; color:#1f2937; background:var(--lime); border:1px solid var(--ink); border-radius:6px; padding:1px 6px; letter-spacing:.3px; }
+  .nt-title{ font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.4; margin-bottom:5px; letter-spacing:-.3px; }
+  .nt-body{ font-size:13px; line-height:1.65; color:#4b5563; white-space:pre-line; word-break:keep-all; }
 </style>
 </head>
 <body>
@@ -329,7 +353,7 @@
 
     <section class="view active" id="view-home">
       <div class="home-top" id="homeTop">
-        <div class="logo-blob"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
+        <div class="logo-blob" id="logoNotice" role="button" tabindex="0" aria-label="공지사항 보기" onclick="openNotice()"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
 <rect x="0.5" y="0.5" width="71" height="71" rx="35.5" fill="url(#paint0_radial_5_1002)" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <path d="M39.2417 19.1405C42.0803 19.1405 45.4058 19.4745 48.0405 20.4432C50.6575 21.4056 52.7776 23.0759 52.7778 25.83C52.7778 26.842 52.497 27.9705 51.771 28.9862C51.1544 29.8488 50.2303 30.6074 48.9302 31.1483C51.9377 34.3444 53.1869 37.7619 53.187 40.6141C53.187 43.9151 51.3925 46.8759 47.978 48.9882C44.5756 51.0929 39.5536 52.369 33.0044 52.369C30.3029 52.369 26.7771 52.1255 23.9097 51.1932C21.0694 50.2697 18.6499 48.5823 18.6499 45.576C18.6501 43.1665 20.2407 40.9758 22.7251 39.7255C21.0573 37.7177 19.7233 34.4848 19.7231 31.4579C19.7231 27.7689 21.7651 24.6702 25.2114 22.5165C28.6486 20.3685 33.5031 19.1405 39.2417 19.1405ZM31.7778 39.119C30.5803 39.119 29.0327 39.2447 27.5435 39.4657C26.4356 39.6301 25.3804 39.8442 24.5347 40.0917C26.4564 41.5982 28.8423 42.161 31.5728 42.161C32.8829 42.161 33.7243 42.0656 34.2319 41.83C34.4681 41.7203 34.6106 41.5885 34.7007 41.4354C34.7935 41.2775 34.856 41.0528 34.856 40.7167C34.856 40.3813 34.794 40.1389 34.6958 39.9589C34.5997 39.7828 34.4518 39.6349 34.2271 39.5116C33.7512 39.2505 32.9675 39.1191 31.7778 39.119ZM40.6724 28.6327C39.371 28.6327 38.5803 28.8109 38.1304 29.0614C37.9139 29.182 37.786 29.3132 37.7104 29.4423C37.6349 29.5713 37.5942 29.7273 37.5942 29.9227C37.5942 30.1058 37.6324 30.26 37.7124 30.3944C37.7925 30.529 37.9331 30.6757 38.188 30.8134C38.7158 31.0986 39.675 31.3153 41.3374 31.3153C42.413 31.3153 43.734 31.2273 44.9497 31.076C45.7613 30.9751 46.505 30.8473 47.0903 30.7059C45.3894 29.1942 42.9903 28.6327 40.6724 28.6327Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <defs>
@@ -338,7 +362,7 @@
 <stop offset="1" stop-color="white"/>
 </radialGradient>
 </defs>
-</svg></div>
+</svg><span class="notice-badge" id="noticeBadge" aria-hidden="true">1</span></div>
         <div class="top-actions">
           <div class="top-actions-row">
           <button class="btn-outline sq" data-r="14" data-fill="#ffffff" aria-label="검색" onclick="openSearch()">
@@ -428,6 +452,15 @@
     <div class="pk-sheet sq" id="pkSheet" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
       <button class="pk-x sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" onclick="closeAdPopup()" aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
       <div id="pkSheetBody"></div>
+    </div>
+  </div>
+  <div class="nt-modal" id="ntModal" onclick="if(event.target===this)closeNotice()">
+    <div class="nt-sheet sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
+      <div class="nt-head">
+        <h3>📢 공지사항</h3>
+        <button class="nt-x" onclick="closeNotice()" aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
+      </div>
+      <div class="nt-list" id="ntList"></div>
     </div>
   </div>
 </div>
@@ -1340,7 +1373,49 @@ async function loadSupabase(){
   }catch(e){ console.warn('sb 클라이언트 로드 실패(집계 기능만 제한)', e); }
 }
 
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAdPopup(); });
+/* ===== 공지사항 (스꾸 로고 클릭 → 히스토리 팝업) =====
+   공지는 Supabase 'seukku_notices' 테이블에서 불러와요 (관리자 페이지에서 추가/수정/삭제).
+   id가 클수록 최신. 유저가 팝업을 열면 그 시점 최신 id까지 '읽음' 처리되어 배지가 사라져요. */
+var NOTICES=[];
+function fmtNoticeDate(iso){ try{ var d=new Date(iso); return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'); }catch(e){ return ''; } }
+function noticeSeen(){ try{ return parseInt(localStorage.getItem('seukku_notice_seen')||'0',10)||0; }catch(e){ return 0; } }
+function noticeMaxId(){ var m=0; for(var i=0;i<NOTICES.length;i++){ if(NOTICES[i].id>m) m=NOTICES[i].id; } return m; }
+function noticeUnread(){ var s=noticeSeen(); var n=0; for(var i=0;i<NOTICES.length;i++){ if(NOTICES[i].id>s) n++; } return n; }
+function updateNoticeBadge(){
+  var b=document.getElementById('noticeBadge'); if(!b) return;
+  var u=noticeUnread();
+  if(u>0){ b.textContent=(u>9?'9+':String(u)); b.classList.add('show'); b.setAttribute('aria-hidden','false'); }
+  else { b.classList.remove('show'); b.setAttribute('aria-hidden','true'); }
+}
+function renderNotices(){
+  var s=noticeSeen(), el=document.getElementById('ntList'); if(!el) return;
+  if(!NOTICES.length){ el.innerHTML='<div class="nt-empty">아직 공지가 없어요 🍀</div>'; return; }
+  el.innerHTML=NOTICES.map(function(n){
+    var isNew=n.id>s;
+    return '<div class="nt-item"><div class="nt-item-top"><span class="nt-date">'+esc(n.date)+'</span>'+(isNew?'<span class="nt-new">NEW</span>':'')+'</div>'+
+      '<div class="nt-title">'+esc(n.title)+'</div><div class="nt-body">'+esc(n.body)+'</div></div>';
+  }).join('');
+  sq();
+}
+function loadNotices(){
+  fetch(SB_URL+'/rest/v1/seukku_notices?select=id,title,body,created_at&active=eq.true&order=pinned.desc,created_at.desc&limit=100',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
+  .then(function(r){ return r.ok?r.json():[]; }).then(function(rows){
+    if(!Array.isArray(rows)) return;
+    NOTICES=rows.map(function(n){ return { id:n.id, date:fmtNoticeDate(n.created_at), title:n.title||'', body:n.body||'' }; });
+    updateNoticeBadge();
+    var m=document.getElementById('ntModal'); if(m && m.classList.contains('open')) renderNotices();
+  }).catch(function(){});
+}
+function openNotice(){
+  renderNotices();
+  document.getElementById('ntModal').classList.add('open');
+  sq();
+  if(NOTICES.length){ try{ localStorage.setItem('seukku_notice_seen', String(noticeMaxId())); }catch(e){} updateNoticeBadge(); }
+  try{ if(window.ga) ga('notice_open',{}); }catch(e){}
+}
+function closeNotice(){ var m=document.getElementById('ntModal'); if(m) m.classList.remove('open'); }
+updateNoticeBadge(); loadNotices();
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeAdPopup(); closeNotice(); } });
 buildChips(); loadSupabase(); startHomeAd();   /* 홈 광고는 정적 설치본을 스케일만 (심사용 정상 호출) */
 </script>
 
