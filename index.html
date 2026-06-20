@@ -922,6 +922,21 @@ function loadWall(){
     WALL_DATA=rows; WALL_LOADED=true; renderWall();
   }).catch(function(){ var el=document.getElementById('wallList'); if(el) el.innerHTML='<div class="wall-empty">불러오지 못했어요</div>'; });
 }
+var WALL_POLL=null;
+function pollWall(){
+  fetch(SB_URL+'/rest/v1/seukku_wall?select=id,nickname,body,created_at&order=created_at.desc&limit=100',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
+  .then(function(r){ return r.json(); }).then(function(rows){
+    if(!Array.isArray(rows)) return;
+    var cur=WALL_DATA[0]?WALL_DATA[0].id:0, inc=rows[0]?rows[0].id:0;
+    if(inc!==cur || rows.length!==WALL_DATA.length){
+      var el=document.getElementById('wallList'), atTop=!el||el.scrollTop<60;
+      WALL_DATA=rows;
+      if(atTop) renderWall();   /* 맨 위(최신)를 보고 있을 때만 다시 그려서 스크롤 튐 방지 */
+    }
+  }).catch(function(){});
+}
+function startWallPoll(){ stopWallPoll(); WALL_POLL=setInterval(function(){ var p=document.getElementById('wallPanel'); if(p&&p.classList.contains('open')) pollWall(); else stopWallPoll(); },20000); }
+function stopWallPoll(){ if(WALL_POLL){ clearInterval(WALL_POLL); WALL_POLL=null; } }
 function postWall(){
   if(window._wallPosting) return;
   var inp=document.getElementById('wallText'), t=(inp.value||'').trim();
@@ -947,7 +962,8 @@ function toggleWall(){
     var inp=document.getElementById('wallText');
     if(inp && !inp._bound){ inp._bound=true; inp.addEventListener('keydown',function(e){ if(e.key==='Enter' && !e.isComposing && e.keyCode!==229){ e.preventDefault(); postWall(); } }); }
     try{ if(window.ga) ga('wall_open',{}); }catch(e){}
-  }
+    startWallPoll();
+  } else { stopWallPoll(); }
 }
 var W3F_KEY="8154e180-f78c-4492-b85b-84253c9b09ee";  // web3forms Access Key (이메일 알림)
 function sendFeedback(){
