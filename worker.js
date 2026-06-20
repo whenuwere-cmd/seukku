@@ -13,10 +13,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // ★ 추가: 옛 도메인(*.workers.dev)으로 들어온 요청은 seukku.cc 로 영구(301) 이동
+    // ★ 옛 기본주소(seukku.seukku.workers.dev)로 들어온 요청만 seukku.cc 로 영구(301) 이동
     //   - 단톡방에 퍼진 옛 링크 + 검색엔진 색인을 새 도메인으로 넘긴다 (path·쿼리 그대로 유지)
-    //   - seukku.cc 자체 요청은 통과시켜 무한 리다이렉트를 막는다
-    if (url.hostname.endsWith(".workers.dev")) {
+    //   - dev-seukku... / {version}-seukku... 같은 preview 주소는 통과시켜 테스트 서버를 살린다
+    //   - seukku.cc 자체 요청도 통과시켜 무한 리다이렉트를 막는다
+    if (url.hostname === "seukku.seukku.workers.dev") {
       return Response.redirect("https://seukku.cc" + url.pathname + url.search, 301);
     }
 

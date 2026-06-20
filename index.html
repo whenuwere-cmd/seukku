@@ -149,6 +149,15 @@
   .chip:active{ transform:scale(.96); }
 
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
+  /* ── 특수문자 탭 (스퀴클 .sq 시스템 사용) ── */
+  .deco-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:16px var(--pad) 140px; }
+  .deco-card{ position:relative; min-height:80px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; font-size:13px; color:#2d3643; line-height:1.55; word-break:break-word; cursor:pointer; -webkit-user-select:none; user-select:none; transition:transform .08s ease; }
+  .deco-card .lbl{ position:relative; z-index:2; }
+  .deco-card:active{ transform:scale(.96); }
+  .deco-toggle{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:60; display:flex; gap:6px; align-items:center; padding:7px 8px; border-radius:30px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
+  .deco-toggle.hidden{ display:none; }
+  .deco-seg{ position:relative; border:0; background:none; padding:10px 16px; border-radius:22px; font-family:inherit; font-size:13px; font-weight:500; color:#2d3643; letter-spacing:-.13px; line-height:18px; white-space:nowrap; cursor:pointer; }
+  .deco-seg .lbl{ position:relative; z-index:2; }
   .pkcard{ grid-column:span 2; min-height:0; position:relative; display:flex; align-items:center; gap:11px; padding:10px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
   .pkcard:active{ transform:scale(.98); }
   .pkcard .pkinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
@@ -314,6 +323,8 @@
       <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-pfxYtNSw6RUVV4JH" data-ad-width="320" data-ad-height="50"></ins></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
+      <div class="chips" id="decoChips" style="display:none"></div>
+      <div class="deco-grid" id="decoGrid" style="display:none"></div>
     </section>
 
     <section class="view" id="view-detail">
@@ -359,6 +370,108 @@
     <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
     <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
   </div>
+  <div class="deco-toggle sq" id="decoToggle" data-r="26" data-fill="#ffffff" data-stroke="#1f2937">
+    <button class="deco-seg" id="segSticker" onclick="setMode('sticker')"><span class="lbl">스티커</span></button>
+    <button class="deco-seg" id="segDeco" onclick="setMode('deco')"><span class="lbl">특수문자₊⊹</span></button>
+  </div>
+<script type="text/plain" id="deco-data-face">
+➸ ---( ⌯' '⌯ )--- ෆ ̖́-
+ෆꔛ(⑉･ ･⑉)ꔛෆ
+➳ ( ˙-˙　)♡
+(^. ̫ .^♡)੭
+꜀( ꜆^ෆ . ෆ^)꜆
+( ˶'ᵕ'🫶🏻)💕
+(" ⑉• •⑉)
+⌯'-'⌯
+꒰ᐢ⸝⸝•༝•⸝⸝ᐢ꒱
+·̩͙꒰ঌ(𐭅" ॑  ॑")𐭅ᰔᩚ
+(´•ᴗ• ก )՞ ՞♡
+₍ᐢෆ ·̫ ෆᐢ₎
+.◜ɞ◝♡
+(◍•ᴗ•◍)❤
+◟̄◞̄❤︎
+૮ - ﻌ • ა ♥
+꒰ •⸝⸝⸝⸝⸝⸝⸝• ꒱
+( ᵕᴗᵕ )!✩
+♡ჺ♡︎𑁦༥𑁦♡݂১
+꙳⸌(ᵒ͈̑ᴗ̂ᵒ͈̑ )
+(  ⸝⸝˘͈ ᵕ˘)(˘͈ᵕ ˘͈♡)
+ʕ ˶ᵔ ᵕ ᵔ˶ʔ⊃⊂ʕ˶ᵔ ᵕ ᵔ˶ ʔ
+₍ᵔ˶◜ʚ̴̶̷  ̫ ʚ̴̶̷◝˶ᵔ₎
+𐔌՞˶>˛<˶՞𐦯
+٩₍ᐢ. ◞ . ᐢ₎۶
+૮₍´｡･⩊･ ｡`₎ა
+꒰ྀི ˶• ༝ •˶ ꒱ྀི
+૮ - 𖥦 - ྀིა °｡⊹ ࣪ ˖°
+꒰ᐢ. ⩊ . ྀིᐢ꒱
+ᐡ⌯'・'⌯ᐡ
+( ˆ𓈒◡˕◡⁠𓈒ˆ)
+(❛ᴗ❛(❛ᴗ❛♡
+(｡ • . •｡)
+(⑉ｰ . ｰ⑉)
+₍^⸝⸝ᴗ ᴗ⸝⸝^₎
+૮꒰ྀི◜༝◝ ꒱ྀིა
+ᵋ ･֊･ ᵌ
+(⸝⸝•ᴗ•✿)
+՞˶･֊･˶՞
+｡ﾟ･｡ﾟᐠ(  ᐢ ᵕ ᐢ )ᐟ｡ﾟ･｡ﾟ
+( *˙˙*)
+( ੭ ･ ౩･ )੭
+◜. ̫.◝꜆
+૮ ․ ․ ྀིა
+(՞˶･֊･˶՞)
+૮ › ༝ ‹ ྀིა
+｡·͜·｡
+૮ •̀ o •́ ྀིა=
+•̀-•́
+(  '-'  ꐦ)
+ಠ‸ಠ
+(,,Ծ‸Ծ,, )
+( •̀ ̫•́ )
+(-、-)
+ᯤ ᯅ ᯤ
+(˙-˙ ٥)
+•̆ . •̆
+(•́ .̮ •̀)՞
+(｡•̀ᴗ-)✧
+( •̀-•́ゞ)
+(ᵕ •̥ · •̥ ᵕ)
+₍ᐢ ᵕ̩̩ㅅᵕ̩̩ ᐢ₎
+（•̥̥̥ ࿁ •̥̥̥）
+( ᵕ_ᵕ̩̩ )
+(՞ ˶• •̥˶՞)︎
+(｡ᵕ̣̣̣̣̣̣ ꘍ ᵕ̣̣̣̣̣̣｡)
+( ⚈̥̥̥̥̥́⌢⚈̥̥̥̥̥̀)
+｡ﾟ･（>﹏<）･ﾟ｡
+(˃̣̣̣̣︿˂̣̣̣̣ )
+( ˃̣̣o˂̣̣ )
+。°(°´ᯅ`°)°。
+( ˶ˆ ᵕ ˆ˶ )
+૮ ˶ᵔ ᵕ ᵔ˶ ა
+ʕ•ᴥ•ʔ
+(=^・ω・^=)
+ᓚᘏᗢ
+૮₍ ˶ᵔ ᵕ ᵔ˶ ₎ა
+ʕっ•ᴥ•ʔっ
+⸜(｡˃ ᵕ ˂ )⸝♡
+꒰ᐢ. .ᐢ꒱₊˚⊹♡
+( ⸝⸝•ᴗ•⸝⸝ )
+٩(ˊᗜˋ*)و
+ʕ ˵• ₒ •˵ ʔ
+( ◡̀_◡́)ᕤ
+૮₍ ´• ˕ •` ₎ა
+(๑˃ᴗ˂)ﻭ
+(˶ᵔ ᵕ ᵔ˶)
+( ⸝⸝ᵕᴗᵕ⸝⸝ )
+٩(ˊᵕˋ*)و
+(人 •͈ᴗ•͈)
+૮ ˶ᵔ ᗜ ᵔ˶ ა
+( ´ ▽ ` )ﾉ
+(≧▽≦)
+⸜(* ॑꒳ ॑* )⸝
+( ˘ ³˘)♡
+૮ ・ﻌ・ა
+</script>
   <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
   <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
     <div class="pk-sheet sq" id="pkSheet" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
@@ -700,7 +813,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
+function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
@@ -957,6 +1070,185 @@ function copyBizMail(){
   try{ ga('biz_mail_copy',{}); }catch(e){}
 }
 function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
+
+/* ───────── 특수문자 탭 (스퀴클 .sq 시스템) ───────── */
+var decoMode=false, decoCat='hot';
+var DECO_CATS=[['hot','HOT ☀︎ ⋆⁺'],['new','NEW ✧･ﾟ'],['face','표정 ⌯\' \'⌯'],['line','구분선 ≈']];
+var DECO={
+  hot:[
+    '✧˚ ༘ ⋆｡˚',
+    '⋆⁺₊⋆ ☀︎ ⋆⁺₊⋆',
+    '✩°｡⋆⸜ 🎀',
+    '⁺˚⋆｡°✩₊',
+    '✧･ﾟ: *✧･ﾟ:*',
+    '·˚ ༘₊· ͟͟͞͞꒰➳',
+    'ੈ✩‧₊˚',
+    '˚ ✦ .  ⁺   . ✦ ˚  . ⁺  ✦',
+    '⋆｡°✩✧˖°⋆',
+    '˗ˏˋ ★ ˎˊ˗',
+    '⊹₊ ⋆ ❅ ⋆ ₊⊹',
+    '✧･ﾟ: ✧',
+    '☾.˖',
+    '˚ ༘♡ ⋆｡˚',
+    '⋆｡˚ ☁︎ ˚｡⋆',
+    'ﾟ+.ﾟ☆',
+    '✩‧₊˚',
+    '˚୨୧⋆｡˚ ⋆',
+    '⋆·˚ ༘ *',
+    '꙳⸌♡⸍꙳',
+    '🪄◝✩',
+    '⋆.ೃ࿔:･',
+    '♡₊˚ 🦢・₊✧',
+    '♡˗ˏˋ ꒰ ♡ ꒱ ˎˊ˗♡',
+    'ᰔᩚ♡ᰔᩚ',
+    '˚₊‧꒰ა ♡ ໒꒱ ‧₊˚',
+    'ˏˋ°•*⁀➷♡',
+    '˗ˏˋ ♡ ˎˊ˗',
+    '⊹˚. ♡',
+    '˚˖𓍢ִ໋✧˚.⋆',
+    '⋆˚✿˖°',
+    '𖤣𖥧𖡼.𖤣𖥧𖡼.𖤣𖥧',
+    '✿❀❁ ❃❋',
+    '⋆⁺₊ ☁︎⋆⁺₊',
+    '☆⋆｡𖦹°‧★',
+    '⋆⁺₊⋆ ☾⋆⁺₊⋆',
+    '˖⁺‧₊˚ ✩ ˚₊‧⁺˖',
+    '｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆',
+    '✭ ₊˚ ⋆',
+    '⊹ ࣪ ˖',
+    '˚ ༘ ☾',
+    '⟡ ☁⋆ ୭ 🕊.⋆｡⋆༶⋆˙',
+    '✧˖°.',
+    '☾ ⋆｡˚ ☁️ ˚｡⋆',
+    '˚ ✦ . 🪐 . ✦ ˚ . ⁺',
+    '⊹ ࣪ ˖ 𓍢ִ໋ ✧ ᶻz ☾',
+    '₊˚ʚ ₊˚✧ ﾟ.',
+    '°❀⋆.ೃ🦋࿔*:･ﾟ',
+    'ꪔ̤̥',
+    '✲ﾟ：ﾟ✲ﾟ：*ﾟ',
+    '⋆⸜ ⚘ ⸝⋆',
+    '⟡ ˖ ࣪⭑ 🎧 ⟡ ˖ ࣪',
+    '🎀𓂃˖˳·˖ ✶ ˖·˳˖𓂃🎀',
+    '𓇼⋆｡˚🐚⋆˙⟡',
+    '🪐⋆⁺₊⋆☁️⋆⁺₊⋆',
+    '˗ˏˋ ˎˊ˗',
+    '⋰ ⋱',
+    '꒰ ⑅ ʚ♡ɞ ⑅ ꒱',
+    '♡𓐍𓏸',
+    '⋆⑅˚₊',
+    '⚝',
+    '★彡',
+    '⚡︎⚡︎⚡︎',
+    '𐕣',
+    '꩜',
+    '☁︎ ⋆⁺₊ 𓇢 ⋆⁺₊ ☁︎ ₊˚. 𓂂 ˚',
+    '✈︎ 𓂃 𓈒 𓏸 𓍢ִ໋ ✧ ˚˖𓍢ִ✧˚',
+    '˚ ✦ . 𓎩 ⁺ . 𓌉 ✦ ˚ . ⁺ 𓊤',
+    '𓍢ִ໋ 𓊤 ༘ ˚ 𓊦 ༘ ˚ ⊹ ࣪ ˖ 𓇨',
+    '⋆⁺₊ 𓎺 ₊˚',
+    '⋆⁺₊ 𓎺 ⋆⁺₊ 𓇢 ₊˚. ✧ ☕️',
+    '☕ 𓈒 𓏸 ₊˚⊹',
+    '𓍢ִ໋ 🥐 ✧˖°',
+    'ᶻz ☕ 𓍢ִ໋',
+    '˚ ✦ . ☕ ⁺ . 🍩 ✦ ˚ . ⁺ ⊹',
+    '⋆⁺₊ ⚘ ₊˚',
+    '✾ ༘ ˚ ✿ ༘ ˚ ❀ ༘ ˚ ʚɞ',
+    '✿⋆⁺₊ ⚘ ⋆⁺₊ ʚɞ ₊˚. ✧',
+    '˚˖𓍢ִ໋ ≈≈≈ ˚˖𓍢ִ✧˚ ° 𖦹⁺˖ ☼'
+  ],
+  'new':[
+    '₊˚ʚ ᗢ₊˚✧ ﾟ.',
+    '⚘ ᡣ𐭩 ·˚',
+    '𖦹⁺˖ 🐾˖⁺𖦹',
+    '𓃠 ₊˚.𓂃',
+    '𓃠 ྀི ₊˚⊹ 🐾',
+    '✧੯•́໒꒱',
+    '੯‧̀͡⬮\u005c',
+    '੯‧̀͡₎᭄ྀི',
+    '੯‧̀͡ ₎˚₊·`',
+    '𓆉 𓂃 𓈒 𓏸 🫧 ˚˖𓍢ִ✧˚',
+    '𓆝 ˚₊· ͟͟͞͞➳ 🫧 𓆟',
+    '✧ 𓅭 𓅰 𓅮 ⋆⁺₊ 𓅯',
+    '𓅯 ྀི ₊˚⊹ ♡',
+    '☾ ⋆*･ﾟ 𓅦 ✧',
+    '𓆑 𓆸 ₊˚. ✧ 𓆧',
+    '˚ ✦ . 𓆝 . ✦ ˚ . ⁺',
+    '˚✧₊⁎❝᷀ົₒ❝᷀ົ⁎⁺˳✧༚',
+    '꒰ ꒱'
+  ],
+  line:[
+    '─── ⋆⋅☆⋅⋆ ──',
+    '★·.·´¯`·.·★',
+    '✦•┈๑⋅⋯ ⋯⋅๑┈•✦',
+    '•───── ☾ ─────•',
+    '═══════ ∘◦❁◦∘ ═══════',
+    '⊱ ──────ஓ๑♡๑ஓ ────── ⊰',
+    '꒷꒦꒷꒦꒷꒦꒷꒦꒷꒦꒷',
+    '·͙⁺˚*•̩̩͙✩•̩̩͙*˚⁺‧͙·',
+    '┊ ┊ ┊ ┊ ┊ ˚✩ ⋆｡˚ ✩',
+    '❁ ≖≖≖≖≖≖≖≖≖≖≖ ❁',
+    '┈┈┈┈┈┈┈ ✁',
+    '⋈・。・。・。・。・⋈',
+    '｡.ꕤ………………………………ꕤ.｡',
+    '✼••┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈••✼',
+    '⌢⌢⌢⌢⌢⌢⌢⌢⌢⌢',
+    '⌣⌣⌣⌣⌣⌣⌣⌣⌣⌣',
+    '✄┈┈┈┈┈┈┈┈',
+    '⋱⋰ ⋱⋰ ⋱⋰',
+    '𓂂𓂃𓂂𓂃𓂂𓂃𓂂',
+    '𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄𓐄'
+  ],
+  face:decoFaceData()
+};
+function decoFaceData(){ var el=document.getElementById('deco-data-face'); if(!el) return []; var seen={},out=[]; el.textContent.split('\n').forEach(function(s){ s=s.trim(); if(!s||seen[s]) return; seen[s]=true; out.push(s); }); return out; }
+function decoEsc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function renderDecoChips(){
+  document.getElementById('decoChips').innerHTML=DECO_CATS.map(function(c){
+    var on=(c[0]===decoCat);
+    return '<div class="chip sq'+(on?' active':'')+'" data-r="13" data-fill="'+(on?'#e7ffb3':'#ffffff')+'" data-stroke="'+(on?'#1f2937':'#e5e7eb')+'" onclick="selDecoChip(\''+c[0]+'\')"><span class="lbl">'+c[1]+'</span></div>';
+  }).join('');
+}
+function renderDeco(){
+  var arr=DECO[decoCat]||[];
+  document.getElementById('decoGrid').innerHTML=arr.map(function(t){
+    var e=decoEsc(t);
+    return '<div class="deco-card sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" role="button" tabindex="0" data-t="'+e+'" onclick="copyDeco(this)"><span class="lbl">'+e+'</span></div>';
+  }).join('');
+}
+function selDecoChip(cat){
+  decoCat=cat; renderDecoChips(); renderDeco(); sq();
+  document.getElementById('scroll').scrollTop=0;
+  if(window.refreshHomeAd) refreshHomeAd();
+}
+function decoLegacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='-9999px'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} }
+function copyDeco(el){
+  var t=(el.getAttribute('data-t')||el.textContent||'').trim();
+  function done(){ toast('복사완료!'); try{ if(window.ga) ga('deco_copy',{ deco_text:t, deco_cat:decoCat }); }catch(e){} }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,function(){ decoLegacyCopy(t); done(); }); }
+  else { decoLegacyCopy(t); done(); }
+}
+function setSeg(el,on){
+  if(!el) return;
+  if(on){ el.classList.add('sq'); el.setAttribute('data-r','22'); el.setAttribute('data-fill','#e7ffb3'); el.setAttribute('data-stroke','#1f2937'); }
+  else { el.classList.remove('sq'); el.removeAttribute('data-r'); el.removeAttribute('data-fill'); el.removeAttribute('data-stroke'); var s=el.querySelector('svg.sqbg'); if(s&&s.parentNode) s.parentNode.removeChild(s); }
+}
+function applyMode(){
+  var onHome=(currentView!=='detail');
+  var tg=document.getElementById('decoToggle'); if(tg) tg.classList.toggle('hidden', !onHome);
+  var s1=document.getElementById('segSticker'), s2=document.getElementById('segDeco');
+  setSeg(s1, !decoMode); setSeg(s2, decoMode);
+  ['chips','homeGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? 'none' : ''; });
+  ['decoChips','decoGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? '' : 'none'; });
+  sq();
+}
+function setMode(m){
+  decoMode=(m==='deco');
+  if(decoMode && !document.getElementById('decoGrid').innerHTML){ renderDecoChips(); renderDeco(); }
+  applyMode();
+  document.getElementById('scroll').scrollTop=0;
+  if(window.refreshHomeAd) refreshHomeAd();
+}
+try{ renderDecoChips(); renderDeco(); applyMode(); }catch(e){}
 /* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
 function fitAd(box){
   if(!box) return false;
