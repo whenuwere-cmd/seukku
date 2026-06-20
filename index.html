@@ -250,7 +250,7 @@
     animation:skkuTwinkle 1.6s ease-in-out infinite; }
   .skku-spark.s1{ width:16px; height:16px; top:6px; right:6px; animation-duration:1.6s; animation-delay:0s; }
   .skku-spark.s3{ width:12px; height:12px; bottom:8px; left:8px; animation-duration:1.9s; animation-delay:.7s; }
-  .fab-chat.wall-open .skku-spark{ opacity:0; transition:opacity .2s; }
+  .fab-chat.wall-open .skku-spark{ display:none; }
   @keyframes skkuTwinkle{ 0%,100%{ transform:scale(.4); opacity:.6; } 50%{ transform:scale(1); opacity:1; } }
   @media (prefers-reduced-motion:reduce){ .skku-spark{ animation:none; transform:scale(.8); } }
   .info-panel{ position:absolute; left:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:340px; background:#fff;
