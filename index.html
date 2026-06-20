@@ -980,22 +980,23 @@ var decoMode=false, decoCat='hot', decoHotList=null, decoHotLoading=false;
 var DECO_CATS=[['hot','HOT ☀︎ ⋆⁺'],['new','NEW ✧･ﾟ'],['recent','최근사용 ෆ ̖́-'],['face','표정 ⌯\' \'⌯'],['line','구분선 ≈']];
 var DECO={ deco:[], face:[], line:[] };
 var decoItemsLoaded=false;
+var DECO_ROWS=[];
 function allDeco(){
   var seen={}, out=[];
-  [DECO.deco, DECO.face, DECO.line].forEach(function(arr){
-    (arr||[]).forEach(function(t){ if(!seen[t]){ seen[t]=1; out.push(t); } });
+  DECO_ROWS.slice().sort(function(a,b){ return b.id-a.id; }).forEach(function(r){
+    if(!seen[r.text]){ seen[r.text]=1; out.push(r.text); }
   });
   return out;
 }
 function loadDecoItems(){
   if(decoItemsLoaded) return;
-  fetch(SB_URL+'/rest/v1/deco_items?select=text,cat,sort&active=eq.true&order=cat.asc,sort.asc&limit=2000',{
+  fetch(SB_URL+'/rest/v1/deco_items?select=id,text,cat,sort&active=eq.true&order=cat.asc,sort.asc&limit=2000',{
     headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY }
   }).then(function(r){ return r.json(); }).then(function(rows){
     if(!Array.isArray(rows)) return;
     var d={ deco:[], face:[], line:[] };
     rows.forEach(function(r){ (d[r.cat]||d.deco).push(r.text); });
-    DECO=d; decoItemsLoaded=true;
+    DECO=d; DECO_ROWS=rows; decoItemsLoaded=true;
     if(decoMode){
       if(decoCat==='hot' && decoHotList===null){ fetchDecoHot(); }
       else { renderDeco(); sq(); }
