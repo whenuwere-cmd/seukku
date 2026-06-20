@@ -448,7 +448,7 @@ function publicUrl(path){ return R2_BASE ? (R2_BASE+"/"+path) : (SB_URL+"/storag
 function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url=ssl:'+u.replace(/^https?:\/\//,'')+'&w='+w+'&q='+(q||62)+'&fit=contain&output=webp'; }
 function baseName(p){ return p.replace(/\.[^.\/]+$/,''); }
 function thumbUrl(s,w){
-  if(s.p) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
+  if(s.p && s.p.indexOf('sticker_')!==0) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
   return wsrv(s.u,w);
 }
 function copyUrl(s){ if(s.p) return publicUrl('copy/'+baseName(s.p)+'.png'); return s.u; }
