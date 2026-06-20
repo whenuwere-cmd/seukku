@@ -266,22 +266,22 @@
     background:#fff; border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:13px; font-weight:700; color:var(--ink); }
   .fab-mail:active{ transform:scale(.94); }
   .wall-panel{ position:absolute; right:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:360px; background:#fff;
-    border:1px solid var(--ink); border-radius:18px; z-index:60; display:none; box-shadow:0 10px 28px rgba(31,41,55,.14); overflow:hidden; }
+    border:1px solid var(--ink); border-radius:18px; z-index:60; display:none; box-shadow:0 10px 28px rgba(31,41,55,.14); }
   .wall-panel.open{ display:flex; flex-direction:column; max-height:min(70vh,560px); }
-  .wall-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; padding:16px 16px 12px; border-bottom:1px solid #f0f0ec; }
+  .wall-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; padding:16px 16px 12px; border-bottom:1px solid var(--ink); }
   .wall-head h3{ margin:0; font-size:15px; font-weight:800; color:var(--ink); }
   .wall-head p{ margin:4px 0 0; font-size:11.5px; color:#9ca3af; line-height:1.5; }
   .wall-x{ flex:0 0 auto; width:30px; height:30px; border:1px solid var(--ink); border-radius:50%; background:#fff; cursor:pointer; font-size:14px; color:var(--ink2); display:flex; align-items:center; justify-content:center; }
   .wall-list{ flex:1 1 auto; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch; }
   .wall-empty{ text-align:center; color:#9ca3af; font-size:12.5px; line-height:1.8; padding:32px 8px; }
   .wall-item{ display:flex; gap:9px; }
-  .wall-av{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px solid var(--ink); background:#fff; font-size:17px; line-height:1; display:flex; align-items:center; justify-content:center; }
+  .wall-av{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px solid var(--ink); background:#F1FFD2; font-size:17px; line-height:1; display:flex; align-items:center; justify-content:center; }
   .wall-body{ flex:1 1 auto; min-width:0; background:#F6F6F6; border-radius:12px; padding:9px 12px; }
   .wall-meta{ display:flex; align-items:center; gap:6px; margin-bottom:3px; }
   .wall-meta b{ font-size:12.5px; font-weight:700; color:var(--ink); }
   .wall-meta span{ font-size:10.5px; color:#b0b4ba; }
   .wall-text{ font-size:13px; line-height:1.55; color:#374151; word-break:break-word; white-space:pre-wrap; }
-  .wall-input{ flex:0 0 auto; display:flex; gap:7px; padding:11px 14px; border-top:1px solid #f0f0ec; background:#fff; }
+  .wall-input{ flex:0 0 auto; display:flex; gap:7px; padding:11px 14px; border-top:1px solid var(--ink); background:transparent; }
   .wall-input input{ flex:1 1 auto; min-width:0; border:1px solid #e5e7eb; border-radius:14px; padding:14px 16px; font-size:16px; font-family:inherit; outline:none; background:#fff; color:var(--ink); }
   .wall-input input::placeholder{ color:#8897ae; }
   .wall-input input:focus{ border-color:var(--ink); }
@@ -388,8 +388,8 @@
   <button class="fab sq" data-r="14" data-fill="#ffffff" id="topBtn" aria-label="맨 위로" onclick="goTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
-  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="할말있어요" onclick="toggleWall()"><span class="lbl">💬</span></button>
-  <button class="fab-mail sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" id="mailBtn" aria-label="의견·오류제보" onclick="toggleInfo()"><span>문의</span></button>
+  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="방명록" onclick="toggleWall()"><span class="lbl">💬</span></button>
+  <button class="fab-mail sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" id="mailBtn" aria-label="의견·오류제보" onclick="toggleInfo()"><span>안내</span></button>
   <div class="info-panel sq" id="infoPanel" data-r="18" data-fill="#ffffff" data-stroke="#1f2937">
     <h3>스꾸 안내 🍀</h3>
     <p>마음껏 복사해서 스토리·메신저 꾸미기에 써주세요. 원하는 스티커·의견·오류 제보 모두 아래에 남겨주세요. (보통 1~2일 내 확인해요)</p>
@@ -401,10 +401,9 @@
     <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
     <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
   </div>
-  <div class="wall-panel" id="wallPanel">
+  <div class="wall-panel sq" data-r="18" data-fill="#ffffff" data-stroke="#1f2937" id="wallPanel">
     <div class="wall-head">
-      <div><h3>💬 할말있어요</h3><p>자유롭게 한마디 남겨주세요 🍀</p></div>
-      <button class="wall-x" onclick="toggleWall()" aria-label="닫기">✕</button>
+      <div><h3>💬 방명록</h3><p>자유롭게 한마디 남겨주세요 🍀<br>욕설이나 비방 등의 메시지는 삭제될 수 있어요.</p></div>
     </div>
     <div class="wall-list" id="wallList"><div class="wall-empty">불러오는 중…</div></div>
     <div class="wall-input">
@@ -872,7 +871,7 @@ var scrollEl=document.getElementById('scroll');
   sc.addEventListener('touchcancel',end,{passive:true});
 })();
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
-function toggleInfo(){ var p=document.getElementById('infoPanel'); p.classList.toggle('open'); if(p.classList.contains('open')){ sq(); var b=document.getElementById('fbSend'); if(b){ b.textContent='보내기'; b.disabled=false; } ga('info_open',{}); } }
+function toggleInfo(){ var p=document.getElementById('infoPanel'); var open=p.classList.toggle('open'); var mb=document.querySelector('#mailBtn span'); if(mb) mb.textContent=open?'✕':'안내'; if(open){ sq(); var b=document.getElementById('fbSend'); if(b){ b.textContent='보내기'; b.disabled=false; } ga('info_open',{}); } }
 
 /* ───────── 방명록(할말있어요) ───────── */
 var WALL_DATA=[], WALL_LOADED=false;
@@ -887,6 +886,7 @@ function wallNick(){
 function wallColor(s){ var h=0,i; s=s||''; for(i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))%360; } return 'hsl('+h+',52%,58%)'; }
 var WALL_EMOJI=['☔️','☺️','📷','🐹','🥐','🫧','🔎','🔗','🍀','🧚🏻‍♀️','💬','🫶🏻','🏠','🍚','🐾','🧜‍♀️','👚','🪡','🧵','🧶','🐶','🐭','🐱','🦊','🐰','🐷','🐮','🐻‍❄️','🐨','🦁','🐥','🦋','🐳','🐋','🫍','🐟','🦈','🐠','🐡','☘️','🍄','🍄‍🟫','🌷','🌹','💐','🪻','🌸','🌼','🌻','🌞','🌺','🌕','🌖','🌗','🌘','🌔','🌓','🌒','🌑','🌙','🪐','💫','⭐️','🌟','💥','☄️','⚡️','✨','🔥','🫯','🌧️','⛈️','💦','🍇','🍒','🍑','🥭','🍍','🍈','🫐','🍓','🍆','🍅','🥝','🥑','🍎','🍐','🍊','🍉','🍌','🍋‍🟩','🌽','🍠','🥖','🍞','🥯','🥨','🧀','🥚','🍳','🥓','🧇','🥞','🧈','🥩','🍗','🍖','🦴','🍟','🍔','🌭','🍕','🥪','🌮','🥘','🍜','🍙','🍘','🍢','🥮','🥠','🍥','🍡','🍧','🍨','🍦','🎂','🍰','🧁','🥧','🍿','🍩','🍪','🌰','🥛','🍯','🫘','🥜','🍼','🫖','☕️','🧃','🥤','🧋','🥎','⚽️','🏀','🎾','🩰','🎨','🫟','🎹','🎧','💿','📀','⌛️','⏳','💎','🔮','⚗️','🧽','🧼','🛍️','🎁','🎀','🎉','💔','❤️‍🔥','❤️‍🩹','❣️','💗','💓','💞','💕','💖','💘'];
 function wallEmoji(s){ var h=0,i; s=s||''; for(i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return WALL_EMOJI[h%WALL_EMOJI.length]; }
+(function(){ var wp=document.getElementById('wallPanel'); if(wp&&window.ResizeObserver){ new ResizeObserver(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }).observe(wp); } })();
 function wallEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function wallTime(iso){
   var d=new Date(iso), diff=(Date.now()-d.getTime())/1000;
@@ -915,9 +915,11 @@ function loadWall(){
   }).catch(function(){ var el=document.getElementById('wallList'); if(el) el.innerHTML='<div class="wall-empty">불러오지 못했어요</div>'; });
 }
 function postWall(){
+  if(window._wallPosting) return;
   var inp=document.getElementById('wallText'), t=(inp.value||'').trim();
   if(!t) return;
   if(t.length>280) t=t.slice(0,280);
+  window._wallPosting=true;
   var btn=document.querySelector('.wall-send'); if(btn) btn.disabled=true;
   fetch(SB_URL+'/rest/v1/seukku_wall',{ method:'POST', headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json', Prefer:'return=representation' }, body:JSON.stringify({ nickname:wallNick(), body:t, cid:(typeof CID!=='undefined'?CID:null) }) })
   .then(function(r){ return r.json(); }).then(function(rows){
@@ -925,15 +927,16 @@ function postWall(){
     if(Array.isArray(rows)&&rows[0]){ WALL_DATA.unshift(rows[0]); renderWall(); }
     else loadWall();
     try{ if(window.ga) ga('wall_post',{}); }catch(e){}
-  }).catch(function(){}).then(function(){ if(btn) btn.disabled=false; });
+  }).catch(function(){}).then(function(){ window._wallPosting=false; if(btn) btn.disabled=false; });
 }
 function toggleWall(){
   var p=document.getElementById('wallPanel'), open=p.classList.toggle('open');
+  var cb=document.querySelector('#chatBtn .lbl'); if(cb) cb.textContent=open?'✕':'💬';
   if(open){
     sq();
     if(!WALL_LOADED) loadWall(); else renderWall();
     var inp=document.getElementById('wallText');
-    if(inp && !inp._bound){ inp._bound=true; inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); postWall(); } }); }
+    if(inp && !inp._bound){ inp._bound=true; inp.addEventListener('keydown',function(e){ if(e.key==='Enter' && !e.isComposing && e.keyCode!==229){ e.preventDefault(); postWall(); } }); }
     try{ if(window.ga) ga('wall_open',{}); }catch(e){}
   }
 }
