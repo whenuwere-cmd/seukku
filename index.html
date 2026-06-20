@@ -151,6 +151,7 @@
   .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px var(--pad) 0; }
   /* ── 특수문자 탭 (스퀴클 .sq 시스템 사용) ── */
   .deco-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:16px var(--pad) 140px; }
+  .deco-empty{ grid-column:1/-1; text-align:center; color:var(--ink2); font-size:13px; line-height:1.9; padding:48px 16px; }
   .deco-card{ position:relative; min-height:80px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; font-size:13px; color:#2d3643; line-height:1.55; word-break:break-word; cursor:pointer; -webkit-user-select:none; user-select:none; transition:transform .08s ease; }
   .deco-card .lbl{ position:relative; z-index:2; }
   .deco-card:active{ transform:scale(.96); }
@@ -1161,8 +1162,8 @@ function copyBizMail(){
 function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('.lbl').textContent=m; t.classList.toggle('high', pos==='high'); t.classList.add('show'); clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},1600); }
 
 /* ───────── 특수문자 탭 (스퀴클 .sq 시스템) ───────── */
-var decoMode=false, decoCat='hot';
-var DECO_CATS=[['hot','HOT ☀︎ ⋆⁺'],['new','NEW ✧･ﾟ'],['face','표정 ⌯\' \'⌯'],['line','구분선 ≈']];
+var decoMode=false, decoCat='hot', decoHotList=null, decoHotLoading=false;
+var DECO_CATS=[['hot','HOT ☀︎ ⋆⁺'],['new','NEW ✧･ﾟ'],['recent','최근사용 ෆ ̖́-'],['face','표정 ⌯\' \'⌯'],['line','구분선 ≈']];
 var DECO={
   hot:[
     '✧˚ ༘ ⋆｡˚',
@@ -1290,6 +1291,39 @@ var DECO={
   face:decoFaceData()
 };
 function decoFaceData(){ var el=document.getElementById('deco-data-face'); if(!el) return []; var seen={},out=[]; el.textContent.split('\n').forEach(function(s){ s=s.trim(); if(!s||seen[s]) return; seen[s]=true; out.push(s); }); return out; }
+function allDeco(){
+  var seen={}, out=[];
+  [DECO.hot, DECO['new'], DECO.face, DECO.line].forEach(function(arr){
+    (arr||[]).forEach(function(t){ if(!seen[t]){ seen[t]=1; out.push(t); } });
+  });
+  return out;
+}
+var DECO_RECENT_KEY='skku_deco_recent';
+function getDecoRecent(){ try{ return JSON.parse(localStorage.getItem(DECO_RECENT_KEY)||'[]')||[]; }catch(e){ return []; } }
+function pushDecoRecent(t){ try{ var a=getDecoRecent().filter(function(x){return x!==t;}); a.unshift(t); a=a.slice(0,50); localStorage.setItem(DECO_RECENT_KEY, JSON.stringify(a)); }catch(e){} }
+function fetchDecoHot(){
+  if(decoHotLoading) return; decoHotLoading=true;
+  function fin(list){ decoHotLoading=false; decoHotList=list||[]; if(decoCat==='hot'){ renderDeco(); sq(); } }
+  if(!sb){ fin(allDeco().slice(0,80)); return; }
+  try{
+    sb.rpc('deco_hot',{ p_hours:3, p_limit:80 }).then(function(res){
+      var rows=(res&&res.data)||[];
+      if(rows.length){ fin(rows.map(function(r){ return r.text; })); return; }
+      sb.from('deco_copies').select('text').order('copy_count',{ascending:false}).limit(80).then(function(r2){
+        var d=(r2&&r2.data)||[];
+        fin(d.length ? d.map(function(x){ return x.text; }) : allDeco().slice(0,80));
+      }, function(){ fin(allDeco().slice(0,80)); });
+    }, function(){ fin(allDeco().slice(0,80)); });
+  }catch(e){ fin(allDeco().slice(0,80)); }
+}
+function decoItems(cat){
+  if(cat==='new') return allDeco();
+  if(cat==='face') return DECO.face||[];
+  if(cat==='line') return DECO.line||[];
+  if(cat==='recent') return getDecoRecent();
+  if(cat==='hot') return (decoHotList&&decoHotList.length) ? decoHotList : null;
+  return [];
+}
 function decoEsc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function renderDecoChips(){
   document.getElementById('decoChips').innerHTML=DECO_CATS.map(function(c){
@@ -1298,14 +1332,28 @@ function renderDecoChips(){
   }).join('');
 }
 function renderDeco(){
-  var arr=DECO[decoCat]||[];
-  document.getElementById('decoGrid').innerHTML=arr.map(function(t){
+  var el=document.getElementById('decoGrid');
+  var arr=decoItems(decoCat);
+  if(decoCat==='hot' && arr===null){
+    el.innerHTML = decoHotLoading
+      ? '<div class="deco-empty">불러오는 중…</div>'
+      : '<div class="deco-empty">아직 인기 특수문자가 없어요<br>복사가 쌓이면 최근 3시간 인기순으로 보여요 ✨</div>';
+    return;
+  }
+  if(decoCat==='recent' && (!arr || !arr.length)){
+    el.innerHTML = '<div class="deco-empty">아직 복사한 특수문자가 없어요<br>복사하면 여기에 모여요 ෆ</div>';
+    return;
+  }
+  arr=arr||[];
+  el.innerHTML=arr.map(function(t){
     var e=decoEsc(t);
     return '<div class="deco-card sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" role="button" tabindex="0" data-t="'+e+'" onclick="copyDeco(this)"><span class="lbl">'+e+'</span></div>';
   }).join('');
 }
 function selDecoChip(cat){
-  decoCat=cat; renderDecoChips(); renderDeco(); sq();
+  decoCat=cat; renderDecoChips();
+  if(cat==='hot') fetchDecoHot();
+  renderDeco(); sq();
   document.getElementById('scroll').scrollTop=0;
   if(window.refreshHomeAd) refreshHomeAd();
 }
@@ -1313,8 +1361,10 @@ function decoLegacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.v
 function copyDeco(el){
   var t=(el.getAttribute('data-t')||el.textContent||'').trim();
   function done(){ toast('복사완료!');
+    try{ pushDecoRecent(t); }catch(e){}
+    if(decoCat==='recent'){ renderDeco(); sq(); }
     try{ if(window.ga) ga('deco_copy',{ deco_text:t, deco_cat:decoCat }); }catch(e){}
-    try{ if(sb) sb.rpc('bump_deco',{ p_text:t, p_cat:decoCat }).then(function(){},function(){}); }catch(e){}
+    try{ if(sb) sb.rpc('bump_deco',{ p_text:t, p_cat:decoCat, p_cid:(typeof CID!=='undefined'?CID:null) }).then(function(){},function(){}); }catch(e){}
   }
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,function(){ decoLegacyCopy(t); done(); }); }
   else { decoLegacyCopy(t); done(); }
@@ -1335,7 +1385,11 @@ function applyMode(){
 }
 function setMode(m){
   decoMode=(m==='deco');
-  if(decoMode && !document.getElementById('decoGrid').innerHTML){ renderDecoChips(); renderDeco(); }
+  if(decoMode){
+    renderDecoChips();
+    if(decoCat==='hot' && decoHotList===null) fetchDecoHot();
+    renderDeco();
+  }
   applyMode();
   document.getElementById('scroll').scrollTop=0;
   if(window.refreshHomeAd) refreshHomeAd();
