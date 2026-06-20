@@ -1312,7 +1312,10 @@ function selDecoChip(cat){
 function decoLegacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='-9999px'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} }
 function copyDeco(el){
   var t=(el.getAttribute('data-t')||el.textContent||'').trim();
-  function done(){ toast('복사완료!'); try{ if(window.ga) ga('deco_copy',{ deco_text:t, deco_cat:decoCat }); }catch(e){} }
+  function done(){ toast('복사완료!');
+    try{ if(window.ga) ga('deco_copy',{ deco_text:t, deco_cat:decoCat }); }catch(e){}
+    try{ if(sb) sb.rpc('bump_deco',{ p_text:t, p_cat:decoCat }).then(function(){},function(){}); }catch(e){}
+  }
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,function(){ decoLegacyCopy(t); done(); }); }
   else { decoLegacyCopy(t); done(); }
 }
