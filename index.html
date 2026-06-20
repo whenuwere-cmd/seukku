@@ -243,7 +243,7 @@
   #ptr.spin svg{ animation:ptrspin .6s linear infinite; transition:none; }
   @keyframes ptrspin{ to{ transform:rotate(360deg); } }
   .fab-chat{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
-    background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; }
+    background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; color:var(--ink); }
   .fab-chat:active{ transform:scale(.94); }
   .info-panel{ position:absolute; left:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:340px; background:#fff;
     border:1px solid var(--ink); border-radius:18px; padding:16px; z-index:60; display:none;
@@ -871,7 +871,7 @@ var scrollEl=document.getElementById('scroll');
   sc.addEventListener('touchcancel',end,{passive:true});
 })();
 function toggleFab(){ document.getElementById('topBtn').classList.toggle('show', scrollEl.scrollTop>300); }
-function toggleInfo(){ var p=document.getElementById('infoPanel'); var open=p.classList.toggle('open'); var mb=document.querySelector('#mailBtn span'); if(mb) mb.textContent=open?'✕':'안내'; if(open){ sq(); var b=document.getElementById('fbSend'); if(b){ b.textContent='보내기'; b.disabled=false; } ga('info_open',{}); } }
+function toggleInfo(){ var p=document.getElementById('infoPanel'); var open=p.classList.toggle('open'); var mb=document.querySelector('#mailBtn span'); if(mb) mb.textContent=open?'✕':'안내'; var mbtn=document.getElementById('mailBtn'); if(mbtn) mbtn.style.fontSize=open?'22px':'13px'; if(open){ sq(); var b=document.getElementById('fbSend'); if(b){ b.textContent='보내기'; b.disabled=false; } ga('info_open',{}); } }
 
 /* ───────── 방명록(할말있어요) ───────── */
 var WALL_DATA=[], WALL_LOADED=false;
