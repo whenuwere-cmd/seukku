@@ -1314,9 +1314,14 @@ async function loadSupabase(){
   var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
   // 1) 스티커 데이터: 외부 라이브러리(esm.sh) 없이 직접 REST → 다음카페/인앱 브라우저에서도 확실히 로드
   try{
-    var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&limit=5000',{headers:H});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    var data=await res.json();
+var data=[];
+    for(var _off=0; _off<6000; _off+=1000){
+      var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&offset='+_off+'&limit=1000',{headers:H});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      var _page=await res.json();
+      data=data.concat(_page);
+      if(_page.length<1000) break;
+    }
     STK=(data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''), dark:(r.dark_bg===true),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
