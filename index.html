@@ -768,6 +768,15 @@ function legacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value
 /* ===== 스티커 딥링크 공유 (/s/{slug} → 받은 사람이 그 스티커로 바로 진입) ===== */
 function shareSticker(){
   var s=curDetail; if(!s) return;
+  /* 아이패드: 이미지 파일을 공유 시트로 (굿노트·사진 저장 등) — 클립보드가 굿노트에서 URL로 둔갑하는 문제 우회 */
+  if(isIPadOS()){
+    var _ready=s._blobReady||null;
+    var _bp=s._blob||loadStickerBlob(s); s._blob=_bp; _bp.then(function(b){ if(b) s._blobReady=b; });
+    ga('share',{ method:'image_share', sticker_id:String(s.id), sticker_name:(s.n||'') });
+    if(_ready){ shareOrDownload(_ready, s); }
+    else{ _bp.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
+    return;
+  }
   var slug=stickerSlug(s);
   var url=location.origin+'/s/'+encodeURIComponent(slug);
   var text=(s.n||'스티커')+' 스티커, 스꾸에서 바로 복사하세요!';
@@ -1075,8 +1084,8 @@ function copySticker(s){
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* 갤럭시(안드로이드)·아이패드: 클립보드가 굿노트 등에서 URL로 둔갑 → 공유 시트(굿노트/저장/인스타 스토리/카톡)로 */
-  if(isAndroid() || isIPadOS()){
+  /* 갤럭시(안드로이드): 클립보드가 불안정 → 공유 시트로. (아이패드는 복사=클립보드 유지, 굿노트는 공유 아이콘으로 이미지 공유) */
+  if(isAndroid()){
     if(ready){ shareOrDownload(ready, s); }
     else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
     return;
@@ -1117,7 +1126,7 @@ document.getElementById('copyBtn').addEventListener('pointerdown',function(){ va
 (function(){
   var lbl=document.querySelector('#copyBtn .lbl');
   if(!lbl) return;
-  if(isAndroid() || isIPadOS()){ lbl.textContent='공유'; }
+  if(isAndroid()){ lbl.textContent='공유'; }
   else if(!canImageCopy()){ lbl.textContent = (navigator.canShare ? '공유' : '저장'); }
 })();
 /* 저장 정책: 갤럭시·안드로이드는 기존 유지 / 아이폰·데스크탑만 저장 막기(우클릭·드래그 차단) */
