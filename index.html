@@ -223,8 +223,8 @@
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 (가로 전체 한 줄, 배너처럼 너비에 꽉 차게 fitAd 스케일) ===== */
   .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:8px 0 14px; }
-  .feedad .feedad-in{ width:100%; overflow:hidden; opacity:0; transition:opacity .28s ease, height .22s ease; }
-  .feedad .kakao_ad_area{ display:block; transform-origin:0 0; }
+  .feedad .feedad-in{ position:relative; width:100%; aspect-ratio:320 / 100; overflow:hidden; opacity:0; transition:opacity .28s ease; }
+  .feedad .kakao_ad_area{ position:absolute; left:0; top:0; display:block; transform-origin:0 0; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
   .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; opacity:0; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
@@ -589,14 +589,13 @@ function setFeedScale(box){
 function fitFeedAd(box){
   var ins=box.querySelector('.kakao_ad_area'); if(!ins) return false;
   var iframe=ins.querySelector('iframe'); if(!iframe) return false;
-  var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||100; if(adW<10) return false;
+  var adW=iframe.offsetWidth||0; if(adW<10) return false;
   var inner=box.querySelector('.feedad-in'); var w=inner?inner.clientWidth:box.clientWidth;
   if(w<10) return false;
   var s=w/adW;   /* 광고 실제 폭 기준 → 옆 안 잘림 */
   ins.style.display='block'; ins.style.transformOrigin='0 0';
   ins.style.transform='scale('+s+')'; ins.style.visibility='visible';
-  if(inner) inner.style.height=Math.round(adH*s)+'px';   /* 광고 실제 높이에 딱 맞춤 → 아래 빈 공간 없음 (전환으로 부드럽게) */
-  return true;
+  return true;   /* 칸 높이는 CSS aspect-ratio로 완전 고정 → 벌어졌다 좁혀지는 움직임 없음 */
 }
 function loadFeedAd(boxId){
   var box=document.getElementById(boxId); if(!box) return;
@@ -615,7 +614,6 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  inner.style.height=Math.round((inner.clientWidth||320)/3.6)+'px';   /* 예약 높이(추정) → 광고 뜰 때 점프 최소화 */
   box.dataset.adLoading='1';
   /* 배너와 동일하게 fitAd로 칸 너비에 꽉 차게 스케일 + 노출. 끝까지 안 오면 빈 줄 접기 */
   var n=0, iv=setInterval(function(){
