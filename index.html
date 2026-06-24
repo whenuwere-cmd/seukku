@@ -605,10 +605,15 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  var n=0, iv=setInterval(function(){
+var n=0, lastH=0, iv=setInterval(function(){
     var fr=ins.querySelector('iframe');
-    if(fr){ fitFeedAd(box); }
-    if(++n>200) clearInterval(iv);
+    if(fr){
+      var h=fr.offsetHeight||0;
+      /* 처음 떴거나, 새로고침으로 iframe 크기가 바뀐 경우에만 다시 맞춤 (그 외엔 건드리지 않음 → 깜빡임 방지) */
+      if(h>10 && h!==lastH){ fitFeedAd(box); lastH=h; }
+    }
+    if(++n>40 && lastH>0) clearInterval(iv);   /* 한 번 맞춰졌으면 12초 후 폴링 종료 */
+    else if(n>200) clearInterval(iv);          /* 끝까지 광고 없으면 60초 후 종료 */
   },300);
 }
 function hydrateFeedAds(){
