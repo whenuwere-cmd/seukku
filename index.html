@@ -222,9 +222,10 @@
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
-  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .feedad .feedad-in{ position:relative; width:100%; height:100%; overflow:hidden; }
-  .feedad .kakao_ad_area{ display:block; transform-origin:center center; }
+  .feedad{ position:relative; grid-column:span 1; aspect-ratio:300/250; align-self:start; overflow:hidden; border-radius:16px; }
+  .feedad .feedad-in{ position:absolute; inset:0; width:100%; height:100%; overflow:hidden; }
+  .feedad .kakao_ad_area{ display:block; width:100%; height:100%; }
+  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:100% !important; height:100% !important; display:block !important; border:0 !important; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
@@ -570,36 +571,19 @@ function feedAdHtml(){
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
-/* 카카오 인피드는 항상 300x250 규격. iframe 실측(타이밍 따라 0/오측정)이 아니라
-   "칸 너비 ÷ 300"으로만 scale을 잡는다 → 절대 과확대 안 됨. 세로(250*scale)는 칸보다 작아 contain 보장. */
-function fitFeedAd(box){
-  if(!box) return false;
-  var inner=box.querySelector('.feedad-in'); if(!inner) return false;
-  var ins=inner.querySelector('.kakao_ad_area'); if(!ins) return false;
-  var iframe=ins.querySelector('iframe'); if(!iframe || iframe.offsetWidth<10) return false;
-  var boxW=box.clientWidth; if(boxW<10) return false;
-  var s=boxW/300;                              /* 광고 규격 폭(300) 기준 → 칸 폭에 딱 맞춤 */
-  s=Math.round(s*1000)/1000;
-  if(box._fitScale===s) return true;
-  box._fitScale=s;
-  ins.style.position='absolute';
-  ins.style.left='50%'; ins.style.top='50%';
-  ins.style.transformOrigin='center center';
-  ins.style.transform='translate(-50%,-50%) scale('+s+')';
-  ins.style.visibility='visible';
-  return true;
-}
+/* 인피드 광고는 CSS(.feedad: aspect-ratio 300/250, iframe width/height 100%)가
+   크기를 전담한다. JS는 transform scale을 일절 쓰지 않음 → 측정 타이밍/새로고침에 따른
+   확대·깜빡임이 구조적으로 발생할 수 없음. 이 함수는 하위호환용(아무 것도 안 함). */
+function fitFeedAd(box){ return true; }
 function loadFeedAd(boxId){
   var box=document.getElementById(boxId); if(!box) return;
   var inner=box.querySelector('.feedad-in'); if(!inner) return;
   if(box.dataset.adLoaded==='1') return;
   box.dataset.adLoaded='1';
   inner.innerHTML='';
-  box._fitScale=null;
   var unit=box.getAttribute('data-unit')||FEEDAD_UNITS[0];
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
-  ins.style.display='none';
   ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
@@ -608,14 +592,6 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  /* iframe이 뜨면 fit. scale은 칸너비÷300 고정이라 한 번만 맞으면 끝(이후 변동 없음). */
-  var n=0, done=false, iv=setInterval(function(){
-    var fr=ins.querySelector('iframe');
-    if(fr && fr.offsetWidth>10){
-      if(fitFeedAd(box)){ done=true; clearInterval(iv); return; }
-    }
-    if(++n>40) clearInterval(iv);   /* 12초 안에 광고 없으면 종료(재고 없음) */
-  },300);
 }
 function hydrateFeedAds(){
   document.querySelectorAll('.feedad').forEach(function(box){
@@ -624,16 +600,12 @@ function hydrateFeedAds(){
     loadFeedAd(box.id);
   });
 }
-/* 스크롤 중엔 직접 호출하지 않고 디바운스로 한 번만 → 스크롤마다 재fit하던 깜빡임 제거 */
+/* 스크롤 중엔 디바운스로 한 번만 → 아직 광고 안 채운 새 칸만 채움(이미 뜬 광고는 안 건드림) */
 var _hydrateTimer=null;
 function scheduleHydrate(){
   if(_hydrateTimer) return;
   _hydrateTimer=setTimeout(function(){ _hydrateTimer=null; hydrateFeedAds(); }, 200);
 }
-/* 창 크기 바뀔 때만 인피드 광고 재정렬(회전·리사이즈 대응). 평소엔 건드리지 않음 */
-window.addEventListener('resize', function(){
-  document.querySelectorAll('.feedad').forEach(function(b){ b._fitScale=null; fitFeedAd(b); });
-});
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
   var ad=null; for(var i=0;i<ADS.length;i++){ if(String(ADS[i].id)===String(id)){ ad=ADS[i]; break; } }
