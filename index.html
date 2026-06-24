@@ -221,6 +221,11 @@
   .share-btn > svg:not(.sqbg){ width:20px; height:20px; }
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
+  /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
+  .feedad{ position:relative; grid-column:span 1; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .feedad .feedad-in{ width:100%; display:flex; align-items:center; justify-content:center; }
+  .feedad .kakao_ad_area{ display:block; transform-origin:center center; }
+  .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
   .ad-fit{ width:100%; overflow:hidden; }
@@ -555,6 +560,44 @@ function adCardHtml(ad){
   if(!ad) return '';
   return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
+  /* ── 인피드 카카오 애드핏 (그리드 한 칸, 테스트용 1개) ── */
+var FEEDAD_UNIT='DAN-8JbuQUWjbsSjUBEM';   /* 스꾸 콘텐츠 사이 300x250 */
+var feedAdSeq=0;
+function feedAdHtml(){
+  var bid='feedad_'+(++feedAdSeq);
+  return '<div class="stk sq feedad" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" id="'+bid+'">'+
+    '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
+}
+function fitFeedAd(box){
+  var inner=box.querySelector('.feedad-in'); if(!inner) return false;
+  var ins=inner.querySelector('.kakao_ad_area'); if(!ins) return false;
+  var iframe=ins.querySelector('iframe'); if(!iframe) return false;
+  var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||250;
+  if(adW<10) return false;
+  var s=box.clientWidth/adW;
+  ins.style.transformOrigin='center center';
+  ins.style.transform='scale('+s+')';
+  ins.style.visibility='visible';
+  return true;
+}
+function loadFeedAd(boxId){
+  var box=document.getElementById(boxId); if(!box) return;
+  var inner=box.querySelector('.feedad-in'); if(!inner) return;
+  var ins=document.createElement('ins');
+  ins.className='kakao_ad_area';
+  ins.style.display='none';
+  ins.setAttribute('data-ad-unit',FEEDAD_UNIT);
+  ins.setAttribute('data-ad-width','300');
+  ins.setAttribute('data-ad-height','250');
+  inner.appendChild(ins);
+  var sc=document.createElement('script');
+  sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
+  inner.appendChild(sc);
+  var n=0, iv=setInterval(function(){
+    if(fitFeedAd(box)){ clearInterval(iv); return; }
+    if(++n>40) clearInterval(iv);
+  },300);
+}
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
   var ad=null; for(var i=0;i<ADS.length;i++){ if(String(ADS[i].id)===String(id)){ ad=ADS[i]; break; } }
@@ -577,6 +620,10 @@ function gridHtml(items, st){
   var eager=st.eager||0, out='', placed=0;
   for(var i=0;i<items.length;i++){
     if(!items[i]) continue;
+    /* 테스트: 첫 15칸(5줄) 뒤에 카카오 인피드 광고 1칸만 */
+    if(st.firstScope && !st.feedDone && st.cells>=15){
+      out += feedAdHtml(); st.cells+=1; st.feedDone=true;
+    }
     var need = st.firstDone ? AD_EVERY : AD_FIRST;
     var due = ADS.length && (st.cells%3===0) && st.sinceAd>=need;
     if(due && st.side===0){            /* 왼쪽 광고: [광고][스티커] */
@@ -649,10 +696,11 @@ function renderHome(){
     document.getElementById('homeGrid').innerHTML='<div class="rc-empty"><span class="big">🕘</span>아직 사용한 스티커가 없어요<span class="sub">복사한 스티커가 여기에 자동으로 모여요</span></div>';
     homeIdx=0; return;
   }
-  var BATCH=24;
-  homeAdState={cells:0, sinceAd:0, eager:6};
+var BATCH=24;
+  homeAdState={cells:0, sinceAd:0, eager:6, firstScope:true};
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
+  setTimeout(function(){ var fa=document.querySelector('.feedad'); if(fa) loadFeedAd(fa.id); },80);
 }
 function appendHome(){
   if(!homeBase.length) return;
