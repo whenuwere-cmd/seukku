@@ -221,12 +221,12 @@
   .share-btn > svg:not(.sqbg){ width:20px; height:20px; }
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
-  /* ===== 인피드 카카오 광고 칸 (그리드 한 칸, 스케일 1회 고정 → 깜빡임 방지) ===== */
-  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; overflow:hidden; border-radius:16px; }
-  .feedad .feedad-in{ position:absolute; left:50%; top:50%; width:300px; height:250px; transform:translate(-50%,-50%) scale(var(--feedScale,1)); transform-origin:center center; }
-  .feedad .kakao_ad_area{ display:block; width:300px; height:250px; }
-  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:300px !important; height:250px !important; display:block !important; border:0 !important; }
-  .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
+  /* ===== 인피드 카카오 광고 (가로 전체 한 줄·실제 크기 320x100, 절대 축소 금지 → 애드핏이 안 내림) ===== */
+  .feedad{ position:relative; grid-column:1 / -1; display:flex; justify-content:center; align-items:center; min-height:100px; padding:10px 0; overflow:hidden; }
+  .feedad .feedad-in{ position:relative; width:320px; height:100px; transform:none; }
+  .feedad .kakao_ad_area{ display:block; width:320px; height:100px; }
+  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:320px !important; height:100px !important; display:block !important; border:0 !important; }
+  .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
   .ad-fit{ width:100%; overflow:hidden; }
@@ -536,7 +536,7 @@ function cardHtml(s,eager){
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
 
 /* ===== 광고(제휴) 카드 ===== */
-var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=10, AD_FIRST=10;   /* 카카오 인피드: 스티커 10개마다 1칸, 단위 수만큼만 */
+var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=18, AD_FIRST=18;   /* 카카오 인피드: 6줄(18개)마다 1줄, 단위 수만큼만 */
 function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function adNum(v){ var n=parseInt(String(v==null?'':v).replace(/[^0-9]/g,''),10); return isFinite(n)?n:0; }
 function adWon(v){ var s=esc(v||''); if(!s) return ''; return /원\s*$/.test(s) ? s.replace(/원\s*$/,'<span class="pkwon">원</span>') : s+'<span class="pkwon">원</span>'; }
@@ -562,7 +562,7 @@ function adCardHtml(ad){
   return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
   /* ── 인피드 카카오 애드핏 (그리드 한 칸, 테스트용 1개) ── */
-var FEEDAD_UNITS=['DAN-8JbuQUWjbsSjUBEM','DAN-KZz83Dw1YG1veNpI','DAN-GQ4Uk6EVFSTKRHMA','DAN-7VJf49kbrlvMMEXA','DAN-5iPVqOjg163SnM9E','DAN-GgrWvOicbShLelNv','DAN-nfDOQf45NY62N9Wm','DAN-Mf9hh7YjqOtykzcs'];   /* 스꾸 콘텐츠 사이 300x250 인피드 단위 8개 (겹침 없이 1번씩) */
+var FEEDAD_UNITS=['DAN-3pe2O9HnIoDiSs8i','DAN-7a5r8Am8smHBOoik','DAN-0nJ82Zr0a5nwbkFp','DAN-0tkRdN49AHKzZxbc','DAN-S0Ujwijq9uS3BjWA','DAN-UF2g9bK2AiItI0zC'];   /* 인피드 320x100 가로배너 단위 6개 (겹침 없이 1번씩) */
 var feedAdRR=0;
 function nextFeedUnit(){ var u=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return u; }   /* 스꾸 콘텐츠 사이 300x250 */
 var feedAdSeq=0;
@@ -593,8 +593,8 @@ function loadFeedAd(boxId){
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
   ins.setAttribute('data-ad-unit',unit);
-  ins.setAttribute('data-ad-width','300');
-  ins.setAttribute('data-ad-height','250');
+  ins.setAttribute('data-ad-width','320');
+  ins.setAttribute('data-ad-height','100');
   inner.appendChild(ins);
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
