@@ -570,15 +570,19 @@ function feedAdHtml(){
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
+/* 광고를 칸에 맞춤(contain). 같은 scale이면 DOM을 건드리지 않음 → 불필요한 리플로우/깜빡임 방지 */
 function fitFeedAd(box){
+  if(!box) return false;
   var inner=box.querySelector('.feedad-in'); if(!inner) return false;
   var ins=inner.querySelector('.kakao_ad_area'); if(!ins) return false;
   var iframe=ins.querySelector('iframe'); if(!iframe) return false;
   var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||250;
   if(adW<10) return false;
   var boxW=box.clientWidth, boxH=box.clientHeight||boxW;
-  /* 안 잘리게 contain: 가로·세로 중 더 작은 배율 + 가운데 정렬 */
-  var s=Math.min(boxW/adW, boxH/adH);
+  var s=Math.min(boxW/adW, boxH/adH);          /* contain: 안 잘리게 */
+  s=Math.round(s*1000)/1000;                   /* 미세 떨림 방지: 소수 3자리로 양자화 */
+  if(box._fitScale===s) return true;           /* 이미 같은 배율이면 그대로 둠(핵심: 깜빡임 차단) */
+  box._fitScale=s;
   ins.style.position='absolute';
   ins.style.left='50%'; ins.style.top='50%';
   ins.style.transformOrigin='center center';
@@ -592,6 +596,7 @@ function loadFeedAd(boxId){
   if(box.dataset.adLoaded==='1') return;
   box.dataset.adLoaded='1';
   inner.innerHTML='';
+  box._fitScale=null;
   var unit=box.getAttribute('data-unit')||FEEDAD_UNITS[0];
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
@@ -600,15 +605,19 @@ function loadFeedAd(boxId){
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
-  /* 이 칸 안에 ba.min.js를 새로 주입 → 카카오 SDK가 아직 안 그린 ins를 스캔/렌더.
-     (각 칸마다 새 script가 들어가야 SDK가 그 칸을 새로 인식함) */
+  /* 칸마다 ba.min.js 새로 주입 → 카카오 SDK가 아직 안 그린 ins를 스캔/렌더 */
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
+  /* iframe이 뜰 때까지만 폴링하며 fit. 한 번 안정적으로 맞춰지면 즉시 종료(폴링 누적 방지). */
   var n=0, iv=setInterval(function(){
     var fr=ins.querySelector('iframe');
-    if(fr){ fitFeedAd(box); }
-    if(++n>200) clearInterval(iv);
+    if(fr && fr.offsetWidth>10){
+      fitFeedAd(box);
+      clearInterval(iv);   /* 맞췄으면 바로 멈춤 → setInterval이 쌓여서 서로 덮어쓰는 깜빡임 원천 차단 */
+      return;
+    }
+    if(++n>40) clearInterval(iv);   /* 12초 안에 광고 없으면 종료(재고 없음) */
   },300);
 }
 function hydrateFeedAds(){
@@ -618,6 +627,16 @@ function hydrateFeedAds(){
     loadFeedAd(box.id);
   });
 }
+/* 스크롤 중엔 직접 호출하지 않고 디바운스로 한 번만 → 스크롤마다 재fit하던 깜빡임 제거 */
+var _hydrateTimer=null;
+function scheduleHydrate(){
+  if(_hydrateTimer) return;
+  _hydrateTimer=setTimeout(function(){ _hydrateTimer=null; hydrateFeedAds(); }, 200);
+}
+/* 창 크기 바뀔 때만 인피드 광고 재정렬(회전·리사이즈 대응). 평소엔 건드리지 않음 */
+window.addEventListener('resize', function(){
+  document.querySelectorAll('.feedad').forEach(function(b){ b._fitScale=null; fitFeedAd(b); });
+});
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
   var ad=null; for(var i=0;i<ADS.length;i++){ if(String(ADS[i].id)===String(id)){ ad=ADS[i]; break; } }
@@ -720,7 +739,7 @@ var BATCH=24;
   homeAdState={cells:0, sinceAd:0, eager:6, firstScope:true};
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
-  setTimeout(hydrateFeedAds,350);
+  scheduleHydrate();
 }
 function appendHome(){
   if(!homeBase.length) return;
@@ -730,11 +749,12 @@ function appendHome(){
     var slice=homeBase.slice(homeIdx, Math.min(homeIdx+9, homeBase.length));
     homeIdx=Math.min(homeIdx+9, homeBase.length);
     var h=gridHtml(slice, homeAdState);
-    document.getElementById('homeGrid').insertAdjacentHTML('beforeend',h); sq(); return;
+    document.getElementById('homeGrid').insertAdjacentHTML('beforeend',h); sq(); scheduleHydrate(); return;
   }
   var arr=[]; for(var i=0;i<9;i++){ arr.push(homeBase[homeIdx%homeBase.length]); homeIdx++; }
   var html=gridHtml(arr, homeAdState);
   document.getElementById('homeGrid').insertAdjacentHTML('beforeend',html); sq();
+  scheduleHydrate();
 }
 
 function openSearch(){ document.getElementById('homeTop').classList.add('hide'); document.getElementById('searchMode').classList.add('open'); sq(); setTimeout(function(){document.getElementById('searchInput').focus();},40); }
@@ -884,7 +904,7 @@ function openDetail(id, opts){ opts=opts||{};
   hero.setAttribute('data-fill', s.dark ? 'checker-dark' : 'checker');
   var _hb=hero.querySelector(':scope > svg.sqbg'); if(_hb) _hb.remove();
   relIdx=Math.min(RBATCH,relBase.length); show('detail'); if(window.applyAllSquircles) applyAllSquircles();
-                              loadAd('adDetail');
+                              loadAd('adDetail'); scheduleHydrate();
   var _slug=stickerSlug(s);
   if(opts.push!==false){ try{ history.pushState({view:'detail',slug:_slug},'','/s/'+encodeURIComponent(_slug)); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/s/'+encodeURIComponent(_slug),(s.n||'스티커')+' · 스꾸'); }
@@ -896,6 +916,7 @@ function appendRelated(){
   var arr=[]; for(var i=0;i<9;i++){ arr.push(relBase[relIdx%relBase.length]); relIdx++; }
   var html=gridHtml(arr, relAdState);
   document.getElementById('relatedGrid').insertAdjacentHTML('beforeend',html); sq();
+  scheduleHydrate();
 }
 
 var scrollEl=document.getElementById('scroll');
@@ -1027,8 +1048,7 @@ scrollEl.addEventListener('scroll',function(){
   toggleFab();
   if(scrollEl.scrollTop+scrollEl.clientHeight < scrollEl.scrollHeight-300) return;
 if(currentView==='home') appendHome(); else if(currentView==='detail') appendRelated();
-  hydrateFeedAds();
-  document.querySelectorAll('.feedad').forEach(fitFeedAd);
+  scheduleHydrate();
 });
 
 function emojiPng(emoji){ return new Promise(function(res){ var sz=512,c=document.createElement('canvas'); c.width=sz;c.height=sz; var x=c.getContext('2d'); x.clearRect(0,0,sz,sz); x.font=Math.floor(sz*0.72)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(emoji||'🖼️',sz/2,sz/2+sz*0.04); c.toBlob(function(b){res(b);},'image/png'); }); }
