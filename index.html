@@ -223,7 +223,7 @@
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸, 스케일 1회 고정 → 깜빡임 방지) ===== */
   .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; overflow:hidden; border-radius:16px; }
-  .feedad .feedad-in{ position:absolute; left:50%; top:50%; width:300px; height:250px; transform:translate(-50%,-50%) scale(var(--feedScale,1)); transform-origin:center center; visibility:hidden; }
+  .feedad .feedad-in{ position:absolute; left:50%; top:50%; width:300px; height:250px; transform:translate(-50%,-50%) scale(var(--feedScale,1)); transform-origin:center center; }
   .feedad .kakao_ad_area{ display:block; width:300px; height:250px; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:300px !important; height:250px !important; display:block !important; border:0 !important; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
@@ -580,7 +580,6 @@ function setFeedScale(box){
   var w=box.clientWidth; if(w<10) return;
   var s=Math.round((w/300)*10000)/10000;
   box.style.setProperty('--feedScale', s);
-  var inner=box.querySelector('.feedad-in'); if(inner) inner.style.visibility='visible';   /* 크기 확정 후 노출 */
 }
 function fitFeedAd(box){ setFeedScale(box); return true; }
 function loadFeedAd(boxId){
@@ -601,10 +600,6 @@ function loadFeedAd(boxId){
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
   requestAnimationFrame(function(){ setFeedScale(box); });   /* 레이아웃 직후 비율 1회 확정 */
-  /* 노필(광고 없음): 일정 시간 내 광고(iframe)가 안 들어오면 빈 칸을 숨겨서 어색한 'AD' 공백 제거 */
-  setTimeout(function(){
-    if(!box.querySelector('iframe')){ box.style.display='none'; }
-  }, 4000);
 }
 function hydrateFeedAds(){
   document.querySelectorAll('.feedad').forEach(function(box){
