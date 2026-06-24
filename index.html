@@ -570,18 +570,17 @@ function feedAdHtml(){
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
-/* 광고를 칸에 맞춤(contain). 같은 scale이면 DOM을 건드리지 않음 → 불필요한 리플로우/깜빡임 방지 */
+/* 카카오 인피드는 항상 300x250 규격. iframe 실측(타이밍 따라 0/오측정)이 아니라
+   "칸 너비 ÷ 300"으로만 scale을 잡는다 → 절대 과확대 안 됨. 세로(250*scale)는 칸보다 작아 contain 보장. */
 function fitFeedAd(box){
   if(!box) return false;
   var inner=box.querySelector('.feedad-in'); if(!inner) return false;
   var ins=inner.querySelector('.kakao_ad_area'); if(!ins) return false;
-  var iframe=ins.querySelector('iframe'); if(!iframe) return false;
-  var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||250;
-  if(adW<10) return false;
-  var boxW=box.clientWidth, boxH=box.clientHeight||boxW;
-  var s=Math.min(boxW/adW, boxH/adH);          /* contain: 안 잘리게 */
-  s=Math.round(s*1000)/1000;                   /* 미세 떨림 방지: 소수 3자리로 양자화 */
-  if(box._fitScale===s) return true;           /* 이미 같은 배율이면 그대로 둠(핵심: 깜빡임 차단) */
+  var iframe=ins.querySelector('iframe'); if(!iframe || iframe.offsetWidth<10) return false;
+  var boxW=box.clientWidth; if(boxW<10) return false;
+  var s=boxW/300;                              /* 광고 규격 폭(300) 기준 → 칸 폭에 딱 맞춤 */
+  s=Math.round(s*1000)/1000;
+  if(box._fitScale===s) return true;
   box._fitScale=s;
   ins.style.position='absolute';
   ins.style.left='50%'; ins.style.top='50%';
@@ -609,13 +608,11 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  /* iframe이 뜰 때까지만 폴링하며 fit. 한 번 안정적으로 맞춰지면 즉시 종료(폴링 누적 방지). */
-  var n=0, iv=setInterval(function(){
+  /* iframe이 뜨면 fit. scale은 칸너비÷300 고정이라 한 번만 맞으면 끝(이후 변동 없음). */
+  var n=0, done=false, iv=setInterval(function(){
     var fr=ins.querySelector('iframe');
     if(fr && fr.offsetWidth>10){
-      fitFeedAd(box);
-      clearInterval(iv);   /* 맞췄으면 바로 멈춤 → setInterval이 쌓여서 서로 덮어쓰는 깜빡임 원천 차단 */
-      return;
+      if(fitFeedAd(box)){ done=true; clearInterval(iv); return; }
     }
     if(++n>40) clearInterval(iv);   /* 12초 안에 광고 없으면 종료(재고 없음) */
   },300);
