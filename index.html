@@ -567,6 +567,7 @@ var feedAdRR=0;
 function nextFeedUnit(){ var u=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return u; }   /* 스꾸 콘텐츠 사이 300x250 */
 var feedAdSeq=0;
 function feedAdHtml(){
+  return '';   /* 인피드 카카오 광고 비활성화: 칸 자체를 만들지 않음 */
   var bid='feedad_'+(++feedAdSeq);
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
@@ -639,10 +640,6 @@ function gridHtml(items, st){
   var eager=st.eager||0, out='', placed=0;
   for(var i=0;i<items.length;i++){
     if(!items[i]) continue;
-    /* 스티커 9개마다 카카오 인피드 광고 1칸 (단위 4개 로테이션) */
-    if(st.stkCount>0 && st.stkCount%9===0 && st.stkCount!==st.lastFeedAt){
-      out += feedAdHtml(); st.cells+=1; st.lastFeedAt=st.stkCount;
-    }
     var need = st.firstDone ? AD_EVERY : AD_FIRST;
     var due = ADS.length && (st.cells%3===0) && st.sinceAd>=need;
     if(due && st.side===0){            /* 왼쪽 광고: [광고][스티커] */
