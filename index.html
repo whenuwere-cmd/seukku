@@ -600,39 +600,15 @@ function loadFeedAd(boxId){
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
-  /* 카카오 SDK가 이미 있으면 이 ins만 렌더, 없으면 스크립트 1회 주입 */
-  function tryRender(){
-    if(window.adfit && typeof window.adfit.render==='function'){
-      try{ window.adfit.render(unit); return true; }catch(e){}
-    }
-    return false;
-  }
-  if(!tryRender()){
-    var sc=document.createElement('script');
-    sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
-    inner.appendChild(sc);
-  }
+  /* 이 칸 안에 ba.min.js를 새로 주입 → 카카오 SDK가 아직 안 그린 ins를 스캔/렌더.
+     (각 칸마다 새 script가 들어가야 SDK가 그 칸을 새로 인식함) */
+  var sc=document.createElement('script');
+  sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
+  inner.appendChild(sc);
   var n=0, iv=setInterval(function(){
     if(fitFeedAd(box)){ clearInterval(iv); return; }
-    if(n===6) tryRender();    /* 2초쯤 뒤 SDK 준비됐으면 한 번 더 렌더 시도 */
     if(++n>50) clearInterval(iv);
   },300);
-}
-var _feedAdObserver=null;
-function getFeedAdObserver(){
-  if(_feedAdObserver) return _feedAdObserver;
-  if(!('IntersectionObserver' in window)) return null;
-  _feedAdObserver=new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(en.isIntersecting){
-        var box=en.target;
-        if(!box.id) box.id='feedad_'+(++feedAdSeq);
-        loadFeedAd(box.id);
-        _feedAdObserver.unobserve(box);
-      }
-    });
-  },{ rootMargin:'200px' });   /* 화면 200px 전부터 미리 로드 */
-  return _feedAdObserver;
 }
 function hydrateFeedAds(){
   var ob=getFeedAdObserver();
