@@ -885,7 +885,7 @@ function openDetail(id, opts){ opts=opts||{};
   hero.setAttribute('data-fill', s.dark ? 'checker-dark' : 'checker');
   var _hb=hero.querySelector(':scope > svg.sqbg'); if(_hb) _hb.remove();
   relIdx=Math.min(RBATCH,relBase.length); show('detail'); if(window.applyAllSquircles) applyAllSquircles();
-                              loadAd('adDetail'); scheduleHydrate();
+                              loadAd('adDetail'); setTimeout(scheduleHydrate, 450);   /* 화면 전환 끝난 뒤 첫 광고 로드 → 초기 노필 방지 */
   var _slug=stickerSlug(s);
   if(opts.push!==false){ try{ history.pushState({view:'detail',slug:_slug},'','/s/'+encodeURIComponent(_slug)); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/s/'+encodeURIComponent(_slug),(s.n||'스티커')+' · 스꾸'); }
