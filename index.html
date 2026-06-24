@@ -562,13 +562,18 @@ function adCardHtml(ad){
   return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
   /* ── 인피드 카카오 애드핏 (그리드 한 칸, 테스트용 1개) ── */
-var FEEDAD_UNITS=['DAN-3pe2O9HnIoDiSs8i','DAN-7a5r8Am8smHBOoik','DAN-0nJ82Zr0a5nwbkFp','DAN-0tkRdN49AHKzZxbc','DAN-S0Ujwijq9uS3BjWA','DAN-UF2g9bK2AiItI0zC'];   /* 인피드 320x100 가로배너 단위 6개 (겹침 없이 1번씩) */
-var feedAdRR=0;
-function nextFeedUnit(){ var u=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return u; }   /* 스꾸 콘텐츠 사이 300x250 */
+var FEEDAD_UNITS=['DAN-3pe2O9HnIoDiSs8i','DAN-7a5r8Am8smHBOoik','DAN-0nJ82Zr0a5nwbkFp','DAN-0tkRdN49AHKzZxbc','DAN-S0Ujwijq9uS3BjWA','DAN-UF2g9bK2AiItI0zC'];   /* 홈 인피드 320x100 단위 6개 */
+var FEEDAD_UNITS_DETAIL=['DAN-8eYmH2CwbUTDavQA','DAN-8cSMBWIwLnwfQntA','DAN-Py129tmFaDiE2NP2','DAN-VjRsxdMpC2PPCZWE','DAN-cZ6Lt0J3qG1158lK','DAN-er3uuu06WcmRvcRU'];   /* 상세 인피드 320x100 단위 6개 (홈과 겹치지 않게 분리) */
+var feedAdRR=0, feedAdRRDetail=0;
+function feedUnits(pool){ return pool==='detail' ? FEEDAD_UNITS_DETAIL : FEEDAD_UNITS; }
+function nextFeedUnit(pool){
+  if(pool==='detail'){ var u=FEEDAD_UNITS_DETAIL[feedAdRRDetail%FEEDAD_UNITS_DETAIL.length]; feedAdRRDetail++; return u; }
+  var v=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return v;
+}
 var feedAdSeq=0;
-function feedAdHtml(){
+function feedAdHtml(pool){
   var bid='feedad_'+(++feedAdSeq);
-  return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
+  return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit(pool)+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
 /* 카카오 인피드는 내부가 항상 300x250 고정으로 그려진다. 그래서 iframe을 측정하지 않고
@@ -647,8 +652,8 @@ function gridHtml(items, st){
     if(!items[i]) continue;
     out += cardHtml(items[i], placed<eager); placed++; st.stk++;
     /* 스티커 AD_EVERY개마다 카카오 인피드 1칸. 단, 단위(FEEDAD_UNITS) 수만큼만 → 같은 단위 재사용(=빈 광고) 방지 */
-    if(st.kakao && (st.stk % AD_EVERY === 0) && st.adsPlaced < FEEDAD_UNITS.length){
-      out += feedAdHtml(); st.adsPlaced++;
+    if(st.kakao && (st.stk % AD_EVERY === 0) && st.adsPlaced < feedUnits(st.pool).length){
+      out += feedAdHtml(st.pool); st.adsPlaced++;
     }
   }
   return out;
@@ -712,7 +717,7 @@ function renderHome(){
     homeIdx=0; return;
   }
 var BATCH=24;
-  homeAdState={stk:0, adsPlaced:0, kakao:true, eager:6}; feedAdRR=0;
+  homeAdState={stk:0, adsPlaced:0, kakao:true, pool:'home', eager:6}; feedAdRR=0;
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
   scheduleHydrate();
@@ -873,7 +878,7 @@ function openDetail(id, opts){ opts=opts||{};
   document.getElementById('detailName').textContent=(s.n||'스티커')+'_'+pad(typeof s.id==='number'?s.id:1);
   relBase=relatedList(s);
   var RBATCH=18;
-  relAdState={cells:0, sinceAd:0, eager:0};
+  relAdState={stk:0, adsPlaced:0, kakao:true, pool:'detail', eager:0}; feedAdRRDetail=0;
   document.getElementById('relatedGrid').innerHTML=gridHtml(relBase.slice(0,RBATCH), relAdState);
   var hero=document.getElementById('hero');
   hero.classList.toggle('dark', !!s.dark);
