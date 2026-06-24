@@ -611,11 +611,29 @@ function loadFeedAd(boxId){
     if(++n>13){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
   }, 300);
 }
+var feedAdObserver=null;
+function getFeedObserver(){
+  if(feedAdObserver) return feedAdObserver;
+  if(!('IntersectionObserver' in window)) return null;
+  feedAdObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var box=e.target; feedAdObserver.unobserve(box);
+      if(box.dataset.adLoaded==='1') return;
+      if(!box.id) box.id='feedad_'+(++feedAdSeq);
+      loadFeedAd(box.id);
+    });
+  }, { root: document.getElementById('scroll'), rootMargin: '250px 0px' });   /* 화면 250px 전에 미리 로드 */
+  return feedAdObserver;
+}
+/* 인피드 광고 지연 로딩: 화면에 가까워질 때만 불러옴 → 한꺼번에 로드되며 버벅이는 것 방지 */
 function hydrateFeedAds(){
+  var obs=getFeedObserver();
   document.querySelectorAll('.feedad').forEach(function(box){
-    if(box.dataset.adLoaded==='1'){ return; }   /* 이미 로드된 칸은 다시 안 건드림 → 스케일 재계산/깜빡임 없음 */
-    if(!box.id) box.id='feedad_'+(++feedAdSeq);
-    loadFeedAd(box.id);
+    if(box.dataset.adLoaded==='1' || box.dataset.adObserved==='1') return;
+    box.dataset.adObserved='1';
+    if(obs){ obs.observe(box); }
+    else { if(!box.id) box.id='feedad_'+(++feedAdSeq); loadFeedAd(box.id); }   /* 미지원 브라우저 폴백 */
   });
 }
 /* 스크롤 중엔 디바운스로 한 번만 → 새 칸 채우고 기존 칸 비율 점검만(transform 재계산 아님) */
