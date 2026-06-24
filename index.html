@@ -561,11 +561,13 @@ function adCardHtml(ad){
   return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
   /* ── 인피드 카카오 애드핏 (그리드 한 칸, 테스트용 1개) ── */
-var FEEDAD_UNIT='DAN-8JbuQUWjbsSjUBEM';   /* 스꾸 콘텐츠 사이 300x250 */
+var FEEDAD_UNITS=['DAN-8JbuQUWjbsSjUBEM','DAN-KZz83Dw1YG1veNpI','DAN-GQ4Uk6EVFSTKRHMA','DAN-7VJf49kbrlvMMEXA'];   /* 스꾸 콘텐츠 사이 300x250 (돌려쓰기) */
+var feedAdRR=0;
+function nextFeedUnit(){ var u=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return u; }   /* 스꾸 콘텐츠 사이 300x250 */
 var feedAdSeq=0;
 function feedAdHtml(){
   var bid='feedad_'+(++feedAdSeq);
-  return '<div class="feedad" id="'+bid+'">'+
+  return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
 function fitFeedAd(box){
@@ -593,7 +595,7 @@ function loadFeedAd(boxId){
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
   ins.style.display='none';
-  ins.setAttribute('data-ad-unit',FEEDAD_UNIT);
+  ins.setAttribute('data-ad-unit', box.getAttribute('data-unit')||FEEDAD_UNITS[0]);
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
@@ -635,20 +637,20 @@ function gridHtml(items, st){
   var eager=st.eager||0, out='', placed=0;
   for(var i=0;i<items.length;i++){
     if(!items[i]) continue;
-    /* 테스트: 첫 15칸(5줄) 뒤에 카카오 인피드 광고 1칸만 */
-    if(st.firstScope && !st.feedDone && st.cells>=15){
-      out += feedAdHtml(); st.cells+=1; st.feedDone=true;
+    /* 스티커 9개마다 카카오 인피드 광고 1칸 (단위 4개 로테이션) */
+    if(st.stkCount>0 && st.stkCount%9===0 && st.stkCount!==st.lastFeedAt){
+      out += feedAdHtml(); st.cells+=1; st.lastFeedAt=st.stkCount;
     }
     var need = st.firstDone ? AD_EVERY : AD_FIRST;
     var due = ADS.length && (st.cells%3===0) && st.sinceAd>=need;
     if(due && st.side===0){            /* 왼쪽 광고: [광고][스티커] */
       out += adCardHtml(nextAd()); st.cells+=2; st.sinceAd=0; st.side=1; st.firstDone=true;
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1;
+      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
     } else if(due && st.side===1){     /* 오른쪽 광고: [스티커][광고] */
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1;
+      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
       out += adCardHtml(nextAd()); st.cells+=2; st.sinceAd=0; st.side=0; st.firstDone=true;
     } else {
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1;
+      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
     }
   }
   return out;
