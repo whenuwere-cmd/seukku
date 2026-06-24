@@ -222,8 +222,8 @@
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 (가로 전체 한 줄, 배너처럼 너비에 꽉 차게 fitAd 스케일) ===== */
-  .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:10px 0 26px; }
-  .feedad .feedad-in{ width:100%; opacity:0; transition:opacity .28s ease; }
+  .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:8px 0 14px; }
+  .feedad .feedad-in{ width:100%; overflow:hidden; opacity:0; transition:opacity .28s ease, height .22s ease; }
   .feedad .kakao_ad_area{ display:block; transform-origin:0 0; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
   .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; opacity:0; }
@@ -586,7 +586,18 @@ function setFeedScale(box){
   var s=Math.round((w/300)*10000)/10000;
   box.style.setProperty('--feedScale', s);
 }
-function fitFeedAd(box){ setFeedScale(box); return true; }
+function fitFeedAd(box){
+  var ins=box.querySelector('.kakao_ad_area'); if(!ins) return false;
+  var iframe=ins.querySelector('iframe'); if(!iframe) return false;
+  var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||100; if(adW<10) return false;
+  var inner=box.querySelector('.feedad-in'); var w=inner?inner.clientWidth:box.clientWidth;
+  if(w<10) return false;
+  var s=w/adW;   /* 광고 실제 폭 기준 → 옆 안 잘림 */
+  ins.style.display='block'; ins.style.transformOrigin='0 0';
+  ins.style.transform='scale('+s+')'; ins.style.visibility='visible';
+  if(inner) inner.style.height=Math.round(adH*s)+'px';   /* 광고 실제 높이에 딱 맞춤 → 아래 빈 공간 없음 (전환으로 부드럽게) */
+  return true;
+}
 function loadFeedAd(boxId){
   var box=document.getElementById(boxId); if(!box) return;
   var inner=box.querySelector('.feedad-in'); if(!inner) return;
@@ -604,18 +615,37 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
+  inner.style.height=Math.round((inner.clientWidth||320)/3.6)+'px';   /* 예약 높이(추정) → 광고 뜰 때 점프 최소화 */
   box.dataset.adLoading='1';
   /* 배너와 동일하게 fitAd로 칸 너비에 꽉 차게 스케일 + 노출. 끝까지 안 오면 빈 줄 접기 */
   var n=0, iv=setInterval(function(){
-    if(fitAd(box)){ box.dataset.adLoading=''; var inr=box.querySelector('.feedad-in'); if(inr) inr.style.opacity='1'; var lbl=box.querySelector('.feedad-ad'); if(lbl) lbl.style.opacity='1'; clearInterval(iv); return; }
+    if(fitFeedAd(box)){ box.dataset.adLoading=''; var inr=box.querySelector('.feedad-in'); if(inr) inr.style.opacity='1'; var lbl=box.querySelector('.feedad-ad'); if(lbl) lbl.style.opacity='1'; clearInterval(iv); return; }
     if(++n>13){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
   }, 300);
 }
+var feedAdObserver=null;
+function getFeedObserver(){
+  if(feedAdObserver) return feedAdObserver;
+  if(!('IntersectionObserver' in window)) return null;
+  feedAdObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var box=e.target; feedAdObserver.unobserve(box);
+      if(box.dataset.adLoaded==='1') return;
+      if(!box.id) box.id='feedad_'+(++feedAdSeq);
+      loadFeedAd(box.id);
+    });
+  }, { root: document.getElementById('scroll'), rootMargin: '250px 0px' });   /* 화면 250px 전에 미리 로드 */
+  return feedAdObserver;
+}
+/* 인피드 광고 지연 로딩: 화면에 가까워질 때만 불러옴 → 한꺼번에 로드되며 버벅이는 것 방지 */
 function hydrateFeedAds(){
+  var obs=getFeedObserver();
   document.querySelectorAll('.feedad').forEach(function(box){
-    if(box.dataset.adLoaded==='1'){ return; }   /* 이미 로드된 칸은 다시 안 건드림 → 스케일 재계산/깜빡임 없음 */
-    if(!box.id) box.id='feedad_'+(++feedAdSeq);
-    loadFeedAd(box.id);
+    if(box.dataset.adLoaded==='1' || box.dataset.adObserved==='1') return;
+    box.dataset.adObserved='1';
+    if(obs){ obs.observe(box); }
+    else { if(!box.id) box.id='feedad_'+(++feedAdSeq); loadFeedAd(box.id); }   /* 미지원 브라우저 폴백 */
   });
 }
 /* 스크롤 중엔 디바운스로 한 번만 → 새 칸 채우고 기존 칸 비율 점검만(transform 재계산 아님) */
