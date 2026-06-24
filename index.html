@@ -222,7 +222,7 @@
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
-  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; } display:flex; align-items:center; justify-content:center; overflow:hidden; } display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .feedad .feedad-in{ position:relative; width:100%; height:100%; overflow:hidden; }
   .feedad .kakao_ad_area{ display:block; transform-origin:center center; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
@@ -606,8 +606,9 @@ function loadFeedAd(boxId){
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
   var n=0, iv=setInterval(function(){
-    if(fitFeedAd(box)){ clearInterval(iv); return; }
-    if(++n>50) clearInterval(iv);
+    var fr=ins.querySelector('iframe');
+    if(fr){ fitFeedAd(box); }
+    if(++n>200) clearInterval(iv);
   },300);
 }
 function hydrateFeedAds(){
