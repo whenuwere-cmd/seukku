@@ -222,7 +222,7 @@
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
-  .feedad{ position:relative; grid-column:span 1; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .feedad .feedad-in{ position:relative; width:100%; height:100%; overflow:hidden; }
   .feedad .kakao_ad_area{ display:block; transform-origin:center center; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
@@ -565,7 +565,7 @@ var FEEDAD_UNIT='DAN-8JbuQUWjbsSjUBEM';   /* 스꾸 콘텐츠 사이 300x250 */
 var feedAdSeq=0;
 function feedAdHtml(){
   var bid='feedad_'+(++feedAdSeq);
-  return '<div class="stk sq feedad" data-r="24" data-fill="#ffffff" data-stroke="#1f2937" id="'+bid+'">'+
+  return '<div class="feedad" id="'+bid+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
 function fitFeedAd(box){
