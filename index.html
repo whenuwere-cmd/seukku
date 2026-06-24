@@ -226,7 +226,7 @@
   .feedad .feedad-in{ width:100%; }
   .feedad .kakao_ad_area{ display:block; transform-origin:0 0; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
-  .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
+  .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; opacity:0; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
   .ad-fit{ width:100%; overflow:hidden; }
@@ -607,8 +607,8 @@ function loadFeedAd(boxId){
   box.dataset.adLoading='1';
   /* 배너와 동일하게 fitAd로 칸 너비에 꽉 차게 스케일 + 노출. 끝까지 안 오면 빈 줄 접기 */
   var n=0, iv=setInterval(function(){
-    if(fitAd(box)){ box.dataset.adLoading=''; clearInterval(iv); return; }
-    if(++n>30){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
+    if(fitAd(box)){ box.dataset.adLoading=''; var lbl=box.querySelector('.feedad-ad'); if(lbl) lbl.style.opacity='1'; clearInterval(iv); return; }
+    if(++n>13){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
   }, 300);
 }
 function hydrateFeedAds(){
@@ -1291,6 +1291,7 @@ function fitAd(box){
   var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||50;
   if(adW<10) return false;                           // 소재 폭 아직 측정 전 → 다음 틱에
   var w=box.clientWidth;
+  if(w<10) return false;                             // 칸 폭이 아직 0(상세 전환 직후 등) → 다음 틱에 (scale 0 방지)
   var s=w/adW;                                       // 소재 실제 폭 기준 → 콘텐츠 폭에 꽉(양옆 마진 동일), 넓은 네이티브는 s≈1이라 안 짤림
   ins.style.display='block';
   ins.style.transformOrigin='0 0';
