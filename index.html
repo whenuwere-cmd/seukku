@@ -223,7 +223,7 @@
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
   .feedad{ position:relative; grid-column:span 1; min-height:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .feedad .feedad-in{ width:100%; display:flex; align-items:center; justify-content:center; }
+  .feedad .feedad-in{ position:relative; width:100%; height:100%; overflow:hidden; }
   .feedad .kakao_ad_area{ display:block; transform-origin:center center; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
@@ -574,9 +574,13 @@ function fitFeedAd(box){
   var iframe=ins.querySelector('iframe'); if(!iframe) return false;
   var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||250;
   if(adW<10) return false;
-  var s=box.clientWidth/adW;
+  var boxW=box.clientWidth, boxH=box.clientHeight||boxW;
+  /* 칸을 꽉 채우도록 가로·세로 중 더 큰 배율 사용(cover) + 가운데 정렬 */
+  var s=Math.max(boxW/adW, boxH/adH);
+  ins.style.position='absolute';
+  ins.style.left='50%'; ins.style.top='50%';
   ins.style.transformOrigin='center center';
-  ins.style.transform='scale('+s+')';
+  ins.style.transform='translate(-50%,-50%) scale('+s+')';
   ins.style.visibility='visible';
   return true;
 }
