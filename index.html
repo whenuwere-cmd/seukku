@@ -245,14 +245,6 @@
   .fab-chat{ position:absolute; right:16px; bottom:calc(24px + env(safe-area-inset-bottom)); width:52px; height:52px; display:flex; align-items:center; justify-content:center;
     background:var(--lime); border:1px solid var(--ink); border-radius:14px; cursor:pointer; z-index:41; font-size:22px; color:var(--ink); }
   .fab-chat:active{ transform:scale(.94); }
-  .skku-spark{ position:absolute; pointer-events:none; z-index:2;
-    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 43 43'><path d='M21.5 0C23.1964 0.000175122 24.7137 1.04515 25.3232 2.62402L25.3252 2.62598L28.8711 11.8467C29.0707 12.3644 29.3773 12.8361 29.7695 13.2285C30.1606 13.6197 30.6288 13.9251 31.1445 14.125L40.3691 17.6729H40.3672C41.1412 17.9695 41.8076 18.4929 42.2773 19.1758C42.7471 19.8589 43 20.669 43 21.498C43 22.3271 42.7471 23.1372 42.2773 23.8203C41.8077 24.503 41.1409 25.0247 40.3672 25.3213L40.3691 25.3232L31.1465 28.8711C30.6295 29.0696 30.1593 29.3741 29.7676 29.7656C29.3758 30.1571 29.0699 30.6276 28.8711 31.1445L25.3252 40.3691C25.0284 41.1417 24.504 41.8063 23.8223 42.2754C23.1393 42.7451 22.3289 42.998 21.5 42.998C20.6709 42.998 19.8609 42.7452 19.1777 42.2754C18.495 41.8058 17.9695 41.1409 17.6729 40.3672V40.3652L14.127 31.1465V31.1445C13.9285 30.6275 13.6239 30.1574 13.2324 29.7656C12.8409 29.3739 12.3704 29.0699 11.8535 28.8711L2.62891 25.3232V25.3213C1.8566 25.0245 1.1917 24.5019 0.722656 23.8203C0.252906 23.1372 0.0000297111 22.3271 0 21.498C0 20.669 0.252879 19.8589 0.722656 19.1758C1.19185 18.4939 1.85623 17.9696 2.62891 17.6729L11.8516 14.125H11.8535C12.3701 13.9266 12.839 13.6215 13.2305 13.2305C13.6222 12.839 13.9281 12.3684 14.127 11.8516L17.6748 2.62598L17.6768 2.62207C17.9753 1.85218 18.4992 1.19033 19.1797 0.722656C19.8607 0.254968 20.668 0.00223934 21.4941 0H21.5Z' fill='%231f2937'/></svg>") center/contain no-repeat;
-    animation:skkuTwinkle 1.6s ease-in-out infinite; }
-  .skku-spark.s1{ width:16px; height:16px; top:6px; right:6px; animation-duration:1.6s; animation-delay:0s; }
-  .skku-spark.s3{ width:12px; height:12px; bottom:8px; left:8px; animation-duration:1.9s; animation-delay:.7s; }
-  .fab-chat.wall-open .skku-spark{ display:none; }
-  @keyframes skkuTwinkle{ 0%,100%{ transform:scale(.4); opacity:.6; } 50%{ transform:scale(1); opacity:1; } }
-  @media (prefers-reduced-motion:reduce){ .skku-spark{ animation:none; transform:scale(.8); } }
   .info-panel{ position:absolute; left:16px; bottom:calc(86px + env(safe-area-inset-bottom)); width:calc(100% - 32px); max-width:340px; background:#fff;
     border:1px solid var(--ink); border-radius:18px; padding:16px; z-index:60; display:none;
     box-shadow:0 8px 24px rgba(31,41,55,.16); }
@@ -305,30 +297,6 @@
   .toast .lbl{ position:relative; z-index:2; }
   .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   .toast.high{ top:22%; }
-
-  /* ===== 공지(스꾸 로고 진입) 배지 + 팝업 ===== */
-  .logo-blob{ cursor:pointer; }
-  .notice-badge{ position:absolute; top:-5px; right:-3px; min-width:26px; height:26px; padding:0 6px; box-sizing:border-box;
-    background:#ff4136; color:#fff; font-size:14px; font-weight:700; line-height:1; border-radius:13px;
-    display:none; align-items:center; justify-content:center; border:1.4px solid var(--ink); z-index:6; }
-  .notice-badge.show{ display:flex; }
-  .nt-modal{ position:absolute; inset:0; background:rgba(31,41,55,.45); z-index:130; display:none; align-items:center; justify-content:center; padding:22px; }
-  .nt-modal.open{ display:flex; animation:fade .2s ease; }
-  .nt-sheet{ position:relative; width:100%; max-width:380px; max-height:74vh; display:flex; flex-direction:column; padding:0; overflow:hidden; box-sizing:border-box; }
-  .nt-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 18px 14px; border-bottom:1px solid var(--ink); }
-  .nt-head h3{ font-size:16px; font-weight:800; color:var(--ink); }
-  .nt-x{ flex:0 0 auto; width:32px; height:32px; border:1px solid var(--ink); border-radius:50%; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; position:relative; z-index:2; }
-  .nt-x svg{ width:18px; height:18px; }
-  .nt-x:active{ transform:scale(.95); }
-  .nt-list{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:6px 16px 16px; }
-  .nt-empty{ text-align:center; color:#9ca3af; font-size:13px; line-height:1.8; padding:40px 8px; }
-  .nt-item{ padding:16px 2px; border-bottom:1px solid #f0f0ec; }
-  .nt-item:last-child{ border-bottom:none; }
-  .nt-item-top{ display:flex; align-items:center; gap:7px; margin-bottom:6px; }
-  .nt-date{ font-size:11.5px; font-weight:600; color:#9ca3af; }
-  .nt-new{ font-size:10px; font-weight:800; color:#1f2937; background:var(--lime); border:1px solid var(--ink); border-radius:6px; padding:1px 6px; letter-spacing:.3px; }
-  .nt-title{ font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.4; margin-bottom:5px; letter-spacing:-.3px; }
-  .nt-body{ font-size:13px; line-height:1.65; color:#4b5563; white-space:pre-line; word-break:keep-all; }
 </style>
 </head>
 <body>
@@ -353,7 +321,7 @@
 
     <section class="view active" id="view-home">
       <div class="home-top" id="homeTop">
-        <div class="logo-blob" id="logoNotice" role="button" tabindex="0" aria-label="공지사항 보기" onclick="openNotice()"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
+        <div class="logo-blob"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
 <rect x="0.5" y="0.5" width="71" height="71" rx="35.5" fill="url(#paint0_radial_5_1002)" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <path d="M39.2417 19.1405C42.0803 19.1405 45.4058 19.4745 48.0405 20.4432C50.6575 21.4056 52.7776 23.0759 52.7778 25.83C52.7778 26.842 52.497 27.9705 51.771 28.9862C51.1544 29.8488 50.2303 30.6074 48.9302 31.1483C51.9377 34.3444 53.1869 37.7619 53.187 40.6141C53.187 43.9151 51.3925 46.8759 47.978 48.9882C44.5756 51.0929 39.5536 52.369 33.0044 52.369C30.3029 52.369 26.7771 52.1255 23.9097 51.1932C21.0694 50.2697 18.6499 48.5823 18.6499 45.576C18.6501 43.1665 20.2407 40.9758 22.7251 39.7255C21.0573 37.7177 19.7233 34.4848 19.7231 31.4579C19.7231 27.7689 21.7651 24.6702 25.2114 22.5165C28.6486 20.3685 33.5031 19.1405 39.2417 19.1405ZM31.7778 39.119C30.5803 39.119 29.0327 39.2447 27.5435 39.4657C26.4356 39.6301 25.3804 39.8442 24.5347 40.0917C26.4564 41.5982 28.8423 42.161 31.5728 42.161C32.8829 42.161 33.7243 42.0656 34.2319 41.83C34.4681 41.7203 34.6106 41.5885 34.7007 41.4354C34.7935 41.2775 34.856 41.0528 34.856 40.7167C34.856 40.3813 34.794 40.1389 34.6958 39.9589C34.5997 39.7828 34.4518 39.6349 34.2271 39.5116C33.7512 39.2505 32.9675 39.1191 31.7778 39.119ZM40.6724 28.6327C39.371 28.6327 38.5803 28.8109 38.1304 29.0614C37.9139 29.182 37.786 29.3132 37.7104 29.4423C37.6349 29.5713 37.5942 29.7273 37.5942 29.9227C37.5942 30.1058 37.6324 30.26 37.7124 30.3944C37.7925 30.529 37.9331 30.6757 38.188 30.8134C38.7158 31.0986 39.675 31.3153 41.3374 31.3153C42.413 31.3153 43.734 31.2273 44.9497 31.076C45.7613 30.9751 46.505 30.8473 47.0903 30.7059C45.3894 29.1942 42.9903 28.6327 40.6724 28.6327Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <defs>
@@ -362,7 +330,7 @@
 <stop offset="1" stop-color="white"/>
 </radialGradient>
 </defs>
-</svg><span class="notice-badge" id="noticeBadge" aria-hidden="true">1</span></div>
+</svg></div>
         <div class="top-actions">
           <div class="top-actions-row">
           <button class="btn-outline sq" data-r="14" data-fill="#ffffff" aria-label="검색" onclick="openSearch()">
@@ -382,7 +350,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-pfxYtNSw6RUVV4JH" data-ad-width="320" data-ad-height="50"></ins></div></div>
+      <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-aq8PHogkWs3Yf9Ka" data-ad-width="320" data-ad-height="100"></ins></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
       <div class="chips" id="decoChips" style="display:none"></div>
@@ -420,7 +388,7 @@
   <button class="fab sq" data-r="14" data-fill="#ffffff" id="topBtn" aria-label="맨 위로" onclick="goTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
-  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="방명록" onclick="toggleWall()"><span class="lbl">💬</span><span class="skku-spark s1"></span><span class="skku-spark s3"></span></button>
+  <button class="fab-chat sq" data-r="14" data-fill="#e7ffb3" id="chatBtn" aria-label="방명록" onclick="toggleWall()"><span class="lbl">💬</span></button>
   <button class="fab-mail sq" data-r="14" data-fill="#ffffff" data-stroke="#1f2937" id="mailBtn" aria-label="의견·오류제보" onclick="toggleInfo()"><span>안내</span></button>
   <div class="info-panel sq" id="infoPanel" data-r="18" data-fill="#ffffff" data-stroke="#1f2937">
     <h3>스꾸 안내 🍀</h3>
@@ -430,6 +398,7 @@
       <button class="info-send" id="fbSend" onclick="sendFeedback()">보내기</button>
     </div>
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
+    <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
     <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
   </div>
   <div class="wall-panel sq" data-r="18" data-fill="#ffffff" data-stroke="#1f2937" id="wallPanel">
@@ -453,15 +422,6 @@
       <div id="pkSheetBody"></div>
     </div>
   </div>
-  <div class="nt-modal" id="ntModal" onclick="if(event.target===this)closeNotice()">
-    <div class="nt-sheet sq" data-r="24" data-fill="#ffffff" data-stroke="#1f2937">
-      <div class="nt-head">
-        <h3>📢 공지사항</h3>
-        <button class="nt-x" onclick="closeNotice()" aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
-      </div>
-      <div class="nt-list" id="ntList"></div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -477,11 +437,11 @@ function publicUrl(path){ return R2_BASE ? (R2_BASE+"/"+path) : (SB_URL+"/storag
    1순위: 버킷에 미리 생성해둔 thumbs/{이름}-{폭}.webp (make-thumbs.mjs로 생성, 1년 캐시)
    2순위: 썸네일이 아직 없으면 wsrv.nl 실시간 변환으로 폴백 (picErr가 처리)
    복사용: copy/{이름}.png (1080px 경량 PNG) → 없으면 원본(s.u) */
-function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url=ssl:'+u.replace(/^https?:\/\//,'')+'&w='+w+'&q='+(q||62)+'&fit=contain&output=webp'; }
+function wsrv(u,w,q){ if(!u) return u; return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&q='+(q||62)+'&output=webp&we&default='+encodeURIComponent(u); }
 function baseName(p){ return p.replace(/\.[^.\/]+$/,''); }
 function thumbUrl(s,w){
-  if(s.p && s.p.indexOf('sticker_')!==0) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
-  return s.u;
+  if(s.p) return publicUrl('thumbs/'+baseName(s.p)+'-'+w+'.webp');
+  return wsrv(s.u,w);
 }
 function copyUrl(s){ if(s.p) return publicUrl('copy/'+baseName(s.p)+'.png'); return s.u; }
 /* 이미지 에러 체인: 미리생성 썸네일 실패 → wsrv 실시간 변환 → 이모지 폴백 */
@@ -768,15 +728,6 @@ function legacyCopy(t){ try{ var ta=document.createElement('textarea'); ta.value
 /* ===== 스티커 딥링크 공유 (/s/{slug} → 받은 사람이 그 스티커로 바로 진입) ===== */
 function shareSticker(){
   var s=curDetail; if(!s) return;
-  /* 아이패드: 이미지 파일을 공유 시트로 (굿노트·사진 저장 등) — 클립보드가 굿노트에서 URL로 둔갑하는 문제 우회 */
-  if(isIPadOS()){
-    var _ready=s._blobReady||null;
-    var _bp=s._blob||loadStickerBlob(s); s._blob=_bp; _bp.then(function(b){ if(b) s._blobReady=b; });
-    ga('share',{ method:'image_share', sticker_id:String(s.id), sticker_name:(s.n||'') });
-    if(_ready){ shareOrDownload(_ready, s); }
-    else{ _bp.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
-    return;
-  }
   var slug=stickerSlug(s);
   var url=location.origin+'/s/'+encodeURIComponent(slug);
   var text=(s.n||'스티커')+' 스티커, 스꾸에서 바로 복사하세요!';
@@ -963,21 +914,6 @@ function loadWall(){
     WALL_DATA=rows; WALL_LOADED=true; renderWall();
   }).catch(function(){ var el=document.getElementById('wallList'); if(el) el.innerHTML='<div class="wall-empty">불러오지 못했어요</div>'; });
 }
-var WALL_POLL=null;
-function pollWall(){
-  fetch(SB_URL+'/rest/v1/seukku_wall?select=id,nickname,body,created_at&order=created_at.desc&limit=100',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
-  .then(function(r){ return r.json(); }).then(function(rows){
-    if(!Array.isArray(rows)) return;
-    var cur=WALL_DATA[0]?WALL_DATA[0].id:0, inc=rows[0]?rows[0].id:0;
-    if(inc!==cur || rows.length!==WALL_DATA.length){
-      var el=document.getElementById('wallList'), atTop=!el||el.scrollTop<60;
-      WALL_DATA=rows;
-      if(atTop) renderWall();   /* 맨 위(최신)를 보고 있을 때만 다시 그려서 스크롤 튐 방지 */
-    }
-  }).catch(function(){});
-}
-function startWallPoll(){ stopWallPoll(); WALL_POLL=setInterval(function(){ var p=document.getElementById('wallPanel'); if(p&&p.classList.contains('open')) pollWall(); else stopWallPoll(); },20000); }
-function stopWallPoll(){ if(WALL_POLL){ clearInterval(WALL_POLL); WALL_POLL=null; } }
 function postWall(){
   if(window._wallPosting) return;
   var inp=document.getElementById('wallText'), t=(inp.value||'').trim();
@@ -996,15 +932,13 @@ function postWall(){
 function toggleWall(){
   var p=document.getElementById('wallPanel'), open=p.classList.toggle('open');
   var cb=document.querySelector('#chatBtn .lbl'); if(cb) cb.textContent=open?'✕':'💬';
-  var cbn=document.getElementById('chatBtn'); if(cbn) cbn.classList.toggle('wall-open', open);
   if(open){
     sq();
     if(!WALL_LOADED) loadWall(); else renderWall();
     var inp=document.getElementById('wallText');
     if(inp && !inp._bound){ inp._bound=true; inp.addEventListener('keydown',function(e){ if(e.key==='Enter' && !e.isComposing && e.keyCode!==229){ e.preventDefault(); postWall(); } }); }
     try{ if(window.ga) ga('wall_open',{}); }catch(e){}
-    startWallPoll();
-  } else { stopWallPoll(); }
+  }
 }
 var W3F_KEY="8154e180-f78c-4492-b85b-84253c9b09ee";  // web3forms Access Key (이메일 알림)
 function sendFeedback(){
@@ -1051,7 +985,6 @@ function canCopyImage(){
 /* 삼성 인터넷은 이미지 클립보드가 불안정 → 공유/저장으로 우회 */
 function isSamsung(){ try{ return /SamsungBrowser/i.test(navigator.userAgent||''); }catch(e){ return false; } }
 function isAndroid(){ try{ return /Android/i.test(navigator.userAgent||''); }catch(e){ return false; } }
-function isIPadOS(){ try{ return /iPad/i.test(navigator.userAgent||'') || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }catch(e){ return false; } }
 function canImageCopy(){ return canCopyImage(); }  /* 갤럭시(삼성)도 복사 시도 → 안 되면 자동 저장 */
 /* 복사가 막힌 기기: Web Share(스토리에 바로 공유) → 안 되면 다운로드 */
 async function shareOrDownload(blob, s){
@@ -1084,7 +1017,7 @@ function copySticker(s){
   var ready=s._blobReady||null;
   var blobPromise=s._blob||loadStickerBlob(s);
   s._blob=blobPromise; blobPromise.then(function(b){ if(b) s._blobReady=b; });
-  /* 갤럭시(안드로이드): 클립보드가 불안정 → 공유 시트로. (아이패드는 복사=클립보드 유지, 굿노트는 공유 아이콘으로 이미지 공유) */
+  /* 갤럭시(안드로이드): 클립보드가 불안정해서 → 공유 시트(저장/인스타 스토리/카톡)로 */
   if(isAndroid()){
     if(ready){ shareOrDownload(ready, s); }
     else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
@@ -1299,7 +1232,7 @@ function fitAllAds(){ document.querySelectorAll('.ad-fit').forEach(fitAd); }
 window.addEventListener('resize', fitAllAds);
 function loadAd(boxId, unit){
   var box=document.getElementById(boxId); if(!box) return;
-  unit=unit||'DAN-vEdvkJkvdKRPfiGR';                         /* 기본=스꾸 스티커 상세 단위 */
+  unit=unit||'DAN-Gvch7fDdypiFaP5K';                         /* 기본=스꾸 스티커 상세 단위 */
   var keepH = box.querySelector('iframe') ? box.style.height : '';  // 기존 광고가 있던 슬롯이면 높이 유지 → 리로드 시 접힘/점프 방지
   box.innerHTML='';
   box.style.height = keepH || '0';
@@ -1309,7 +1242,7 @@ function loadAd(boxId, unit){
   ins.style.display='none';
   ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','320');
-  ins.setAttribute('data-ad-height','50');
+  ins.setAttribute('data-ad-height','100');
   box.appendChild(ins);
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
@@ -1324,7 +1257,7 @@ function ensureHomeAd(){
   var box=document.getElementById('adHome'); if(!box) return;
   var f=box.querySelector('iframe');
   if(f && f.offsetWidth>10){ fitAd(box); return; }
-  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');
+  loadAd('adHome','DAN-aq8PHogkWs3Yf9Ka');
 }
 /* 카테고리 전환(=가상 페이지뷰) 시 상단 배너를 새로 호출 → 노출 증가. 사용자 액션에만, 연타는 디바운스 */
 var _lastAdRefresh=0;
@@ -1332,7 +1265,7 @@ function refreshHomeAd(){
   var now=Date.now();
   if(now-_lastAdRefresh < 700) return;     // 너무 빠른 연타는 무시(불필요 요청·정책 안전)
   _lastAdRefresh=now;
-  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');  // ins 새로 생성 → 새 광고 요청 = 새 노출
+  loadAd('adHome','DAN-aq8PHogkWs3Yf9Ka');  // ins 새로 생성 → 새 광고 요청 = 새 노출
 }
 function startHomeAd(){
   var box=document.getElementById('adHome'); if(!box) return;
@@ -1356,14 +1289,9 @@ async function loadSupabase(){
   var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
   // 1) 스티커 데이터: 외부 라이브러리(esm.sh) 없이 직접 REST → 다음카페/인앱 브라우저에서도 확실히 로드
   try{
-    var data=[];
-    for(var _off=0; _off<6000; _off+=1000){
-      var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&offset='+_off+'&limit=1000',{headers:H});
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      var _page=await res.json();
-      data=data.concat(_page);
-      if(_page.length<1000) break;
-    }
+    var res=await fetch(SB_URL+'/rest/v1/stickers?select=*&order=created_at.desc&limit=5000',{headers:H});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    var data=await res.json();
     STK=(data||[]).map(function(r){
       return { id:r.id, n:r.name||r.image_path, c:(r.category||catFromFile(r.image_path)), kw:(r.keywords||''), tg:(r.ai_tags||''), dark:(r.dark_bg===true),
                u:publicUrl(r.image_path), p:r.image_path, e:'🖼️',
@@ -1381,49 +1309,7 @@ async function loadSupabase(){
   }catch(e){ console.warn('sb 클라이언트 로드 실패(집계 기능만 제한)', e); }
 }
 
-/* ===== 공지사항 (스꾸 로고 클릭 → 히스토리 팝업) =====
-   공지는 Supabase 'seukku_notices' 테이블에서 불러와요 (관리자 페이지에서 추가/수정/삭제).
-   id가 클수록 최신. 유저가 팝업을 열면 그 시점 최신 id까지 '읽음' 처리되어 배지가 사라져요. */
-var NOTICES=[];
-function fmtNoticeDate(iso){ try{ var d=new Date(iso); return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'); }catch(e){ return ''; } }
-function noticeSeen(){ try{ return parseInt(localStorage.getItem('seukku_notice_seen')||'0',10)||0; }catch(e){ return 0; } }
-function noticeMaxId(){ var m=0; for(var i=0;i<NOTICES.length;i++){ if(NOTICES[i].id>m) m=NOTICES[i].id; } return m; }
-function noticeUnread(){ var s=noticeSeen(); var n=0; for(var i=0;i<NOTICES.length;i++){ if(NOTICES[i].id>s) n++; } return n; }
-function updateNoticeBadge(){
-  var b=document.getElementById('noticeBadge'); if(!b) return;
-  var u=noticeUnread();
-  if(u>0){ b.textContent=(u>9?'9+':String(u)); b.classList.add('show'); b.setAttribute('aria-hidden','false'); }
-  else { b.classList.remove('show'); b.setAttribute('aria-hidden','true'); }
-}
-function renderNotices(){
-  var s=noticeSeen(), el=document.getElementById('ntList'); if(!el) return;
-  if(!NOTICES.length){ el.innerHTML='<div class="nt-empty">아직 공지가 없어요 🍀</div>'; return; }
-  el.innerHTML=NOTICES.map(function(n){
-    var isNew=n.id>s;
-    return '<div class="nt-item"><div class="nt-item-top"><span class="nt-date">'+esc(n.date)+'</span>'+(isNew?'<span class="nt-new">NEW</span>':'')+'</div>'+
-      '<div class="nt-title">'+esc(n.title)+'</div><div class="nt-body">'+esc(n.body)+'</div></div>';
-  }).join('');
-  sq();
-}
-function loadNotices(){
-  fetch(SB_URL+'/rest/v1/seukku_notices?select=id,title,body,created_at&active=eq.true&order=pinned.desc,created_at.desc&limit=100',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
-  .then(function(r){ return r.ok?r.json():[]; }).then(function(rows){
-    if(!Array.isArray(rows)) return;
-    NOTICES=rows.map(function(n){ return { id:n.id, date:fmtNoticeDate(n.created_at), title:n.title||'', body:n.body||'' }; });
-    updateNoticeBadge();
-    var m=document.getElementById('ntModal'); if(m && m.classList.contains('open')) renderNotices();
-  }).catch(function(){});
-}
-function openNotice(){
-  renderNotices();
-  document.getElementById('ntModal').classList.add('open');
-  sq();
-  if(NOTICES.length){ try{ localStorage.setItem('seukku_notice_seen', String(noticeMaxId())); }catch(e){} updateNoticeBadge(); }
-  try{ if(window.ga) ga('notice_open',{}); }catch(e){}
-}
-function closeNotice(){ var m=document.getElementById('ntModal'); if(m) m.classList.remove('open'); }
-updateNoticeBadge(); loadNotices();
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeAdPopup(); closeNotice(); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAdPopup(); });
 buildChips(); loadSupabase(); startHomeAd();   /* 홈 광고는 정적 설치본을 스케일만 (심사용 정상 호출) */
 </script>
 
