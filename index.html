@@ -223,7 +223,7 @@
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 (가로 전체 한 줄, 배너처럼 너비에 꽉 차게 fitAd 스케일) ===== */
   .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:10px 0 26px; }
-  .feedad .feedad-in{ width:100%; }
+  .feedad .feedad-in{ width:100%; opacity:0; transition:opacity .28s ease; }
   .feedad .kakao_ad_area{ display:block; transform-origin:0 0; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
   .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; opacity:0; }
@@ -607,7 +607,7 @@ function loadFeedAd(boxId){
   box.dataset.adLoading='1';
   /* 배너와 동일하게 fitAd로 칸 너비에 꽉 차게 스케일 + 노출. 끝까지 안 오면 빈 줄 접기 */
   var n=0, iv=setInterval(function(){
-    if(fitAd(box)){ box.dataset.adLoading=''; var lbl=box.querySelector('.feedad-ad'); if(lbl) lbl.style.opacity='1'; clearInterval(iv); return; }
+    if(fitAd(box)){ box.dataset.adLoading=''; var inr=box.querySelector('.feedad-in'); if(inr) inr.style.opacity='1'; var lbl=box.querySelector('.feedad-ad'); if(lbl) lbl.style.opacity='1'; clearInterval(iv); return; }
     if(++n>13){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
   }, 300);
 }
