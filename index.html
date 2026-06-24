@@ -608,6 +608,14 @@ function loadFeedAd(boxId){
     if(++n>40) clearInterval(iv);
   },300);
 }
+  function hydrateFeedAds(){
+  document.querySelectorAll('.feedad').forEach(function(box){
+    if(box.dataset.adLoaded==='1') return;
+    if(box.querySelector('.kakao_ad_area')) return;
+    box.dataset.adLoaded='1';
+    loadFeedAd(box.id);
+  });
+}
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
   var ad=null; for(var i=0;i<ADS.length;i++){ if(String(ADS[i].id)===String(id)){ ad=ADS[i]; break; } }
@@ -710,7 +718,7 @@ var BATCH=24;
   homeAdState={cells:0, sinceAd:0, eager:6, firstScope:true};
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
-  setTimeout(function(){ var fa=document.querySelector('.feedad'); if(fa) loadFeedAd(fa.id); },400);
+  setTimeout(hydrateFeedAds,300); if(fa) loadFeedAd(fa.id); },400);
 }
 function appendHome(){
   if(!homeBase.length) return;
