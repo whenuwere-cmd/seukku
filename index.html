@@ -404,7 +404,7 @@
       <button class="info-send" id="fbSend" onclick="sendFeedback()">보내기</button>
     </div>
     <div class="biz-row"><span>비즈니스 문의는 메일로 보내주세요</span><button class="biz-copy" onclick="copyBizMail()">메일 주소 복사</button></div>
-    <div class="pk-disclosure">'AD' 표시 카드는 광고예요. 쿠팡 파트너스 등 제휴 활동의 일환으로 일정액의 수수료를 받을 수 있어요.</div>
+    <div class="pk-disclosure">'AD' 표시는 광고예요. (카카오 애드핏)</div>
     <a class="pk-privacy" href="/privacy.html">개인정보처리방침</a>
   </div>
   <div class="wall-panel sq" data-r="18" data-fill="#ffffff" data-stroke="#1f2937" id="wallPanel">
@@ -536,7 +536,7 @@ function cardHtml(s,eager){
 function sq(){ requestAnimationFrame(function(){ if(window.applyAllSquircles) window.applyAllSquircles(); }); }
 
 /* ===== 광고(제휴) 카드 ===== */
-var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=18, AD_FIRST=6;   /* 첫 광고는 스티커 AD_FIRST개 뒤, 이후 AD_EVERY개마다(줄 첫 칸에서만) */
+var ADS=[], AD_POOL=[], adRR=0, AD_EVERY=10, AD_FIRST=10;   /* 카카오 인피드: 스티커 10개마다 1칸, 단위 수만큼만 */
 function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function adNum(v){ var n=parseInt(String(v==null?'':v).replace(/[^0-9]/g,''),10); return isFinite(n)?n:0; }
 function adWon(v){ var s=esc(v||''); if(!s) return ''; return /원\s*$/.test(s) ? s.replace(/원\s*$/,'<span class="pkwon">원</span>') : s+'<span class="pkwon">원</span>'; }
@@ -562,12 +562,11 @@ function adCardHtml(ad){
   return '<div class="pkcard sq" data-r="22" data-fill="#f6f6f6" data-stroke="#1f2937" role="button" tabindex="0" onclick="openAdPopup('+ad.id+')">'+adInner(ad)+'</div>';
 }
   /* ── 인피드 카카오 애드핏 (그리드 한 칸, 테스트용 1개) ── */
-var FEEDAD_UNITS=['DAN-8JbuQUWjbsSjUBEM','DAN-KZz83Dw1YG1veNpI','DAN-GQ4Uk6EVFSTKRHMA','DAN-7VJf49kbrlvMMEXA'];   /* 스꾸 콘텐츠 사이 300x250 (돌려쓰기) */
+var FEEDAD_UNITS=['DAN-8JbuQUWjbsSjUBEM','DAN-KZz83Dw1YG1veNpI','DAN-GQ4Uk6EVFSTKRHMA','DAN-7VJf49kbrlvMMEXA','DAN-5iPVqOjg163SnM9E','DAN-GgrWvOicbShLelNv','DAN-nfDOQf45NY62N9Wm','DAN-Mf9hh7YjqOtykzcs'];   /* 스꾸 콘텐츠 사이 300x250 인피드 단위 8개 (겹침 없이 1번씩) */
 var feedAdRR=0;
 function nextFeedUnit(){ var u=FEEDAD_UNITS[feedAdRR%FEEDAD_UNITS.length]; feedAdRR++; return u; }   /* 스꾸 콘텐츠 사이 300x250 */
 var feedAdSeq=0;
 function feedAdHtml(){
-  return '';   /* 인피드 카카오 광고 비활성화: 칸 자체를 만들지 않음 */
   var bid='feedad_'+(++feedAdSeq);
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
@@ -636,20 +635,14 @@ function closeAdPopup(){ document.getElementById('pkModal').classList.remove('op
    광고(2칸)는 줄 첫 칸일 때만 넣되 side로 좌/우 번갈아(지그재그) → 빈 칸 없음
    side 0 = [광고2칸][스티커] · side 1 = [스티커][광고2칸] */
 function gridHtml(items, st){
-  st.cells=st.cells||0; st.sinceAd=st.sinceAd||0; st.side=st.side||0;
+  st.stk = st.stk||0; st.adsPlaced = st.adsPlaced||0;
   var eager=st.eager||0, out='', placed=0;
   for(var i=0;i<items.length;i++){
     if(!items[i]) continue;
-    var need = st.firstDone ? AD_EVERY : AD_FIRST;
-    var due = ADS.length && (st.cells%3===0) && st.sinceAd>=need;
-    if(due && st.side===0){            /* 왼쪽 광고: [광고][스티커] */
-      out += adCardHtml(nextAd()); st.cells+=2; st.sinceAd=0; st.side=1; st.firstDone=true;
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
-    } else if(due && st.side===1){     /* 오른쪽 광고: [스티커][광고] */
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
-      out += adCardHtml(nextAd()); st.cells+=2; st.sinceAd=0; st.side=0; st.firstDone=true;
-    } else {
-      out += cardHtml(items[i], placed<eager); placed++; st.cells+=1; st.sinceAd+=1; st.stkCount=(st.stkCount||0)+1;
+    out += cardHtml(items[i], placed<eager); placed++; st.stk++;
+    /* 스티커 AD_EVERY개마다 카카오 인피드 1칸. 단, 단위(FEEDAD_UNITS) 수만큼만 → 같은 단위 재사용(=빈 광고) 방지 */
+    if(st.kakao && (st.stk % AD_EVERY === 0) && st.adsPlaced < FEEDAD_UNITS.length){
+      out += feedAdHtml(); st.adsPlaced++;
     }
   }
   return out;
@@ -713,7 +706,7 @@ function renderHome(){
     homeIdx=0; return;
   }
 var BATCH=24;
-  homeAdState={cells:0, sinceAd:0, eager:6, firstScope:true};
+  homeAdState={stk:0, adsPlaced:0, kakao:true, eager:6}; feedAdRR=0;
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
   scheduleHydrate();
