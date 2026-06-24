@@ -575,8 +575,8 @@ function fitFeedAd(box){
   var adW=iframe.offsetWidth||0, adH=iframe.offsetHeight||250;
   if(adW<10) return false;
   var boxW=box.clientWidth, boxH=box.clientHeight||boxW;
-  /* 칸을 꽉 채우도록 가로·세로 중 더 큰 배율 사용(cover) + 가운데 정렬 */
-  var s=Math.max(boxW/adW, boxH/adH);
+  /* 안 잘리게 contain: 가로·세로 중 더 작은 배율 + 가운데 정렬 */
+  var s=Math.min(boxW/adW, boxH/adH);
   ins.style.position='absolute';
   ins.style.left='50%'; ins.style.top='50%';
   ins.style.transformOrigin='center center';
