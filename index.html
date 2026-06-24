@@ -224,7 +224,7 @@
   /* ===== 인피드 카카오 광고 (가로 전체 한 줄, 배너처럼 너비에 꽉 차게 fitAd 스케일) ===== */
   .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:8px 0 14px; }
   .feedad .feedad-in{ position:relative; width:100%; aspect-ratio:320 / 100; overflow:hidden; opacity:0; transition:opacity .28s ease; }
-  .feedad .kakao_ad_area{ position:absolute; left:50%; top:50%; display:block; }
+  .feedad .kakao_ad_area{ position:absolute; left:0; top:0; display:block; transform-origin:0 0; }
   .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
   .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; opacity:0; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
@@ -593,8 +593,8 @@ function fitFeedAd(box){
   var inner=box.querySelector('.feedad-in'); var w=inner?inner.clientWidth:box.clientWidth;
   if(w<10) return false;
   var s=w/adW;   /* 광고 실제 폭 기준 → 옆 안 잘림 */
-  ins.style.display='block'; ins.style.transformOrigin='center center';
-  ins.style.transform='translate(-50%,-50%) scale('+s+')'; ins.style.visibility='visible';
+  ins.style.display='block'; ins.style.transformOrigin='0 0';
+  ins.style.transform='scale('+s+')'; ins.style.visibility='visible';
   return true;   /* 칸 높이는 CSS aspect-ratio로 완전 고정 → 벌어졌다 좁혀지는 움직임 없음 */
 }
 function loadFeedAd(boxId){
