@@ -588,10 +588,10 @@ function loadFeedAd(boxId){
   if(box.dataset.adLoaded==='1') return;
   box.dataset.adLoaded='1';
   inner.innerHTML='';
-  setFeedScale(box);                 /* 광고 뜨기 전에 미리 축소 비율 고정 → 떴을 때 이미 맞음 */
   var unit=box.getAttribute('data-unit')||FEEDAD_UNITS[0];
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
+  ins.style.display='none';                         /* 공식 스니펫처럼 none으로 시작 → 광고 들어오면 코드가 켬 */
   ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','320');
   ins.setAttribute('data-ad-height','100');
@@ -599,7 +599,16 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  requestAnimationFrame(function(){ setFeedScale(box); });   /* 레이아웃 직후 비율 1회 확정 */
+  /* 배너(fitAd)와 동일 원리: 광고(iframe)가 들어오면 칸을 켜고(display:block), 끝까지 안 오면 빈 줄 접기 */
+  var n=0, iv=setInterval(function(){
+    var iframe=ins.querySelector('iframe');
+    if(iframe && (iframe.offsetWidth>10 || iframe.clientWidth>10)){
+      ins.style.display='block';
+      box.style.display='';
+      clearInterval(iv); return;
+    }
+    if(++n>30){ clearInterval(iv); if(!ins.querySelector('iframe')) box.style.display='none'; }   /* ~9초 안 차면 접기 */
+  }, 300);
 }
 function hydrateFeedAds(){
   document.querySelectorAll('.feedad').forEach(function(box){
