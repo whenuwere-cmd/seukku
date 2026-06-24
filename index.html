@@ -611,12 +611,10 @@ function loadFeedAd(boxId){
   },300);
 }
 function hydrateFeedAds(){
-  var ob=getFeedAdObserver();
   document.querySelectorAll('.feedad').forEach(function(box){
-    if(box.dataset.adLoaded==='1' || box.dataset.adObserved==='1') return;
-    box.dataset.adObserved='1';
+    if(box.dataset.adLoaded==='1') return;
     if(!box.id) box.id='feedad_'+(++feedAdSeq);
-    if(ob){ ob.observe(box); } else { loadFeedAd(box.id); }   /* 옵저버 없으면 즉시 로드 */
+    loadFeedAd(box.id);
   });
 }
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
@@ -1028,6 +1026,7 @@ scrollEl.addEventListener('scroll',function(){
   toggleFab();
   if(scrollEl.scrollTop+scrollEl.clientHeight < scrollEl.scrollHeight-300) return;
   if(currentView==='home') appendHome(); else if(currentView==='detail') appendRelated();
+  hydrateFeedAds();
 });
 
 function emojiPng(emoji){ return new Promise(function(res){ var sz=512,c=document.createElement('canvas'); c.width=sz;c.height=sz; var x=c.getContext('2d'); x.clearRect(0,0,sz,sz); x.font=Math.floor(sz*0.72)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(emoji||'🖼️',sz/2,sz/2+sz*0.04); c.toBlob(function(b){res(b);},'image/png'); }); }
