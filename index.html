@@ -350,7 +350,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-pfxYtNSw6RUVV4JH" data-ad-width="320" data-ad-height="50"></ins></div></div>
+      <div class="ad-bar"><div class="ad-fit" id="adHome"><ins class="kakao_ad_area" style="display:none" data-ad-unit="DAN-aq8PHogkWs3Yf9Ka" data-ad-width="320" data-ad-height="100"></ins></div></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="homeGrid"></div>
       <div class="chips" id="decoChips" style="display:none"></div>
@@ -1232,7 +1232,7 @@ function fitAllAds(){ document.querySelectorAll('.ad-fit').forEach(fitAd); }
 window.addEventListener('resize', fitAllAds);
 function loadAd(boxId, unit){
   var box=document.getElementById(boxId); if(!box) return;
-  unit=unit||'DAN-vEdvkJkvdKRPfiGR';                         /* 기본=스꾸 스티커 상세 단위 */
+  unit=unit||'DAN-Gvch7fDdypiFaP5K';                         /* 기본=스꾸 스티커 상세 단위 */
   var keepH = box.querySelector('iframe') ? box.style.height : '';  // 기존 광고가 있던 슬롯이면 높이 유지 → 리로드 시 접힘/점프 방지
   box.innerHTML='';
   box.style.height = keepH || '0';
@@ -1242,7 +1242,7 @@ function loadAd(boxId, unit){
   ins.style.display='none';
   ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','320');
-  ins.setAttribute('data-ad-height','50');
+  ins.setAttribute('data-ad-height','100');
   box.appendChild(ins);
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
@@ -1257,7 +1257,7 @@ function ensureHomeAd(){
   var box=document.getElementById('adHome'); if(!box) return;
   var f=box.querySelector('iframe');
   if(f && f.offsetWidth>10){ fitAd(box); return; }
-  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');
+  loadAd('adHome','DAN-aq8PHogkWs3Yf9Ka');
 }
 /* 카테고리 전환(=가상 페이지뷰) 시 상단 배너를 새로 호출 → 노출 증가. 사용자 액션에만, 연타는 디바운스 */
 var _lastAdRefresh=0;
@@ -1265,7 +1265,7 @@ function refreshHomeAd(){
   var now=Date.now();
   if(now-_lastAdRefresh < 700) return;     // 너무 빠른 연타는 무시(불필요 요청·정책 안전)
   _lastAdRefresh=now;
-  loadAd('adHome','DAN-pfxYtNSw6RUVV4JH');  // ins 새로 생성 → 새 광고 요청 = 새 노출
+  loadAd('adHome','DAN-aq8PHogkWs3Yf9Ka');  // ins 새로 생성 → 새 광고 요청 = 새 노출
 }
 function startHomeAd(){
   var box=document.getElementById('adHome'); if(!box) return;
