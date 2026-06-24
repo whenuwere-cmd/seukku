@@ -221,11 +221,11 @@
   .share-btn > svg:not(.sqbg){ width:20px; height:20px; }
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
-  /* ===== 인피드 카카오 광고 (가로 전체 한 줄·실제 크기 320x100, 절대 축소 금지 → 애드핏이 안 내림) ===== */
-  .feedad{ position:relative; grid-column:1 / -1; display:flex; justify-content:center; align-items:center; min-height:100px; padding:10px 0; overflow:hidden; }
-  .feedad .feedad-in{ position:relative; width:320px; height:100px; transform:none; }
-  .feedad .kakao_ad_area{ display:block; width:320px; height:100px; }
-  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:320px !important; height:100px !important; display:block !important; border:0 !important; }
+  /* ===== 인피드 카카오 광고 (가로 전체 한 줄, 배너처럼 너비에 꽉 차게 fitAd 스케일) ===== */
+  .feedad{ position:relative; grid-column:1 / -1; width:100%; overflow:hidden; padding:10px 0; }
+  .feedad .feedad-in{ width:100%; }
+  .feedad .kakao_ad_area{ display:block; transform-origin:0 0; }
+  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ display:block; border:0; }
   .feedad .feedad-ad{ position:absolute; top:0; right:4px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
@@ -599,15 +599,11 @@ function loadFeedAd(boxId){
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
-  /* 배너(fitAd)와 동일 원리: 광고(iframe)가 들어오면 칸을 켜고(display:block), 끝까지 안 오면 빈 줄 접기 */
+  box.dataset.adLoading='1';
+  /* 배너와 동일하게 fitAd로 칸 너비에 꽉 차게 스케일 + 노출. 끝까지 안 오면 빈 줄 접기 */
   var n=0, iv=setInterval(function(){
-    var iframe=ins.querySelector('iframe');
-    if(iframe && (iframe.offsetWidth>10 || iframe.clientWidth>10)){
-      ins.style.display='block';
-      box.style.display='';
-      clearInterval(iv); return;
-    }
-    if(++n>30){ clearInterval(iv); if(!ins.querySelector('iframe')) box.style.display='none'; }   /* ~9초 안 차면 접기 */
+    if(fitAd(box)){ box.dataset.adLoading=''; clearInterval(iv); return; }
+    if(++n>30){ box.dataset.adLoading=''; if(!box.querySelector('iframe')) box.style.display='none'; clearInterval(iv); }
   }, 300);
 }
 function hydrateFeedAds(){
