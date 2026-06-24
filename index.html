@@ -222,10 +222,10 @@
   .share-btn:active{ transform:scale(.95); }
   .explore-head{ padding:24px var(--pad) 0; font-size:12px; font-weight:500; color:var(--ink); letter-spacing:-.24px; }
   /* ===== 인피드 카카오 광고 칸 (그리드 한 칸) ===== */
-  .feedad{ position:relative; grid-column:span 1; aspect-ratio:300/250; align-self:start; overflow:hidden; border-radius:16px; }
-  .feedad .feedad-in{ position:absolute; inset:0; width:100%; height:100%; overflow:hidden; }
-  .feedad .kakao_ad_area{ display:block; width:100%; height:100%; }
-  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:100% !important; height:100% !important; display:block !important; border:0 !important; }
+  .feedad{ position:relative; grid-column:span 1; aspect-ratio:1/1; overflow:hidden; border-radius:16px; }
+  .feedad .feedad-in{ position:absolute; left:50%; top:50%; width:300px; height:250px; transform:translate(-50%,-50%) scale(var(--feedScale,1)); transform-origin:center center; }
+  .feedad .kakao_ad_area{ display:block; width:300px; height:250px; }
+  .feedad .kakao_ad_area ins, .feedad .kakao_ad_area iframe{ width:300px !important; height:250px !important; display:block !important; border:0 !important; }
   .feedad .feedad-ad{ position:absolute; top:6px; right:8px; z-index:3; font-size:9px; font-weight:800; color:#9ca3af; letter-spacing:.5px; }
   /* ===== 카카오 애드핏 광고 (320x50, 비율 고정 scale) ===== */
   .ad-bar{ display:flex; justify-content:center; align-items:flex-start; margin:0; padding:20px var(--pad) 0; }
@@ -571,16 +571,24 @@ function feedAdHtml(){
   return '<div class="feedad" id="'+bid+'" data-unit="'+nextFeedUnit()+'">'+
     '<span class="feedad-ad">AD</span><div class="feedad-in"></div></div>';
 }
-/* 인피드 광고는 CSS(.feedad: aspect-ratio 300/250, iframe width/height 100%)가
-   크기를 전담한다. JS는 transform scale을 일절 쓰지 않음 → 측정 타이밍/새로고침에 따른
-   확대·깜빡임이 구조적으로 발생할 수 없음. 이 함수는 하위호환용(아무 것도 안 함). */
-function fitFeedAd(box){ return true; }
+/* 카카오 인피드는 내부가 항상 300x250 고정으로 그려진다. 그래서 iframe을 측정하지 않고
+   inner(300x250 고정 박스)를 "칸 폭 ÷ 300"으로 CSS 변수 한 번만 축소한다.
+   칸 폭은 레이아웃 직후 안정적이라 측정 타이밍 문제가 없고, JS가 transform을 매번
+   다시 쓰지 않으므로(변수 1회 세팅) 확대·깜빡임이 발생하지 않는다. */
+function setFeedScale(box){
+  if(!box) return;
+  var w=box.clientWidth; if(w<10) return;
+  var s=Math.round((w/300)*10000)/10000;
+  box.style.setProperty('--feedScale', s);
+}
+function fitFeedAd(box){ setFeedScale(box); return true; }
 function loadFeedAd(boxId){
   var box=document.getElementById(boxId); if(!box) return;
   var inner=box.querySelector('.feedad-in'); if(!inner) return;
   if(box.dataset.adLoaded==='1') return;
   box.dataset.adLoaded='1';
   inner.innerHTML='';
+  setFeedScale(box);                 /* 광고 뜨기 전에 미리 축소 비율 고정 → 떴을 때 이미 맞음 */
   var unit=box.getAttribute('data-unit')||FEEDAD_UNITS[0];
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
@@ -588,24 +596,27 @@ function loadFeedAd(boxId){
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
-  /* 칸마다 ba.min.js 새로 주입 → 카카오 SDK가 아직 안 그린 ins를 스캔/렌더 */
   var sc=document.createElement('script');
   sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
   inner.appendChild(sc);
 }
 function hydrateFeedAds(){
   document.querySelectorAll('.feedad').forEach(function(box){
-    if(box.dataset.adLoaded==='1') return;
+    if(box.dataset.adLoaded==='1'){ setFeedScale(box); return; }   /* 이미 로드된 칸은 비율만 재확인(저비용) */
     if(!box.id) box.id='feedad_'+(++feedAdSeq);
     loadFeedAd(box.id);
   });
 }
-/* 스크롤 중엔 디바운스로 한 번만 → 아직 광고 안 채운 새 칸만 채움(이미 뜬 광고는 안 건드림) */
+/* 스크롤 중엔 디바운스로 한 번만 → 새 칸 채우고 기존 칸 비율 점검만(transform 재계산 아님) */
 var _hydrateTimer=null;
 function scheduleHydrate(){
   if(_hydrateTimer) return;
   _hydrateTimer=setTimeout(function(){ _hydrateTimer=null; hydrateFeedAds(); }, 200);
 }
+/* 화면 회전·리사이즈 시에만 비율 갱신 */
+window.addEventListener('resize', function(){
+  document.querySelectorAll('.feedad').forEach(setFeedScale);
+});
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
 function openAdPopup(id){
   var ad=null; for(var i=0;i<ADS.length;i++){ if(String(ADS[i].id)===String(id)){ ad=ADS[i]; break; } }
