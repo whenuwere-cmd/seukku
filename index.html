@@ -590,9 +590,19 @@ function loadFeedAd(boxId){
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
-  var sc=document.createElement('script');
-  sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
-  inner.appendChild(sc);
+/* 이미 SDK가 떠 있으면 이 칸만 명시적으로 렌더, 아니면 스크립트 주입 */
+  if(window.adfit && typeof window.adfit.render==='function'){
+    try{ window.adfit.render(FEEDAD_UNIT); }catch(e){}
+  } else if(window.kakao_ad_area || document.querySelector('script[src*="ba.min.js"]')){
+    /* SDK 스크립트는 이미 있는데 adfit API가 노출 안 되는 버전 → 스크립트 재주입으로 재스캔 유도 */
+    var sc=document.createElement('script');
+    sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true;
+    inner.appendChild(sc);
+  } else {
+    var sc2=document.createElement('script');
+    sc2.type='text/javascript'; sc2.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc2.async=true;
+    inner.appendChild(sc2);
+  }
   var n=0, iv=setInterval(function(){
     if(fitFeedAd(box)){ clearInterval(iv); return; }
     if(++n>40) clearInterval(iv);
@@ -700,7 +710,7 @@ var BATCH=24;
   homeAdState={cells:0, sinceAd:0, eager:6, firstScope:true};
   document.getElementById('homeGrid').innerHTML=gridHtml(l.slice(0,BATCH), homeAdState);
   homeIdx=Math.min(BATCH,l.length); sq();
-  setTimeout(function(){ var fa=document.querySelector('.feedad'); if(fa) loadFeedAd(fa.id); },80);
+  setTimeout(function(){ var fa=document.querySelector('.feedad'); if(fa) loadFeedAd(fa.id); },400);
 }
 function appendHome(){
   if(!homeBase.length) return;
