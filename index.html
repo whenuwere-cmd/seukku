@@ -589,22 +589,32 @@ function fitFeedAd(box){
 function loadFeedAd(boxId){
   var box=document.getElementById(boxId); if(!box) return;
   var inner=box.querySelector('.feedad-in'); if(!inner) return;
-  if(box.dataset.adLoaded==='1') return;     /* 이미 로드한 칸이면 스킵 */
+  if(box.dataset.adLoaded==='1') return;
   box.dataset.adLoaded='1';
   inner.innerHTML='';
+  var unit=box.getAttribute('data-unit')||FEEDAD_UNITS[0];
   var ins=document.createElement('ins');
   ins.className='kakao_ad_area';
   ins.style.display='none';
-  ins.setAttribute('data-ad-unit', box.getAttribute('data-unit')||FEEDAD_UNITS[0]);
+  ins.setAttribute('data-ad-unit',unit);
   ins.setAttribute('data-ad-width','300');
   ins.setAttribute('data-ad-height','250');
   inner.appendChild(ins);
-  /* 이 칸 옆에 ba.min.js를 새로 주입 → 카카오 SDK가 이 ins를 새로 스캔/렌더 */
-  var sc=document.createElement('script');
-  sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
-  inner.appendChild(sc);
+  /* 카카오 SDK가 이미 있으면 이 ins만 렌더, 없으면 스크립트 1회 주입 */
+  function tryRender(){
+    if(window.adfit && typeof window.adfit.render==='function'){
+      try{ window.adfit.render(unit); return true; }catch(e){}
+    }
+    return false;
+  }
+  if(!tryRender()){
+    var sc=document.createElement('script');
+    sc.type='text/javascript'; sc.src='//t1.daumcdn.net/kas/static/ba.min.js'; sc.async=true; sc.charset='utf-8';
+    inner.appendChild(sc);
+  }
   var n=0, iv=setInterval(function(){
     if(fitFeedAd(box)){ clearInterval(iv); return; }
+    if(n===6) tryRender();    /* 2초쯤 뒤 SDK 준비됐으면 한 번 더 렌더 시도 */
     if(++n>50) clearInterval(iv);
   },300);
 }
