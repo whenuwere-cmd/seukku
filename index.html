@@ -618,11 +618,29 @@ function loadFeedAd(boxId){
     if(++n>50) clearInterval(iv);
   },300);
 }
+var _feedAdObserver=null;
+function getFeedAdObserver(){
+  if(_feedAdObserver) return _feedAdObserver;
+  if(!('IntersectionObserver' in window)) return null;
+  _feedAdObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        var box=en.target;
+        if(!box.id) box.id='feedad_'+(++feedAdSeq);
+        loadFeedAd(box.id);
+        _feedAdObserver.unobserve(box);
+      }
+    });
+  },{ rootMargin:'200px' });   /* 화면 200px 전부터 미리 로드 */
+  return _feedAdObserver;
+}
 function hydrateFeedAds(){
+  var ob=getFeedAdObserver();
   document.querySelectorAll('.feedad').forEach(function(box){
-    if(box.dataset.adLoaded==='1') return;
+    if(box.dataset.adLoaded==='1' || box.dataset.adObserved==='1') return;
+    box.dataset.adObserved='1';
     if(!box.id) box.id='feedad_'+(++feedAdSeq);
-    loadFeedAd(box.id);
+    if(ob){ ob.observe(box); } else { loadFeedAd(box.id); }   /* 옵저버 없으면 즉시 로드 */
   });
 }
 function adClick(id){ try{ ga('ad_click',{ad_id:String(id)}); }catch(e){} try{ if(sb) sb.rpc('bump_ad_click',{ad_id:id}); }catch(e){} }
