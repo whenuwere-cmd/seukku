@@ -481,6 +481,7 @@ var SB_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 var SB_BUCKET = "seukku";        // Storage 버킷 이름
 var sb=null;
 var R2_BASE  = "https://pub-bb9fc97b95e344769253b627a8327e4f.r2.dev";
+var UGC_BASE = "https://pub-80e2b5d6ac024adea58164fa06d48191.r2.dev";
 function publicUrl(path){ return R2_BASE ? (R2_BASE+"/"+path) : (SB_URL+"/storage/v1/object/public/"+SB_BUCKET+"/"+path); }
 
 /* ===== 썸네일 전략 =====
@@ -543,8 +544,8 @@ var STK=[
 ];
 STK.forEach(function(s,i){ s.id=i+1; s.copy_count=9000-i*137; s.created=i+1; s.rnd=Math.random(); });
 
-var CHIPS=['HOT','NEW','최근','Summer','emoji','⚾️','Text','Food','Retro','Mono','Electric','etc'];
-var CHIP_LABEL={ 'HOT':'❤️‍🔥 지금인기', 'NEW':'✨ NEW', '최근':'🥨 최근사용' }; // 내부 키는 그대로, 화면에 보이는 글자만 교체
+var CHIPS=['HOT','NEW','최근','Summer','emoji','⚾️','Text','Food','Retro','Mono','Electric','etc','유저 제작'];
+var CHIP_LABEL={ 'HOT':'❤️‍🔥 지금인기', 'NEW':'✨ NEW', '최근':'🥨 최근사용', '유저 제작':'💬 유저제작' }; // 내부 키는 그대로, 화면에 보이는 글자만 교체
 /* 칩별 ai_tags 확장 키워드 — 해당 카테고리 + 아래 키워드가 태그/이름/키워드에 있으면 같이 노출 */
 var CHIP_TAGS={
   'Summer':['여름','써머','summer','바다','beach','비치','시원','휴가','바캉스','vacation','조개','소라','트로피컬','tropical','선글라스','sunglasses','수박','아이스','얼음','ice','파란','블루','blue','청량','워터','water','수영','해변','금붕어','물고기','fish','꽃','flower'],
@@ -906,7 +907,7 @@ function copySource(){
   return currentView==='detail' ? 'related' : 'home';
 }
 function bumpCount(s, source){
-  if(!s) return; s.copy_count=(s.copy_count||0)+1;
+  if(!s||s.ugc) return; s.copy_count=(s.copy_count||0)+1;
   if(sb){
     try{ sb.rpc('increment_copy',{ p_id:s.id }).then(function(){},function(){}); }catch(e){}
     try{ sb.from('copy_events').insert({ sticker_id:s.id, source:source||'unknown', cid:CID }).then(function(){},function(){}); }catch(e){}
@@ -1697,6 +1698,22 @@ async function fetchHot6(){
     if(active==='HOT') renderHome();
   }catch(e){ console.warn('hot6 실패', e); }
 }
+async function loadUserBubblesPublic(){
+  if(!SB_URL || !SB_KEY) return;
+  try{
+    var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
+    var res=await fetch(SB_URL+'/rest/v1/seukku_user_bubbles?select=id,nickname,text,bubble,image_path,created_at&status=eq.public&order=created_at.desc&limit=2000',{headers:H});
+    if(!res.ok) return;
+    var rows=await res.json();
+    var items=(rows||[]).map(function(r){
+      return { id:'ub_'+r.id, n:(r.text||'유저 말풍선'), c:'유저 제작', kw:(r.text||''), tg:'', dark:false,
+               u:UGC_BASE+'/'+r.image_path, e:'💬',
+               copy_count:0, featured:false, created:Date.parse(r.created_at)||0, rnd:Math.random(), ugc:true };
+    });
+    STK=STK.filter(function(s){ return !s.ugc; }).concat(items);
+    if(active==='유저 제작'){ buildChips(); renderHome(); }
+  }catch(e){}
+}
 async function loadSupabase(){
   if(!SB_URL || !SB_KEY) return;            // 미설정이면 더미 유지
   var H={ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY };
@@ -1713,6 +1730,7 @@ async function loadSupabase(){
     try{ var ar=await fetch(SB_URL+'/rest/v1/ads?select=*',{headers:H}); if(ar.ok){ ADS=(await ar.json())||[]; shuffleAds(); } }catch(e){ console.warn('ads 불러오기 실패', e); }
     buildChips(); renderHome();
     handleInitialRoute();
+    loadUserBubblesPublic();
   }catch(e){ console.warn('스티커 로드 실패 → 더미 사용', e); buildChips(); renderHome(); }
   // 2) 집계/쓰기용 클라이언트(복사수·피드백·인기순 hot6)는 백그라운드 best-effort — 실패해도 화면엔 영향 없음
   try{
@@ -1892,7 +1910,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
       var map={}; (rows||[]).forEach(function(x){ map[x.key]=x.value||''; });
       if(map.category_order){
         var _ord=map.category_order.split(',').map(function(x){return x.trim();}).filter(Boolean);
-        if(_ord.length){ CHIPS=['HOT','NEW','최근'].concat(_ord); buildChips(); }
+        if(_ord.length){ CHIPS=['HOT','NEW','최근'].concat(_ord); if(CHIPS.indexOf('유저 제작')<0) CHIPS.push('유저 제작'); buildChips(); }
       }
       if(map.banner_text){
         document.querySelectorAll('.notice-track span').forEach(function(s){ s.textContent=map.banner_text; });
