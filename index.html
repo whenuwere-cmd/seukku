@@ -1916,7 +1916,7 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
       var map={}; (rows||[]).forEach(function(x){ map[x.key]=x.value||''; });
       if(map.category_order){
         var _ord=map.category_order.split(',').map(function(x){return x.trim();}).filter(Boolean);
-        if(_ord.length){ CHIPS=['HOT','NEW','최근'].concat(_ord); if(CHIPS.indexOf('유저 제작')<0) CHIPS.push('유저 제작'); buildChips(); }
+        if(_ord.length){ CHIPS=['HOT','NEW','최근'].concat(_ord); var _ui=CHIPS.indexOf('유저 제작'); if(_ui>=0) CHIPS.splice(_ui,1); var _ai=-1; for(var _k=0;_k<CHIPS.length;_k++){ if(CHIPS[_k].indexOf('동물')>=0){ _ai=_k; break; } } if(_ai>=0) CHIPS.splice(_ai+1,0,'유저 제작'); else CHIPS.push('유저 제작'); buildChips(); }
       }
       if(map.banner_text){
         document.querySelectorAll('.notice-track span').forEach(function(s){ s.textContent=map.banner_text; });
