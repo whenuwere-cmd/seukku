@@ -155,9 +155,9 @@
   .deco-card{ position:relative; min-height:80px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; font-size:13px; color:#2d3643; line-height:1.55; word-break:break-word; cursor:pointer; -webkit-user-select:none; user-select:none; transition:transform .08s ease; }
   .deco-card .lbl{ position:relative; z-index:2; }
   .deco-card:active{ transform:scale(.96); }
-  .deco-toggle{ position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:60; display:flex; gap:6px; align-items:center; padding:7px 8px; border-radius:30px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
+  .deco-toggle{ position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:60; display:flex; gap:3px; align-items:center; padding:7px 7px; border-radius:30px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
   .deco-toggle.hidden{ display:none; }
-  .deco-seg{ position:relative; border:0; background:none; padding:10px 16px; border-radius:22px; font-family:inherit; font-size:13px; font-weight:500; color:#2d3643; letter-spacing:-.13px; line-height:18px; white-space:nowrap; cursor:pointer; }
+  .deco-seg{ position:relative; border:0; background:none; padding:10px 13px; border-radius:22px; font-family:inherit; font-size:13px; font-weight:500; color:#2d3643; letter-spacing:-.13px; line-height:18px; white-space:nowrap; cursor:pointer; }
   .deco-seg .lbl{ position:relative; z-index:2; }
   .pkcard{ grid-column:span 2; min-height:0; position:relative; display:flex; align-items:center; gap:11px; padding:10px 12px; box-sizing:border-box; text-decoration:none; overflow:hidden; cursor:pointer; }
   .pkcard:active{ transform:scale(.98); }
@@ -312,7 +312,7 @@
   .cb-notice-t b{ font-weight:700; }
   .cb-thumbs{ display:flex; gap:10px; overflow-x:auto; padding:4px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .cb-thumbs::-webkit-scrollbar{ display:none; }
-  .cb-thumb{ flex:0 0 auto; width:48px; height:28px; border-radius:9px; background:#fafafa; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
+  .cb-thumb{ flex:0 0 auto; width:48px; height:28px; border-radius:9px; background:#fafafa; border:1.5px solid #e5e7eb; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
   .cb-thumb.on{ border-color:#1f2937; box-shadow:0 0 0 2px #e7ffb3; }
   .cb-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .cb-stage{ position:relative; margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
@@ -388,7 +388,7 @@
       <div id="createPanel" style="display:none">
         <div class="cb-notice sq" data-r="18" data-fill="#f2ffdd" data-stroke="#1f2937"><span class="cb-notice-t">여기서 만든 말풍선은 누구나 볼 수 있는 <b>공개 스티커</b>가 돼요. 욕설·비방·정치적인 내용 등 부적절한 말풍선을 올리면 <b>삭제되고, 계정이 영구 정지될 수 있어요.</b></span></div>
         <div class="cb-thumbs" id="cbThumbs"></div>
-        <div class="cb-stage sq" data-r="22" data-fill="#ffffff" data-stroke="#1f2937" data-sw="3"><canvas id="cbPreview" width="760" height="317"></canvas></div>
+        <div class="cb-stage sq" data-r="22" data-fill="#ffffff" data-stroke="#1f2937"><canvas id="cbPreview" width="760" height="317"></canvas></div>
         <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
         <div class="cb-count"><span id="cbCount">0</span>/10</div>
         <div class="cb-actions">
@@ -1358,7 +1358,7 @@ function cbKakaoLoggedIn(){ return false; }   /* TODO: Kakao SDK 연동 후 실�
 /* === 피그마 스펙 (1109×463 기준) === */
 /* 치수·텍스트박스는 말풍선마다 다름(아래 BUBBLES의 w/h/tx/ty/tw/th 사용) */
 var CB_FONT_PX=100;                    // 폰트 크기(네이티브)
-var CB_TRACK_EM=-0.05;                 // 자간 (좁게, 조정값)
+var CB_TRACK_EM=-0.06;                 // 자간 (좁게, 조정값)
 var CB_STROKE_EM=0.07;                 // 흰색 스트로크 두께
 var CB_EXPORT_W=760;                   // 내보내기 가로 px
 /* 굴림 우선 → 없으면 나눔고딕(웹폰트) → 시스템 고딕 */
@@ -1483,7 +1483,22 @@ function copyBubble(){
   var inp=document.getElementById('cbInput');
   if(!inp || inp.value.trim()===''){ toast('말풍선에 넣을 텍스트를 적어주세요 ✍️'); return; }
   try{ ga('bubble_copy',{ bubble_id:BUBBLES[cbIdx].id }); }catch(e){}
-  cbToBlob().then(function(b){ if(b) cbCopyImageBlob(b, 'seukku-'+BUBBLES[cbIdx].id); else toast('잠시 후 다시 시도해주세요'); });
+  var fname='seukku-'+BUBBLES[cbIdx].id+'.png';
+  var blobPromise=cbToBlob();                        /* 제스처 안에서 즉시 시작 (Promise<Blob>) */
+  if(isAndroid()){                                   /* 안드로이드: 공유 시트 */
+    blobPromise.then(function(b){ if(b) cbShareBlob(b, fname); else toast('잠시 후 다시 시도해주세요'); });
+    return;
+  }
+  if(canImageCopy()){                                /* 아이폰·데스크탑: Promise째로 ClipboardItem → iOS 제스처 유지 */
+    try{
+      var item=new ClipboardItem({'image/png': blobPromise.then(function(b){ if(!b) throw new Error('no blob'); return b; })});
+      navigator.clipboard.write([item])
+        .then(function(){ toast('복사 완료!\n붙여넣기 해보세요 ✨'); })
+        .catch(function(){ blobPromise.then(function(b){ if(b) cbShareBlob(b, fname); else toast('복사가 안 됐어요. 한 번 더 눌러주세요'); }); });
+      return;
+    }catch(e){}
+  }
+  blobPromise.then(function(b){ if(b) cbShareBlob(b, fname); else toast('잠시 후 다시 시도해주세요'); });
 }
 
 /* ── 업로드 (백엔드 연동 전: 로그인 게이트만) ── */
