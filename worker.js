@@ -130,7 +130,7 @@ async function handleUpload(request, env) {
   if (Array.from(text).length > 10) return jsonResp({ error: "text_too_long" }, 400);
   if (!bubble)           return jsonResp({ error: "no_bubble" }, 400);
   // 허용된 말풍선 종류만
-  const ALLOWED = ["yellow", "green", "blue", "pink"];
+  const ALLOWED = ["yellow", "green", "blue", "pink", "limeoval", "greenoval", "pinkoval", "sunsetoval", "whiteoval", "whitebox"];
   if (ALLOWED.indexOf(bubble) === -1) return jsonResp({ error: "bad_bubble" }, 400);
 
   // dataURL(base64 png) → 바이너리
