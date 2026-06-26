@@ -1572,8 +1572,42 @@ function uploadBubble(){
 function uploadAndCopy(){
   var inp=document.getElementById('cbInput');
   if(!inp || inp.value.trim()===''){ toast('말풍선에 넣을 텍스트를 적어주세요 ✍️'); return; }
-  copyBubble();
-  /* TODO(다음 단계): 카카오 로그인 → 모더레이션 → R2 업로드 → seukku_user_bubbles → 공개 카탈로그 노출 */
+  if(!cbKakaoLoggedIn()){ toast('카카오 로그인 후 이용해주세요 🔒'); cbUpdateAuthUI(); return; }
+  copyBubble();                                              /* 복사 (제스처 유지) */
+  cbUploadToServer(inp.value.trim(), BUBBLES[cbIdx].id);     /* 업로드 (백그라운드) */
+}
+
+/* 캔버스 → PNG dataURL (업로드용) */
+async function cbToDataURL(){
+  var inp=document.getElementById('cbInput'), off=document.createElement('canvas');
+  await cbRender(off, BUBBLES[cbIdx], (inp?inp.value:''), false);
+  return off.toDataURL('image/png');
+}
+
+/* /api/upload 로 업로드 — 토큰검증(B)+R2+DB insert 는 worker 가 처리 */
+function cbUploadToServer(text, bubble){
+  if(!sb || !sb.auth){ return; }
+  sb.auth.getSession().then(function(r){
+    var session = r && r.data && r.data.session;
+    if(!session || !session.access_token){ toast('로그인이 만료됐어요. 다시 로그인해주세요'); cbSetUser(null); return; }
+    cbToDataURL().then(function(dataUrl){
+      if(!dataUrl){ toast('이미지 생성 실패, 다시 시도해주세요'); return; }
+      fetch('/api/upload', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
+        body: JSON.stringify({ text:text, bubble:bubble, image:dataUrl })
+      }).then(function(res){ return res.json().then(function(j){ return { ok:res.ok, j:j }; }, function(){ return { ok:res.ok, j:null }; }); })
+        .then(function(o){
+          if(o.ok && o.j && o.j.ok){
+            toast('유저 제작에 올라갔어요! ✨');
+            try{ ga('bubble_upload',{ bubble_id:bubble }); }catch(e){}
+          } else {
+            var code=(o.j && o.j.error) ? o.j.error : 'unknown';
+            toast('업로드 실패 ('+code+')');
+          }
+        }, function(){ toast('업로드 중 오류가 났어요. 잠시 후 다시'); });
+    }, function(){ toast('이미지 생성 실패'); });
+  }, function(){ toast('로그인 확인 실패'); });
 }
 
 /* ── 초기화 (만들기 탭 처음 열 때 1회) ── */
