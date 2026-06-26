@@ -317,7 +317,8 @@
   .cb-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .cb-stage{ position:relative; margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
     padding:18px; min-height:140px; }
-  .cb-stage canvas{ position:relative; z-index:1; max-width:100%; max-height:280px; height:auto; }
+  .cb-stage canvas{ position:relative; z-index:1; max-width:100%; max-height:280px; height:auto;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; -webkit-user-drag:none; }
   .cb-auth{ display:flex; align-items:center; justify-content:center; gap:8px; margin:14px 0 4px; min-height:32px; flex-wrap:wrap; }
   .cb-kakao{ display:inline-flex; align-items:center; gap:6px; background:#FEE500; color:#191600; border:0; border-radius:13px; padding:12px 18px; font-size:14px; font-weight:700; letter-spacing:-.3px; cursor:pointer; }
   .cb-kakao:active{ transform:scale(.97); }
@@ -1626,6 +1627,11 @@ function initCreate(){
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
   if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
   cbPreview(); cbUpdateAuthUI();
+  try{ var _cv=document.getElementById('cbPreview'); var _st=document.querySelector('.cb-stage');
+    [_cv,_st].forEach(function(el){ if(!el) return;
+      el.addEventListener('contextmenu', function(e){ e.preventDefault(); }); /* PC 우클릭 + 모바일 길게누르기 */
+      el.addEventListener('dragstart', function(e){ e.preventDefault(); });   /* 드래그 저장 */
+    }); }catch(e){}
   try{ if(document.fonts && document.fonts.load){ document.fonts.load("100px 'Pretendard'").then(function(){ cbPreview(); },function(){}); } }catch(e){}
 }
 
