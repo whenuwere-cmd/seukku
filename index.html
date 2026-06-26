@@ -309,13 +309,12 @@
   .cb-help b{ color:#1f2937; }
   .cb-thumbs{ display:flex; gap:10px; overflow-x:auto; padding:4px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .cb-thumbs::-webkit-scrollbar{ display:none; }
-  .cb-thumb{ flex:0 0 auto; width:92px; height:54px; border-radius:14px; background:#fafafa; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
-  .cb-thumb.on{ border-color:#1f2937; box-shadow:0 0 0 3px #e7ffb3; }
+  .cb-thumb{ flex:0 0 auto; width:48px; height:28px; border-radius:9px; background:#fafafa; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
+  .cb-thumb.on{ border-color:#1f2937; box-shadow:0 0 0 2px #e7ffb3; }
   .cb-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .cb-stage{ margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
-    background:repeating-conic-gradient(#f1f3f5 0% 25%, #ffffff 0% 50%) 50% / 22px 22px;
-    border-radius:20px; padding:14px; min-height:170px; }
-  .cb-stage canvas{ max-width:100%; max-height:300px; height:auto; }
+  .cb-stage{ position:relative; margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
+    padding:18px; min-height:140px; }
+  .cb-stage canvas{ position:relative; z-index:1; max-width:100%; max-height:280px; height:auto; }
   .cb-input{ width:100%; box-sizing:border-box; border:2px solid #1f2937; border-radius:16px;
     padding:12px 14px; font-size:15px; font-family:inherit; line-height:1.5; resize:none; outline:none; background:#fff; }
   .cb-count{ text-align:right; font-size:12px; color:#9ca3af; margin:6px 4px 0; }
@@ -386,7 +385,7 @@
       <div id="createPanel" style="display:none">
         <p class="cb-help">말풍선을 고르고 <b>텍스트만</b> 적으면 바로 복사돼요 (최대 10자). 업로드하면 모두가 쓰는 공개 스티커가 돼요 — <b>업로드는 카카오 로그인 필요</b> 🔒</p>
         <div class="cb-thumbs" id="cbThumbs"></div>
-        <div class="cb-stage"><canvas id="cbPreview" width="760" height="317"></canvas></div>
+        <div class="cb-stage sq" data-r="22" data-fill="#ffffff" data-stroke="#1f2937"><canvas id="cbPreview" width="760" height="317"></canvas></div>
         <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
         <div class="cb-count"><span id="cbCount">0</span>/10</div>
         <div class="cb-actions">
@@ -452,8 +451,8 @@
   </div>
   <div class="deco-toggle sq" id="decoToggle" data-r="26" data-fill="#ffffff" data-stroke="#1f2937">
     <button class="deco-seg" id="segSticker" onclick="setMode('sticker')"><span class="lbl">스티커</span></button>
-    <button class="deco-seg" id="segDeco" onclick="setMode('deco')"><span class="lbl">특수문자₊⊹</span></button>
-    <button class="deco-seg" id="segCreate" onclick="setMode('create')"><span class="lbl">만들기✏︎</span></button>
+    <button class="deco-seg" id="segDeco" onclick="setMode('deco')"><span class="lbl">특수문자</span></button>
+    <button class="deco-seg" id="segCreate" onclick="setMode('create')"><span class="lbl">만들기</span></button>
   </div>
 <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
   <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
@@ -1355,9 +1354,7 @@ var KAKAO_JS_KEY = "";                 // 카카오 JS 앱키 (https://developer
 function cbKakaoLoggedIn(){ return false; }   /* TODO: Kakao SDK 연동 후 실제 로그인 상태 반환 */
 
 /* === 피그마 스펙 (1109×463 기준) === */
-var CB_BW=1109, CB_BH=463;             // 블롭 원본 비율
-var CB_CX=554, CB_CY=231.5;            // 텍스트 박스 중심
-var CB_TW=820;                         // 텍스트 박스 폭
+/* 치수·텍스트박스는 말풍선마다 다름(아래 BUBBLES의 w/h/tx/ty/tw/th 사용) */
 var CB_FONT_PX=100;                    // 폰트 크기(네이티브)
 var CB_TRACK_EM=-0.20;                 // 자간 -20px @100px = -0.2em (좁게)
 var CB_STROKE_EM=0.07;                 // 흰색 스트로크 두께
@@ -1367,10 +1364,14 @@ var cbFont = "'Gulim','굴림','Nanum Gothic','Apple SD Gothic Neo','맑은 고�
 
 /* === 말풍선 4종 (피그마 순서: 노랑/연두/하늘/분홍) === */
 var BUBBLES = [
-  { id:'yellow', name:'노랑', url:'/bubbles/yellow.webp' },
-  { id:'green',  name:'연두', url:'/bubbles/green.webp'  },
-  { id:'blue',   name:'하늘', url:'/bubbles/blue.webp'   },
-  { id:'pink',   name:'분홍', url:'/bubbles/pink.webp'   }
+  { id:'yellow',  name:'블러노랑', url:'/bubbles/yellow.webp',      w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
+  { id:'green',   name:'블러연두', url:'/bubbles/green.webp',       w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
+  { id:'blue',    name:'블러하늘', url:'/bubbles/blue.webp',        w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
+  { id:'pink',    name:'블러분홍', url:'/bubbles/pink.webp',        w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
+  { id:'oyellow', name:'노랑',     url:'/bubbles/oval-yellow.webp', w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
+  { id:'ored',    name:'빨강',     url:'/bubbles/oval-red.webp',    w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
+  { id:'ogreen',  name:'연두',     url:'/bubbles/oval-green.webp',  w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
+  { id:'oblue',   name:'하늘',     url:'/bubbles/oval-blue.webp',   w:1000, h:400, tx:150, ty:135,   tw:700, th:130 }
 ];
 
 var cbIdx=0, cbReady=false, cbToken=0, cbImgCache={};
@@ -1416,12 +1417,12 @@ function cbFitDraw(ctx, text, cx, cy, fontPx, boxW, color, strokeW){
 
 /* ── 캔버스에 블롭+텍스트 렌더 ── */
 async function cbRender(canvas, tpl, text, placeholder){
-  var s=CB_EXPORT_W/CB_BW, cw=Math.round(CB_BW*s), ch=Math.round(CB_BH*s);
+  var s=CB_EXPORT_W/tpl.w, cw=Math.round(tpl.w*s), ch=Math.round(tpl.h*s);
   canvas.width=cw; canvas.height=ch;
   var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,cw,ch);
   var img=await cbLoadImg(tpl);
   if(img) ctx.drawImage(img,0,0,cw,ch);
-  var cx=CB_CX*s, cy=CB_CY*s, boxW=CB_TW*s, fontPx=CB_FONT_PX*s;
+  var cx=(tpl.tx+tpl.tw/2)*s, cy=(tpl.ty+tpl.th/2)*s, boxW=tpl.tw*s, fontPx=CB_FONT_PX*s;
   var t=(text||'').replace(/\s+/g,' ').trim();
   if(t===''){ if(placeholder) cbFitDraw(ctx,'텍스트 입력',cx,cy,fontPx,boxW,'#9aa0a6',0); }
   else cbFitDraw(ctx, t, cx, cy, fontPx, boxW, '#000000', fontPx*CB_STROKE_EM);
@@ -1436,7 +1437,7 @@ function cbPreview(){
 function cbSelect(i){
   cbIdx=i;
   var th=document.getElementById('cbThumbs'); if(th){ var ks=th.children; for(var k=0;k<ks.length;k++) ks[k].classList.toggle('on', k===i); }
-  cbPreview();
+  cbPreview(); try{ sq(); }catch(e){}
 }
 function cbRenderThumbs(){
   var th=document.getElementById('cbThumbs'); if(!th) return; th.innerHTML='';
