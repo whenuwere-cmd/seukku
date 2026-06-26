@@ -318,6 +318,13 @@
   .cb-stage{ position:relative; margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
     padding:18px; min-height:140px; }
   .cb-stage canvas{ position:relative; z-index:1; max-width:100%; max-height:280px; height:auto; }
+  .cb-auth{ display:flex; align-items:center; justify-content:center; gap:8px; margin:2px 0 12px; min-height:40px; flex-wrap:wrap; }
+  .cb-kakao{ display:inline-flex; align-items:center; gap:6px; background:#FEE500; color:#191600; border:0; border-radius:13px; padding:12px 18px; font-size:14px; font-weight:700; letter-spacing:-.3px; cursor:pointer; }
+  .cb-kakao:active{ transform:scale(.97); }
+  .cb-auth-on{ font-size:13px; color:#4b5563; letter-spacing:-.3px; }
+  .cb-auth-on b{ color:#1f2937; }
+  .cb-auth-out{ background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px 11px; font-size:12.5px; font-weight:600; color:#6b7280; cursor:pointer; }
+  .cb-auth-out:active{ transform:scale(.97); }
   .cb-input{ width:100%; box-sizing:border-box; border:2px solid #1f2937; border-radius:16px;
     padding:12px 14px; font-size:15px; font-family:inherit; line-height:1.5; resize:none; outline:none; background:#fff; }
   .cb-count{ text-align:right; font-size:12px; color:#9ca3af; margin:6px 4px 0; }
@@ -391,6 +398,7 @@
         <div class="cb-stage sq" data-r="22" data-fill="checker" data-stroke="#1f2937"><canvas id="cbPreview" width="760" height="317"></canvas></div>
         <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
         <div class="cb-count"><span id="cbCount">0</span>/10</div>
+        <div class="cb-auth" id="cbAuth"></div>
         <div class="cb-actions">
           <button class="cb-btn sq" data-r="16" data-fill="#e7ffb3" data-stroke="#1f2937" onclick="uploadAndCopy()"><span class="lbl">업로드 및 복사</span></button>
         </div>
@@ -1349,9 +1357,57 @@ function setMode(m){
 }
 try{ renderDecoChips(); renderDeco(); applyMode(); }catch(e){}
 /* ═════════ 만들기 탭: 말풍선 메이커 (블러 블롭 4종) ═════════ */
-/* === 카카오 로그인/업로드 설정 (다음 단계에서 채움) === */
-var KAKAO_JS_KEY = "";                 // 카카오 JS 앱키 (https://developers.kakao.com)
-function cbKakaoLoggedIn(){ return false; }   /* TODO: Kakao SDK 연동 후 실제 로그인 상태 반환 */
+/* === 카카오 로그인 (Supabase Auth OAuth) === */
+var cbUser=null;
+function cbKakaoLoggedIn(){ return !!cbUser; }
+function cbUserName(){
+  if(!cbUser) return '';
+  var m=cbUser.user_metadata||{};
+  return m.name || m.full_name || m.nickname || m.preferred_username || (cbUser.email? cbUser.email.split('@')[0] : '회원');
+}
+function cbSetUser(u){ cbUser=u||null; cbUpdateAuthUI(); }
+function cbUpdateAuthUI(){
+  var el=document.getElementById('cbAuth'); if(!el) return;
+  if(cbUser){
+    el.innerHTML='<span class="cb-auth-on">✓ <b>'+esc(cbUserName())+'</b>님으로 로그인됨</span>'
+      +'<button class="cb-auth-out" onclick="cbLogout()">로그아웃</button>';
+  } else {
+    el.innerHTML='<button class="cb-kakao" onclick="cbLogin()">💬 카카오로 로그인하고 올리기</button>';
+  }
+}
+function cbLogin(){
+  if(!sb || !sb.auth){ toast('잠시 후 다시 시도해주세요'); return; }
+  /* 카카오로 이동했다 돌아오므로 작성 내용 저장 → 복귀 시 복원 */
+  try{ var inp=document.getElementById('cbInput'); localStorage.setItem('cb_pending', JSON.stringify({ t:(inp?inp.value:''), b:cbIdx, ts:Date.now() })); }catch(e){}
+  sb.auth.signInWithOAuth({ provider:'kakao', options:{ redirectTo: location.origin+location.pathname } })
+    .then(function(r){ if(r && r.error){ toast('로그인 시작 실패: '+r.error.message); } });
+}
+function cbLogout(){
+  if(!sb || !sb.auth) return;
+  sb.auth.signOut().then(function(){ cbSetUser(null); toast('로그아웃됐어요'); });
+}
+function cbInitAuth(){
+  if(!sb || !sb.auth) return;
+  sb.auth.getSession().then(function(r){ cbSetUser(r && r.data && r.data.session ? r.data.session.user : null); }, function(){});
+  sb.auth.onAuthStateChange(function(_e, session){ cbSetUser(session ? session.user : null); });
+  /* 로그인 후 복귀: 만들기 탭 자동 오픈 + 작성 내용/말풍선 복원 */
+  try{
+    var raw=localStorage.getItem('cb_pending');
+    if(raw){
+      localStorage.removeItem('cb_pending');
+      var p=JSON.parse(raw);
+      if(p && (Date.now()-(p.ts||0) < 600000)){
+        setMode('create');
+        setTimeout(function(){
+          if(typeof p.b==='number' && BUBBLES[p.b]) cbSelect(p.b);
+          var inp=document.getElementById('cbInput');
+          if(inp){ inp.value=p.t||''; var cnt=document.getElementById('cbCount'); if(cnt) cnt.textContent=Array.from(inp.value).length; }
+          cbPreview();
+        }, 140);
+      }
+    }
+  }catch(e){}
+}
 
 /* === 피그마 스펙 (1109×463 기준) === */
 /* 치수·텍스트박스는 말풍선마다 다름(아래 BUBBLES의 w/h/tx/ty/tw/th 사용) */
@@ -1622,6 +1678,7 @@ async function loadSupabase(){
   try{
     var mod=await import("https://esm.sh/@supabase/supabase-js@2");
     sb=mod.createClient(SB_URL,SB_KEY);
+    cbInitAuth();
     fetchHot6();
   }catch(e){ console.warn('sb 클라이언트 로드 실패(집계 기능만 제한)', e); }
 }
