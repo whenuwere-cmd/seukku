@@ -1379,7 +1379,7 @@ function cbLogin(){
   if(!sb || !sb.auth){ toast('잠시 후 다시 시도해주세요'); return; }
   /* 카카오로 이동했다 돌아오므로 작성 내용 저장 → 복귀 시 복원 */
   try{ var inp=document.getElementById('cbInput'); localStorage.setItem('cb_pending', JSON.stringify({ t:(inp?inp.value:''), b:cbIdx, ts:Date.now() })); }catch(e){}
-  sb.auth.signInWithOAuth({ provider:'kakao', options:{ redirectTo: location.origin+location.pathname } })
+  sb.auth.signInWithOAuth({ provider:'kakao', options:{ redirectTo: location.origin+location.pathname, scopes:'profile_nickname profile_image' } })
     .then(function(r){ if(r && r.error){ toast('로그인 시작 실패: '+r.error.message); } });
 }
 function cbLogout(){
