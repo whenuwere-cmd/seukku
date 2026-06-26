@@ -327,8 +327,7 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
-<style>@font-face{font-family:'SeukkuGulim';src:url('/fonts/seukku-gulim.woff2') format('woff2');font-display:swap;}</style>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="app">
@@ -1358,23 +1357,23 @@ function cbKakaoLoggedIn(){ return false; }   /* TODO: Kakao SDK 연동 후 실�
 
 /* === 피그마 스펙 (1109×463 기준) === */
 /* 치수·텍스트박스는 말풍선마다 다름(아래 BUBBLES의 w/h/tx/ty/tw/th 사용) */
-var CB_FONT_PX=100;                    // 폰트 크기(네이티브)
+var CB_FONT_PX=130;                    // 폰트 크기(네이티브)
 var CB_TRACK_EM=-0.06;                 // 자간 (좁게, 조정값)
 var CB_STROKE_EM=0.20;                 // 흰색 스트로크 두께
 var CB_EXPORT_W=760;                   // 내보내기 가로 px
 /* 굴림 우선 → 없으면 나눔고딕(웹폰트) → 시스템 고딕 */
-var cbFont = "'SeukkuGulim','Gulim','굴림','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif";
+var cbFont = "'Gulim','굴림','Nanum Gothic','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif";
 
 /* === 말풍선 4종 (피그마 순서: 노랑/연두/하늘/분홍) === */
 var BUBBLES = [
-  { id:'yellow',  name:'블러노랑', url:'/bubbles/yellow.webp',      w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
-  { id:'green',   name:'블러연두', url:'/bubbles/green.webp',       w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
-  { id:'blue',    name:'블러하늘', url:'/bubbles/blue.webp',        w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
-  { id:'pink',    name:'블러분홍', url:'/bubbles/pink.webp',        w:1109, h:463, tx:144, ty:166.5, tw:820, th:130 },
-  { id:'oyellow', name:'노랑',     url:'/bubbles/oval-yellow.webp', w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
-  { id:'ored',    name:'빨강',     url:'/bubbles/oval-red.webp',    w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
-  { id:'ogreen',  name:'연두',     url:'/bubbles/oval-green.webp',  w:1000, h:400, tx:150, ty:135,   tw:700, th:130 },
-  { id:'oblue',   name:'하늘',     url:'/bubbles/oval-blue.webp',   w:1000, h:400, tx:150, ty:135,   tw:700, th:130 }
+  { id:'yellow',  name:'블러노랑', url:'/bubbles/yellow.webp',      w:1109, h:463, tx:144, ty:149,   tw:820, th:165 },
+  { id:'green',   name:'블러연두', url:'/bubbles/green.webp',       w:1109, h:463, tx:144, ty:149,   tw:820, th:165 },
+  { id:'blue',    name:'블러하늘', url:'/bubbles/blue.webp',        w:1109, h:463, tx:144, ty:149,   tw:820, th:165 },
+  { id:'pink',    name:'블러분홍', url:'/bubbles/pink.webp',        w:1109, h:463, tx:144, ty:149,   tw:820, th:165 },
+  { id:'oyellow', name:'노랑',     url:'/bubbles/oval-yellow.webp', w:1000, h:400, tx:90,  ty:117.5, tw:820, th:165 },
+  { id:'ored',    name:'빨강',     url:'/bubbles/oval-red.webp',    w:1000, h:400, tx:90,  ty:117.5, tw:820, th:165 },
+  { id:'ogreen',  name:'연두',     url:'/bubbles/oval-green.webp',  w:1000, h:400, tx:90,  ty:117.5, tw:820, th:165 },
+  { id:'oblue',   name:'하늘',     url:'/bubbles/oval-blue.webp',   w:1000, h:400, tx:90,  ty:117.5, tw:820, th:165 }
 ];
 
 var cbIdx=0, cbReady=false, cbToken=0, cbImgCache={};
@@ -1529,7 +1528,7 @@ function initCreate(){
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
   if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
   cbPreview();
-  try{ if(document.fonts && document.fonts.load){ document.fonts.load("100px 'SeukkuGulim'").then(function(){ cbPreview(); },function(){}); document.fonts.load("100px 'Noto Sans KR'").then(function(){ cbPreview(); },function(){}); } }catch(e){}
+  try{ if(document.fonts && document.fonts.load){ document.fonts.load("100px 'Nanum Gothic'").then(function(){ cbPreview(); },function(){}); } }catch(e){}
 }
 
 /* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
