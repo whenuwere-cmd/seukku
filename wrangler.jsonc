@@ -12,5 +12,12 @@
     //   - /sitemap.xml 동적 생성이 옛 정적 sitemap.xml 파일에 가려지지 않음
     //   - worker는 해당 없는 요청을 env.ASSETS.fetch 로 그대로 넘기므로 정적 서빙은 정상
     "run_worker_first": true
-  }
+  },
+  // ★ 추가: 유저 제작 스티커(UGC) 저장용 R2 버킷 바인딩
+  "r2_buckets": [
+    {
+      "binding": "UGC_BUCKET",
+      "bucket_name": "seukku-ugc"
+    }
+  ]
 }
