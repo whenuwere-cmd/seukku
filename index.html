@@ -1162,7 +1162,12 @@ function copySticker(s){
   /* 갤럭시(안드로이드): 클립보드가 불안정해서 → 공유 시트(저장/인스타 스토리/카톡)로 */
   if(isAndroid()){
     if(ready){ shareOrDownload(ready, s); }
-    else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
+    else{
+      /* 공유 시트는 '탭 제스처' 안에서만 뜸 → 이미지를 아직 못 받았으면 이번 탭으로는 못 띄움.
+         조용히 실패하지 말고, 미리 받아둔 뒤 한 번 더 누르면 바로 뜨도록 명확히 안내 */
+      toast('이미지 준비 중이에요!\n1초 뒤 한 번 더 눌러주세요 🙏');
+      blobPromise.then(function(b){ if(b) s._blobReady=b; });
+    }
     return;
   }
   /* 아이폰·데스크탑: 클립보드 복사 (준비된 blob이면 blob 자체, 아니면 Promise) */
