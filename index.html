@@ -318,7 +318,8 @@
   .cb-stage{ position:relative; margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
     padding:18px; min-height:140px; }
   .cb-stage canvas{ position:relative; z-index:1; max-width:100%; max-height:280px; height:auto; }
-  .cb-auth{ display:flex; align-items:center; justify-content:center; gap:8px; margin:2px 0 12px; min-height:40px; flex-wrap:wrap; }
+  .cb-gate{ display:flex; justify-content:center; margin:14px 0 20px; }
+  .cb-auth{ display:flex; align-items:center; justify-content:center; gap:8px; margin:14px 0 4px; min-height:32px; flex-wrap:wrap; }
   .cb-kakao{ display:inline-flex; align-items:center; gap:6px; background:#FEE500; color:#191600; border:0; border-radius:13px; padding:12px 18px; font-size:14px; font-weight:700; letter-spacing:-.3px; cursor:pointer; }
   .cb-kakao:active{ transform:scale(.97); }
   .cb-auth-on{ font-size:13px; color:#4b5563; letter-spacing:-.3px; }
@@ -394,13 +395,16 @@
       <div class="deco-grid" id="decoGrid" style="display:none"></div>
       <div id="createPanel" style="display:none">
         <div class="cb-notice sq" data-r="18" data-fill="#f2ffdd" data-stroke="#1f2937"><span class="cb-notice-t">여기서 만든 말풍선은 누구나 볼 수 있는 <b>공개 스티커</b>가 돼요. 욕설·비방·정치적인 내용 등 부적절한 말풍선을 올리면 <b>삭제되고, 계정이 영구 정지될 수 있어요.</b></span></div>
+        <div class="cb-gate" id="cbGate"></div>
+        <div id="cbMaker">
         <div class="cb-thumbs" id="cbThumbs"></div>
         <div class="cb-stage sq" data-r="22" data-fill="checker" data-stroke="#1f2937"><canvas id="cbPreview" width="760" height="317"></canvas></div>
         <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
         <div class="cb-count"><span id="cbCount">0</span>/10</div>
-        <div class="cb-auth" id="cbAuth"></div>
         <div class="cb-actions">
           <button class="cb-btn sq" data-r="16" data-fill="#e7ffb3" data-stroke="#1f2937" onclick="uploadAndCopy()"><span class="lbl">업로드 및 복사</span></button>
+        </div>
+        <div class="cb-auth" id="cbAuth"></div>
         </div>
       </div>
     </section>
@@ -1367,12 +1371,16 @@ function cbUserName(){
 }
 function cbSetUser(u){ cbUser=u||null; cbUpdateAuthUI(); }
 function cbUpdateAuthUI(){
-  var el=document.getElementById('cbAuth'); if(!el) return;
+  var gate=document.getElementById('cbGate'), maker=document.getElementById('cbMaker'), auth=document.getElementById('cbAuth');
   if(cbUser){
-    el.innerHTML='<span class="cb-auth-on">✓ <b>'+esc(cbUserName())+'</b>님으로 로그인됨</span>'
+    if(gate) gate.style.display='none';
+    if(maker) maker.style.display='';
+    if(auth) auth.innerHTML='<span class="cb-auth-on">✓ <b>'+esc(cbUserName())+'</b>님으로 로그인됨</span>'
       +'<button class="cb-auth-out" onclick="cbLogout()">로그아웃</button>';
   } else {
-    el.innerHTML='<button class="cb-kakao" onclick="cbLogin()">💬 카카오로 로그인하고 올리기</button>';
+    if(maker) maker.style.display='none';
+    if(auth) auth.innerHTML='';
+    if(gate){ gate.style.display=''; gate.innerHTML='<button class="cb-kakao" onclick="cbLogin()">💬 카카오로 로그인하고 만들기</button>'; }
   }
 }
 function cbLogin(){
@@ -1572,13 +1580,13 @@ function uploadAndCopy(){
 
 /* ── 초기화 (만들기 탭 처음 열 때 1회) ── */
 function initCreate(){
-  if(cbReady){ cbPreview(); return; }
+  if(cbReady){ cbPreview(); cbUpdateAuthUI(); return; }
   cbReady=true;
   cbRenderThumbs();
   BUBBLES.forEach(function(t){ cbLoadImg(t); });   // 4종 미리 로드
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
   if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
-  cbPreview();
+  cbPreview(); cbUpdateAuthUI();
   try{ if(document.fonts && document.fonts.load){ document.fonts.load("100px 'Pretendard'").then(function(){ cbPreview(); },function(){}); } }catch(e){}
 }
 
