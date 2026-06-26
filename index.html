@@ -359,7 +359,7 @@
 
     <section class="view active" id="view-home">
       <div class="home-top" id="homeTop">
-        <div class="logo-blob"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
+        <div class="logo-blob" role="button" tabindex="0" aria-label="홈으로" style="cursor:pointer" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}"><svg width="70" height="70" viewBox="-1 -1 74 74" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스꾸 seukku" style="display:block;width:70px;height:70px;">
 <rect x="0.5" y="0.5" width="71" height="71" rx="35.5" fill="url(#paint0_radial_5_1002)" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <path d="M39.2417 19.1405C42.0803 19.1405 45.4058 19.4745 48.0405 20.4432C50.6575 21.4056 52.7776 23.0759 52.7778 25.83C52.7778 26.842 52.497 27.9705 51.771 28.9862C51.1544 29.8488 50.2303 30.6074 48.9302 31.1483C51.9377 34.3444 53.1869 37.7619 53.187 40.6141C53.187 43.9151 51.3925 46.8759 47.978 48.9882C44.5756 51.0929 39.5536 52.369 33.0044 52.369C30.3029 52.369 26.7771 52.1255 23.9097 51.1932C21.0694 50.2697 18.6499 48.5823 18.6499 45.576C18.6501 43.1665 20.2407 40.9758 22.7251 39.7255C21.0573 37.7177 19.7233 34.4848 19.7231 31.4579C19.7231 27.7689 21.7651 24.6702 25.2114 22.5165C28.6486 20.3685 33.5031 19.1405 39.2417 19.1405ZM31.7778 39.119C30.5803 39.119 29.0327 39.2447 27.5435 39.4657C26.4356 39.6301 25.3804 39.8442 24.5347 40.0917C26.4564 41.5982 28.8423 42.161 31.5728 42.161C32.8829 42.161 33.7243 42.0656 34.2319 41.83C34.4681 41.7203 34.6106 41.5885 34.7007 41.4354C34.7935 41.2775 34.856 41.0528 34.856 40.7167C34.856 40.3813 34.794 40.1389 34.6958 39.9589C34.5997 39.7828 34.4518 39.6349 34.2271 39.5116C33.7512 39.2505 32.9675 39.1191 31.7778 39.119ZM40.6724 28.6327C39.371 28.6327 38.5803 28.8109 38.1304 29.0614C37.9139 29.182 37.786 29.3132 37.7104 29.4423C37.6349 29.5713 37.5942 29.7273 37.5942 29.9227C37.5942 30.1058 37.6324 30.26 37.7124 30.3944C37.7925 30.529 37.9331 30.6757 38.188 30.8134C38.7158 31.0986 39.675 31.3153 41.3374 31.3153C42.413 31.3153 43.734 31.2273 44.9497 31.076C45.7613 30.9751 46.505 30.8473 47.0903 30.7059C45.3894 29.1942 42.9903 28.6327 40.6724 28.6327Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
 <defs>
@@ -897,7 +897,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 
 var currentView='home';
 function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
-function goHome(opts){ opts=opts||{}; show('home'); renderHome();
+function goHome(opts){ opts=opts||{}; createMode=false; decoMode=false; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
 
