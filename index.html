@@ -303,7 +303,29 @@
   .toast .lbl{ position:relative; z-index:2; }
   .toast.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   .toast.high{ top:22%; }
+  /* ───────── 만들기 탭 (말풍선 메이커) ───────── */
+  #createPanel{ padding:2px 14px 130px; }
+  .cb-help{ font-size:13px; color:#6b7280; line-height:1.55; margin:8px 2px 12px; }
+  .cb-help b{ color:#1f2937; }
+  .cb-thumbs{ display:flex; gap:10px; overflow-x:auto; padding:4px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .cb-thumbs::-webkit-scrollbar{ display:none; }
+  .cb-thumb{ flex:0 0 auto; width:92px; height:54px; border-radius:14px; background:#fafafa; border:2px solid #e5e7eb; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; transition:border-color .12s, box-shadow .12s; }
+  .cb-thumb.on{ border-color:#1f2937; box-shadow:0 0 0 3px #e7ffb3; }
+  .cb-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .cb-stage{ margin:6px 0 14px; display:flex; align-items:center; justify-content:center;
+    background:repeating-conic-gradient(#f1f3f5 0% 25%, #ffffff 0% 50%) 50% / 22px 22px;
+    border-radius:20px; padding:14px; min-height:170px; }
+  .cb-stage canvas{ max-width:100%; max-height:300px; height:auto; }
+  .cb-input{ width:100%; box-sizing:border-box; border:2px solid #1f2937; border-radius:16px;
+    padding:12px 14px; font-size:15px; font-family:inherit; line-height:1.5; resize:none; outline:none; background:#fff; }
+  .cb-count{ text-align:right; font-size:12px; color:#9ca3af; margin:6px 4px 0; }
+  .cb-actions{ display:flex; gap:10px; margin-top:14px; }
+  .cb-btn{ flex:1; border:none; padding:15px 12px; font-size:15px; font-weight:700; color:#1f2937; cursor:pointer; background:transparent; }
+  .cb-btn .lbl{ position:relative; z-index:2; }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="app">
@@ -361,6 +383,17 @@
       <div class="grid" id="homeGrid"></div>
       <div class="chips" id="decoChips" style="display:none"></div>
       <div class="deco-grid" id="decoGrid" style="display:none"></div>
+      <div id="createPanel" style="display:none">
+        <p class="cb-help">말풍선을 고르고 <b>텍스트만</b> 적으면 바로 복사돼요 (최대 10자). 업로드하면 모두가 쓰는 공개 스티커가 돼요 — <b>업로드는 카카오 로그인 필요</b> 🔒</p>
+        <div class="cb-thumbs" id="cbThumbs"></div>
+        <div class="cb-stage"><canvas id="cbPreview" width="760" height="317"></canvas></div>
+        <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
+        <div class="cb-count"><span id="cbCount">0</span>/10</div>
+        <div class="cb-actions">
+          <button class="cb-btn sq" data-r="16" data-fill="#ffffff" data-stroke="#1f2937" onclick="copyBubble()"><span class="lbl">복사하기</span></button>
+          <button class="cb-btn sq" data-r="16" data-fill="#e7ffb3" data-stroke="#1f2937" onclick="uploadBubble()"><span class="lbl">업로드 🔒</span></button>
+        </div>
+      </div>
     </section>
 
     <section class="view" id="view-detail">
@@ -420,6 +453,7 @@
   <div class="deco-toggle sq" id="decoToggle" data-r="26" data-fill="#ffffff" data-stroke="#1f2937">
     <button class="deco-seg" id="segSticker" onclick="setMode('sticker')"><span class="lbl">스티커</span></button>
     <button class="deco-seg" id="segDeco" onclick="setMode('deco')"><span class="lbl">특수문자₊⊹</span></button>
+    <button class="deco-seg" id="segCreate" onclick="setMode('create')"><span class="lbl">만들기✏︎</span></button>
   </div>
 <div class="toast" id="toast"><span class="lbl">복사완료!</span></div>
   <div class="pk-modal" id="pkModal" onclick="if(event.target===this)closeAdPopup()">
@@ -973,8 +1007,8 @@ function toggleInfo(){ var p=document.getElementById('infoPanel'); var open=p.cl
 
 /* ───────── 방명록(할말있어요) ───────── */
 var WALL_DATA=[], WALL_LOADED=false;
-var WALL_ADJ=['수줍은','포근한','조용한','명랑한','따뜻한','새침한','용감한','느긋한','반짝이는','엉뚱한','상냥한','씩씩한','나른한','발랄한','수상한','달콤한','촉촉한','보송한','폭신한','말랑한'];
-var WALL_NOUN=['바다표범','민들레','두더지','수달','참새','고슴도치','다람쥐','너구리','펭귄','토끼','햄스터','문어','복숭아','감자','구름','별똥별','해파리','오리','고양이','강아지'];
+var WALL_ADJ=['수줍은','포근한','조용한','명랑한','따뜻한','새침한','용감한','느긋한','반짝이는','엉뚱한','상냥한','씩씩한','나른한','발랄한','수상한','달콤한','촉촉한','보송한','폭신한','말랑한','차분한','깜찍한','든든한','다정한','시원한','야무진','똘똘한','보드라운','포동한','새콤한','향긋한','몽글한','활기찬','우아한','천진한','의젓한','살가운','꼬물한','도톰한','나긋한','싱그러운','곰살맞은','수더분한','까불한'];
+var WALL_NOUN=['바다표범','민들레','두더지','수달','참새','고슴도치','다람쥐','너구리','펭귄','토끼','햄스터','문어','복숭아','감자','구름','별똥별','해파리','오리','고양이','강아지','여우','판다','코알라','알파카','라쿤','고래','돌고래','거북이','병아리','청설모','햇살','달님','솜사탕','푸딩','마카롱','도토리','자두','살구','딸기','망고','단호박','고구마','새싹','무지개'];
 function wallNick(){
   try{ var n=localStorage.getItem('skku_wall_nick'); if(n) return n; }catch(e){}
   var nk=WALL_ADJ[Math.floor(Math.random()*WALL_ADJ.length)]+' '+WALL_NOUN[Math.floor(Math.random()*WALL_NOUN.length)];
@@ -1183,6 +1217,7 @@ function toast(m,pos){ var t=document.getElementById('toast'); t.querySelector('
 
 /* ───────── 특수문자 탭 (스퀴클 .sq 시스템) ───────── */
 var decoMode=false, decoCat='hot', decoHotList=null, decoHotLoading=false;
+var createMode=false;
 var DECO_CATS=[['hot','HOT ☀︎ ⋆⁺'],['new','NEW ✧･ﾟ'],['recent','최근사용 ෆ ̖́-'],['face','표정 ⌯\' \'⌯'],['line','구분선 ≈']];
 var DECO={ deco:[], face:[], line:[] };
 var decoItemsLoaded=false;
@@ -1291,13 +1326,16 @@ function setSeg(el,on){
 function applyMode(){
   var onHome=(currentView!=='detail');
   var tg=document.getElementById('decoToggle'); if(tg) tg.classList.toggle('hidden', !onHome);
-  var s1=document.getElementById('segSticker'), s2=document.getElementById('segDeco');
-  setSeg(s1, !decoMode); setSeg(s2, decoMode);
-  ['chips','homeGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? 'none' : ''; });
-  ['decoChips','decoGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = decoMode ? '' : 'none'; });
+  var s1=document.getElementById('segSticker'), s2=document.getElementById('segDeco'), s3=document.getElementById('segCreate');
+  setSeg(s1, !decoMode && !createMode); setSeg(s2, decoMode && !createMode); setSeg(s3, createMode);
+  var showSticker=(!decoMode && !createMode), showDeco=(decoMode && !createMode);
+  ['chips','homeGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = showSticker ? '' : 'none'; });
+  ['decoChips','decoGrid'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display = showDeco ? '' : 'none'; });
+  var cp=document.getElementById('createPanel'); if(cp) cp.style.display = createMode ? '' : 'none';
   sq();
 }
 function setMode(m){
+  createMode=(m==='create');
   decoMode=(m==='deco');
   if(decoMode){
     loadDecoItems();
@@ -1305,11 +1343,167 @@ function setMode(m){
     if(decoItemsLoaded && decoCat==='hot' && decoHotList===null) fetchDecoHot();
     renderDeco();
   }
+  if(createMode){ initCreate(); }
   applyMode();
   document.getElementById('scroll').scrollTop=0;
   if(window.refreshHomeAd) refreshHomeAd();
 }
 try{ renderDecoChips(); renderDeco(); applyMode(); }catch(e){}
+/* ═════════ 만들기 탭: 말풍선 메이커 (블러 블롭 4종) ═════════ */
+/* === 카카오 로그인/업로드 설정 (다음 단계에서 채움) === */
+var KAKAO_JS_KEY = "";                 // 카카오 JS 앱키 (https://developers.kakao.com)
+function cbKakaoLoggedIn(){ return false; }   /* TODO: Kakao SDK 연동 후 실제 로그인 상태 반환 */
+
+/* === 피그마 스펙 (1109×463 기준) === */
+var CB_BW=1109, CB_BH=463;             // 블롭 원본 비율
+var CB_CX=554, CB_CY=231.5;            // 텍스트 박스 중심
+var CB_TW=820;                         // 텍스트 박스 폭
+var CB_FONT_PX=100;                    // 폰트 크기(네이티브)
+var CB_TRACK_EM=-0.20;                 // 자간 -20px @100px = -0.2em (좁게)
+var CB_STROKE_EM=0.07;                 // 흰색 스트로크 두께
+var CB_EXPORT_W=760;                   // 내보내기 가로 px
+/* 굴림 우선 → 없으면 나눔고딕(웹폰트) → 시스템 고딕 */
+var cbFont = "'Gulim','굴림','Nanum Gothic','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif";
+
+/* === 말풍선 4종 (피그마 순서: 노랑/연두/하늘/분홍) === */
+var BUBBLES = [
+  { id:'yellow', name:'노랑', url:'/bubbles/yellow.webp' },
+  { id:'green',  name:'연두', url:'/bubbles/green.webp'  },
+  { id:'blue',   name:'하늘', url:'/bubbles/blue.webp'   },
+  { id:'pink',   name:'분홍', url:'/bubbles/pink.webp'   }
+];
+
+var cbIdx=0, cbReady=false, cbToken=0, cbImgCache={};
+
+/* ── 블롭 이미지 로드(캐시) ── */
+function cbLoadImg(tpl){
+  if(cbImgCache[tpl.id]) return cbImgCache[tpl.id];
+  cbImgCache[tpl.id]=new Promise(function(res){
+    var im=new Image();
+    im.onload=function(){ res(im); };
+    im.onerror=function(){ res(null); };
+    im.src=tpl.url;
+  });
+  return cbImgCache[tpl.id];
+}
+
+/* ── 한 줄 텍스트: 글자별 자간 + 흰 스트로크 + 검정 채움 ── */
+function cbDrawLine(ctx, text, cx, cy, fontPx, color, strokeW){
+  ctx.font=fontPx+"px "+cbFont;
+  ctx.textBaseline='middle'; ctx.textAlign='left';
+  ctx.lineJoin='round'; ctx.miterLimit=2;
+  var chars=Array.from(text);
+  var track=fontPx*CB_TRACK_EM;
+  var widths=chars.map(function(c){ return ctx.measureText(c).width; });
+  var total=0; widths.forEach(function(w){ total+=w; }); total+=track*Math.max(0,chars.length-1);
+  var x=cx-total/2;
+  for(var i=0;i<chars.length;i++){
+    if(strokeW>0){ ctx.lineWidth=strokeW; ctx.strokeStyle='#ffffff'; ctx.strokeText(chars[i], x, cy); }
+    ctx.fillStyle=color; ctx.fillText(chars[i], x, cy);
+    x+=widths[i]+track;
+  }
+  return total;
+}
+/* 박스 폭 넘으면 폰트 자동 축소 후 그리기 */
+function cbFitDraw(ctx, text, cx, cy, fontPx, boxW, color, strokeW){
+  ctx.font=fontPx+"px "+cbFont;
+  var track=fontPx*CB_TRACK_EM;
+  var chars=Array.from(text), total=0;
+  chars.forEach(function(c){ total+=ctx.measureText(c).width; }); total+=track*Math.max(0,chars.length-1);
+  if(total>boxW && total>0){ var k=boxW/total; fontPx*=k; strokeW*=k; }
+  cbDrawLine(ctx, text, cx, cy, fontPx, color, strokeW);
+}
+
+/* ── 캔버스에 블롭+텍스트 렌더 ── */
+async function cbRender(canvas, tpl, text, placeholder){
+  var s=CB_EXPORT_W/CB_BW, cw=Math.round(CB_BW*s), ch=Math.round(CB_BH*s);
+  canvas.width=cw; canvas.height=ch;
+  var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,cw,ch);
+  var img=await cbLoadImg(tpl);
+  if(img) ctx.drawImage(img,0,0,cw,ch);
+  var cx=CB_CX*s, cy=CB_CY*s, boxW=CB_TW*s, fontPx=CB_FONT_PX*s;
+  var t=(text||'').replace(/\s+/g,' ').trim();
+  if(t===''){ if(placeholder) cbFitDraw(ctx,'텍스트 입력',cx,cy,fontPx,boxW,'#9aa0a6',0); }
+  else cbFitDraw(ctx, t, cx, cy, fontPx, boxW, '#000000', fontPx*CB_STROKE_EM);
+}
+
+/* ── 미리보기(레이스 방지) ── */
+function cbPreview(){
+  var my=++cbToken, cv=document.getElementById('cbPreview'), inp=document.getElementById('cbInput');
+  if(!cv||!inp) return;
+  cbRender(cv, BUBBLES[cbIdx], inp.value, true).then(function(){},function(){});
+}
+function cbSelect(i){
+  cbIdx=i;
+  var th=document.getElementById('cbThumbs'); if(th){ var ks=th.children; for(var k=0;k<ks.length;k++) ks[k].classList.toggle('on', k===i); }
+  cbPreview();
+}
+function cbRenderThumbs(){
+  var th=document.getElementById('cbThumbs'); if(!th) return; th.innerHTML='';
+  BUBBLES.forEach(function(tpl,i){
+    var d=document.createElement('div'); d.className='cb-thumb'+(i===cbIdx?' on':'');
+    var im=document.createElement('img'); im.src=tpl.url; im.alt=tpl.name; im.loading='lazy';
+    d.appendChild(im); d.onclick=function(){ cbSelect(i); };
+    th.appendChild(d);
+  });
+}
+
+/* ── 복사: 기존 기기 분기 재활용 (아이폰=클립보드 / 안드=공유 / 폴백=저장) ── */
+function cbShareBlob(blob, fname){
+  try{ var file=new File([blob],fname,{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(function(e){ if(e&&e.name==='AbortError')return; cbDownload(blob,fname); }); return; }
+  }catch(e){}
+  cbDownload(blob,fname);
+}
+function cbDownload(blob, fname){
+  try{ var url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){URL.revokeObjectURL(url);},4000); toast('저장됨! 갤러리/다운로드에서 확인'); }
+  catch(e){ toast('잠시 후 다시 시도해주세요'); }
+}
+function cbCopyImageBlob(blob, base){
+  var fname=(base||'seukku')+'.png';
+  if(isAndroid()){ cbShareBlob(blob, fname); return; }
+  if(canImageCopy()){
+    try{
+      var item=new ClipboardItem({'image/png':blob});
+      navigator.clipboard.write([item]).then(function(){ toast('복사 완료!\n붙여넣기 해보세요 ✨'); }).catch(function(){ toast('복사가 안 됐어요. 한 번 더 눌러주세요'); });
+    }catch(e){ toast('복사가 안 됐어요. 한 번 더 눌러주세요'); }
+    return;
+  }
+  cbShareBlob(blob, fname);
+}
+async function cbToBlob(){
+  var inp=document.getElementById('cbInput'), off=document.createElement('canvas');
+  await cbRender(off, BUBBLES[cbIdx], (inp?inp.value:''), false);
+  return await new Promise(function(rs){ off.toBlob(rs,'image/png'); });
+}
+function copyBubble(){
+  var inp=document.getElementById('cbInput');
+  if(!inp || inp.value.trim()===''){ toast('말풍선에 넣을 텍스트를 적어주세요 ✍️'); return; }
+  try{ ga('bubble_copy',{ bubble_id:BUBBLES[cbIdx].id }); }catch(e){}
+  cbToBlob().then(function(b){ if(b) cbCopyImageBlob(b, 'seukku-'+BUBBLES[cbIdx].id); else toast('잠시 후 다시 시도해주세요'); });
+}
+
+/* ── 업로드 (백엔드 연동 전: 로그인 게이트만) ── */
+function uploadBubble(){
+  var inp=document.getElementById('cbInput');
+  if(!inp || inp.value.trim()===''){ toast('텍스트를 먼저 적어주세요 ✍️'); return; }
+  if(!cbKakaoLoggedIn()){ toast('업로드는 카카오 로그인 후 열려요 🔒\n(로그인 연동은 다음 단계에서!)'); return; }
+  /* TODO(다음 단계): 텍스트 모더레이션 → R2 업로드 → seukku_user_bubbles insert → 공개 카탈로그 노출 */
+  toast('업로드 준비 중이에요!');
+}
+
+/* ── 초기화 (만들기 탭 처음 열 때 1회) ── */
+function initCreate(){
+  if(cbReady){ cbPreview(); return; }
+  cbReady=true;
+  cbRenderThumbs();
+  BUBBLES.forEach(function(t){ cbLoadImg(t); });   // 4종 미리 로드
+  var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
+  if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
+  cbPreview();
+  try{ if(document.fonts && document.fonts.load){ document.fonts.load("100px 'Nanum Gothic'").then(function(){ cbPreview(); },function(){}); } }catch(e){}
+}
+
 /* ===== 카카오 애드핏 광고 (비율 고정 scale + SPA 재호출) ===== */
 function fitAd(box){
   if(!box) return false;
