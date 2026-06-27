@@ -1,4 +1,4 @@
-const CACHE='seukku-v5';   /* v4 → v5: fetch 핸들러가 외부(광고 등) 요청을 가로채지 않도록 수정 */
+const CACHE='seukku-v6';   /* v5 → v6: 옛날 워커(POST 가로채던 ≤v4) 강제 갱신용 버전업 — 로직은 v5와 동일 */
 self.addEventListener('install', e=>{
   // index.html을 미리 캐싱하지 않음 → 배포 직후 옛날 HTML이 먼저 뜨는 깜빡임 방지
   self.skipWaiting();
