@@ -750,6 +750,7 @@ function hasCat(s,cat){ return splitCats(s.c).indexOf(cat)>=0; }
     return rl;
   }
   var l=STK.slice();
+  if(active!=='유저 제작') l=l.filter(function(s){ return !s.ugc; });  // 유저 제작 말풍선은 '유저 제작' 탭에서만 노출 (NEW·HOT 등 일반 탭 제외)
   if(active==='HOT'){
     l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 3시간 복사 많은 순
   }
