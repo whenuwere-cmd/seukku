@@ -1950,5 +1950,42 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
     }).catch(function(){});
 })();
 </script>
+<script>
+(function () {
+  // 브라우저 자동 복원 끄기
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  // 스크롤 위치 계속 저장
+  let ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      sessionStorage.setItem('seukku_scrollY', String(window.scrollY));
+      ticking = false;
+    });
+  }, { passive: true });
+
+  // 돌아왔을 때: 컨텐츠 높이가 채워지면 복원
+  function restore() {
+    var y = parseInt(sessionStorage.getItem('seukku_scrollY') || '0', 10);
+    if (!y) return;
+
+    var tries = 0;
+    (function tryScroll() {
+      // 스티커 그리드가 그려져서 그 위치까지 스크롤 가능해지면 복원
+      if (document.body.scrollHeight >= y + window.innerHeight || tries > 60) {
+        window.scrollTo(0, y);
+      } else {
+        tries++;
+        requestAnimationFrame(tryScroll); // 아직이면 다음 프레임에 재시도
+      }
+    })();
+  }
+
+  if (document.readyState === 'complete') restore();
+  else window.addEventListener('load', restore);
+})();
+</script>
 </body>
 </html>
