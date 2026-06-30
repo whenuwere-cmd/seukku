@@ -750,6 +750,7 @@ function hasCat(s,cat){ return splitCats(s.c).indexOf(cat)>=0; }
     return rl;
   }
   var l=STK.slice();
+  if(active!=='유저 제작') l=l.filter(function(s){ return !s.ugc; });  // 유저 제작 말풍선은 '유저 제작' 탭에서만 노출 (NEW·HOT 등 일반 탭 제외)
   if(active==='HOT'){
     l.sort(function(a,b){ var d=(b.hot6||0)-(a.hot6||0); return d!==0?d:(b.copy_count||0)-(a.copy_count||0); });  // 최근 3시간 복사 많은 순
   }
@@ -1618,12 +1619,27 @@ function cbUploadToServer(text, bubble){
   }, function(){ toast('로그인 확인 실패'); });
 }
 
+/* ── DB에서 말풍선 배경 목록 불러오기 (관리자에서 추가/삭제한 것 반영) ── */
+function loadBubbles(){
+  fetch(SB_URL+'/rest/v1/seukku_bubbles?select=id,name,url,w,h,tx,ty,tw,th&active=eq.true&order=ord.asc,created_at.asc',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(rows){
+      if(!rows || !rows.length) return;          // 실패/빈 결과 → 하드코딩 BUBBLES 유지(안전)
+      BUBBLES = rows;
+      cbImgCache = {};                            // 이미지 캐시 리셋
+      if(cbIdx >= BUBBLES.length) cbIdx = 0;      // 인덱스 보정
+      if(cbReady){ cbRenderThumbs(); BUBBLES.forEach(function(t){ cbLoadImg(t); }); cbPreview(); }
+    })
+    .catch(function(){});                         // 네트워크 실패 → 하드코딩 유지
+}
+
 /* ── 초기화 (만들기 탭 처음 열 때 1회) ── */
 function initCreate(){
   if(cbReady){ cbPreview(); cbUpdateAuthUI(); return; }
   cbReady=true;
   cbRenderThumbs();
   BUBBLES.forEach(function(t){ cbLoadImg(t); });   // 4종 미리 로드
+  loadBubbles();   // DB 최신 배경 목록으로 갱신(실패 시 위 하드코딩 유지)
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
   if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
   cbPreview(); cbUpdateAuthUI();
