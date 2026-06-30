@@ -1162,12 +1162,7 @@ function copySticker(s){
   /* 갤럭시(안드로이드): 클립보드가 불안정해서 → 공유 시트(저장/인스타 스토리/카톡)로 */
   if(isAndroid()){
     if(ready){ shareOrDownload(ready, s); }
-    else{
-      /* 공유 시트는 '탭 제스처' 안에서만 뜸 → 이미지를 아직 못 받았으면 이번 탭으로는 못 띄움.
-         조용히 실패하지 말고, 미리 받아둔 뒤 한 번 더 누르면 바로 뜨도록 명확히 안내 */
-      toast('이미지 준비 중이에요!\n1초 뒤 한 번 더 눌러주세요 🙏');
-      blobPromise.then(function(b){ if(b) s._blobReady=b; });
-    }
+    else{ blobPromise.then(function(b){ if(b){ s._blobReady=b; shareOrDownload(b, s); } else { toast('잠시 후 다시 시도해주세요'); } }); }
     return;
   }
   /* 아이폰·데스크탑: 클립보드 복사 (준비된 blob이면 blob 자체, 아니면 Promise) */
@@ -1623,12 +1618,27 @@ function cbUploadToServer(text, bubble){
   }, function(){ toast('로그인 확인 실패'); });
 }
 
+/* ── DB에서 말풍선 배경 목록 불러오기 (관리자에서 추가/삭제한 것 반영) ── */
+function loadBubbles(){
+  fetch(SB_URL+'/rest/v1/seukku_bubbles?select=id,name,url,w,h,tx,ty,tw,th&active=eq.true&order=ord.asc,created_at.asc',{ headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY } })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(rows){
+      if(!rows || !rows.length) return;          // 실패/빈 결과 → 하드코딩 BUBBLES 유지(안전)
+      BUBBLES = rows;
+      cbImgCache = {};                            // 이미지 캐시 리셋
+      if(cbIdx >= BUBBLES.length) cbIdx = 0;      // 인덱스 보정
+      if(cbReady){ cbRenderThumbs(); BUBBLES.forEach(function(t){ cbLoadImg(t); }); cbPreview(); }
+    })
+    .catch(function(){});                         // 네트워크 실패 → 하드코딩 유지
+}
+
 /* ── 초기화 (만들기 탭 처음 열 때 1회) ── */
 function initCreate(){
   if(cbReady){ cbPreview(); cbUpdateAuthUI(); return; }
   cbReady=true;
   cbRenderThumbs();
   BUBBLES.forEach(function(t){ cbLoadImg(t); });   // 4종 미리 로드
+  loadBubbles();   // DB 최신 배경 목록으로 갱신(실패 시 위 하드코딩 유지)
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
   if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
   cbPreview(); cbUpdateAuthUI();
