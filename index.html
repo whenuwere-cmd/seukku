@@ -409,7 +409,7 @@
 
     <section class="view" id="view-detail">
       <div class="detail-wrap">
-        <button class="btn-outline sq" data-r="14" data-fill="#ffffff" onclick="goHome()">
+        <button class="btn-outline sq" data-r="14" data-fill="#ffffff" onclick="history.back()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0"/><path d="M5 12l4 4"/><path d="M5 12l4 -4"/></svg>
           뒤로
         </button>
@@ -897,7 +897,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
+function show(v){ if(currentView==='home'){ try{ window._homeY=document.getElementById('scroll').scrollTop; }catch(e){} } document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; createMode=false; decoMode=false; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
@@ -1825,7 +1825,14 @@ apply();
 window.addEventListener('popstate', function(e){
   var st=e.state||{};
   if(st.view==='detail' && st.slug){ var s=findBySlug(st.slug); if(s){ openDetail(s.id,{push:false}); return; } }
-  if(currentView!=='home') goHome({push:false});
+  if(currentView!=='home'){
+    show('home');
+    var _y=window._homeY||0;
+    requestAnimationFrame(function(){
+      document.getElementById('scroll').scrollTop=_y;
+      requestAnimationFrame(function(){ document.getElementById('scroll').scrollTop=_y; });
+    });
+  }
 });
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
