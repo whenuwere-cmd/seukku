@@ -26,18 +26,22 @@ export default {
     // ★ 말풍선 배경 이미지: 정적 에셋(/bubbles/*.webp) 우선, 없으면 R2 업로드분 프록시.
     //   - 기존 배경(레포 /bubbles/ 폴더의 webp)은 그대로 정적 서빙.
     //   - 관리자에서 새로 올린 배경은 R2(R2_BASE)에 bubbles/{id}.{ext} 로 들어가므로
-    //     정적에서 404 나면 R2 public 에서 받아 same-origin 으로 되돌려준다. (CORS 불필요)
+    //     정적에서 못 찾으면 R2 public 에서 받아 same-origin 으로 되돌려준다. (CORS 불필요)
+    //   ※ SPA 폴백(not_found_handling)이 없는 파일에도 index.html을 200으로 주므로,
+    //     '응답 content-type 이 image/* 일 때만' 정적을 채택하고, 아니면 R2 로 넘어간다.
     if (url.pathname.startsWith("/bubbles/") && request.method === "GET") {
       const a = await env.ASSETS.fetch(request);
-      if (a.status === 200) return a;
+      const aType = (a.headers.get("content-type") || "").toLowerCase();
+      if (a.status === 200 && aType.startsWith("image/")) return a;
       try {
         const r = await fetch(R2_BASE + url.pathname, { cf: { cacheEverything: true } });
-        if (r.status === 200) {
+        const rType = (r.headers.get("content-type") || "").toLowerCase();
+        if (r.status === 200 && rType.startsWith("image/")) {
           const h = new Headers(r.headers);
           h.set("cache-control", "public, max-age=86400");
           return new Response(r.body, { status: 200, headers: h });
         }
-      } catch (e) { /* R2 실패 시 아래 정적 응답(404) 그대로 반환 */ }
+      } catch (e) { /* R2 실패 시 아래 정적 응답 그대로 반환 */ }
       return a;
     }
 
