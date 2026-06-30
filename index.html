@@ -897,7 +897,7 @@ document.getElementById('searchInput').addEventListener('input',function(e){
 });
 
 var currentView='home';
-function show(v){ document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
+function show(v){ if(currentView==='home'){ try{ window._homeY=document.getElementById('scroll').scrollTop; }catch(e){} } document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');}); document.getElementById('view-'+v).classList.add('active'); document.getElementById('scroll').scrollTop=0; currentView=v; toggleFab(); sq(); if(window.applyMode)applyMode(); setTimeout(function(){ if(v==='home') refreshHomeAd(); fitAllAds(); },60); }
 function goHome(opts){ opts=opts||{}; createMode=false; decoMode=false; show('home'); renderHome();
   if(opts.push!==false){ try{ history.pushState({view:'home'},'','/'); }catch(e){} }
   if(opts.pageview!==false){ sendPageView('/','스꾸 · 무료 스티커 복사'); } }
@@ -1825,7 +1825,14 @@ apply();
 window.addEventListener('popstate', function(e){
   var st=e.state||{};
   if(st.view==='detail' && st.slug){ var s=findBySlug(st.slug); if(s){ openDetail(s.id,{push:false}); return; } }
-  if(currentView!=='home') goHome({push:false});
+  if(currentView!=='home'){
+    show('home');
+    var _y=window._homeY||0;
+    requestAnimationFrame(function(){
+      document.getElementById('scroll').scrollTop=_y;
+      requestAnimationFrame(function(){ document.getElementById('scroll').scrollTop=_y; });
+    });
+  }
 });
 window.addEventListener('load',function(){ apply(); setTimeout(apply,300); });
 var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(apply,120); });
@@ -1948,43 +1955,6 @@ var rt=null; window.addEventListener('resize',function(){ clearTimeout(rt); rt=s
         if(p){ p.style.whiteSpace='pre-line'; p.textContent=map.contact_text; }
       }
     }).catch(function(){});
-})();
-</script>
-<script>
-(function () {
-  // 브라우저 자동 복원 끄기
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-
-  // 스크롤 위치 계속 저장
-  let ticking = false;
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function () {
-      sessionStorage.setItem('seukku_scrollY', String(window.scrollY));
-      ticking = false;
-    });
-  }, { passive: true });
-
-  // 돌아왔을 때: 컨텐츠 높이가 채워지면 복원
-  function restore() {
-    var y = parseInt(sessionStorage.getItem('seukku_scrollY') || '0', 10);
-    if (!y) return;
-
-    var tries = 0;
-    (function tryScroll() {
-      // 스티커 그리드가 그려져서 그 위치까지 스크롤 가능해지면 복원
-      if (document.body.scrollHeight >= y + window.innerHeight || tries > 60) {
-        window.scrollTo(0, y);
-      } else {
-        tries++;
-        requestAnimationFrame(tryScroll); // 아직이면 다음 프레임에 재시도
-      }
-    })();
-  }
-
-  if (document.readyState === 'complete') restore();
-  else window.addEventListener('load', restore);
 })();
 </script>
 </body>
