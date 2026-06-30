@@ -6,6 +6,7 @@
  *
  * ★ /api/upload : 유저 제작 말풍선(UGC) 업로드. 카카오 로그인 토큰 검증 →
  *   R2(seukku-ugc) PNG 저장 → seukku_user_bubbles 테이블 insert.
+ * ★ /bubbles/*  : 말풍선 배경 이미지. 정적 에셋 우선, 없으면 R2 업로드분 프록시.
  */
 const SB_URL  = "https://ttdvoyzzpqufyiaetvxy.supabase.co";
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZHZveXp6cHF1ZnlpYWV0dnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTA4NzAsImV4cCI6MjA5NjQ2Njg3MH0.ij7Ok1enQKrxXxndv8CL8iu3WwXmlomsBL92lrzNz0c"; // anon (공개용)
@@ -20,6 +21,24 @@ export default {
     // ★ 유저 제작 말풍선 업로드 API (가장 먼저 처리)
     if (url.pathname === "/api/upload") {
       return handleUpload(request, env);
+    }
+
+    // ★ 말풍선 배경 이미지: 정적 에셋(/bubbles/*.webp) 우선, 없으면 R2 업로드분 프록시.
+    //   - 기존 배경(레포 /bubbles/ 폴더의 webp)은 그대로 정적 서빙.
+    //   - 관리자에서 새로 올린 배경은 R2(R2_BASE)에 bubbles/{id}.{ext} 로 들어가므로
+    //     정적에서 404 나면 R2 public 에서 받아 same-origin 으로 되돌려준다. (CORS 불필요)
+    if (url.pathname.startsWith("/bubbles/") && request.method === "GET") {
+      const a = await env.ASSETS.fetch(request);
+      if (a.status === 200) return a;
+      try {
+        const r = await fetch(R2_BASE + url.pathname, { cf: { cacheEverything: true } });
+        if (r.status === 200) {
+          const h = new Headers(r.headers);
+          h.set("cache-control", "public, max-age=86400");
+          return new Response(r.body, { status: 200, headers: h });
+        }
+      } catch (e) { /* R2 실패 시 아래 정적 응답(404) 그대로 반환 */ }
+      return a;
     }
 
     // ★ 옛 기본주소(seukku.seukku.workers.dev)로 들어온 요청만 seukku.cc 로 영구(301) 이동
