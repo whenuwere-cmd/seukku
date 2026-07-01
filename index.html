@@ -1091,7 +1091,7 @@ function sendFeedback(){
   ga('feedback_send',{});
   toast('전달됐어요! 고마워요 💚','high');
   /* 전송은 백그라운드 (화면은 바로 반응) */
-  if(sb){ try{ sb.from('seukku_feedback').insert({ message:msg }).then(function(){},function(){}); }catch(e){} }
+  if(SB_URL && SB_KEY){ try{ fetch(SB_URL+'/rest/v1/seukku_feedback',{ method:'POST', headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ message:msg }) }).catch(function(){}); }catch(e){} }
   if(W3F_KEY){ try{ fetch('https://api.web3forms.com/submit',{ method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body: JSON.stringify({ access_key:W3F_KEY, subject:'스꾸 새 문의', from_name:'스꾸 문의', message:msg }) }).catch(function(){}); }catch(e){} }
   /* 잠깐 '전송완료' 보여주고 닫기 */
   setTimeout(function(){ ta.value=''; document.getElementById('infoPanel').classList.remove('open'); }, 700);
