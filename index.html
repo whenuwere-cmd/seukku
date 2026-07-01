@@ -397,8 +397,8 @@
         <div class="cb-notice sq" data-r="18" data-fill="#f2ffdd" data-stroke="#1f2937"><span class="cb-notice-t">여기서 만든 말풍선은 누구나 볼 수 있는 <b>공개 스티커</b>가 돼요. 욕설·비방·정치적인 내용 등 부적절한 말풍선을 올리면 <b>삭제되고, 계정이 영구 정지될 수 있어요.</b></span></div>
         <div class="cb-thumbs" id="cbThumbs"></div>
         <div class="cb-stage sq" data-r="22" data-fill="checker" data-stroke="#1f2937"><canvas id="cbPreview" width="760" height="317"></canvas></div>
-        <textarea id="cbInput" class="cb-input" rows="1" maxlength="10" placeholder="여기에 한마디 (최대 10자)"></textarea>
-        <div class="cb-count"><span id="cbCount">0</span>/10</div>
+        <textarea id="cbInput" class="cb-input" rows="1" maxlength="24" placeholder="여기에 한마디 (최대 20자, 줄바꿈 OK)"></textarea>
+        <div class="cb-count"><span id="cbCount">0</span>/20</div>
         <div class="cb-actions">
           <button class="cb-btn sq" id="cbUploadBtn" data-r="16" data-fill="#e7ffb3" data-stroke="#1f2937" onclick="uploadAndCopy()"><span class="lbl">업로드 및 복사</span></button>
           <button class="cb-btn sq" id="cbGateBtn" data-r="16" data-fill="#FEE500" data-stroke="#1f2937" onclick="cbLogin()"><span class="lbl">💬 카카오로 로그인하고 만들기</span></button>
@@ -1410,7 +1410,7 @@ function cbInitAuth(){
         setTimeout(function(){
           if(typeof p.b==='number' && BUBBLES[p.b]) cbSelect(p.b);
           var inp=document.getElementById('cbInput');
-          if(inp){ inp.value=p.t||''; var cnt=document.getElementById('cbCount'); if(cnt) cnt.textContent=Array.from(inp.value).length; }
+          if(inp){ inp.value=p.t||''; var cnt=document.getElementById('cbCount'); if(cnt) cnt.textContent=Array.from(inp.value.replace(/\n/g,'')).length; }
           cbPreview();
         }, 140);
       }
@@ -1424,6 +1424,10 @@ var CB_FONT_PX=130;                    // 폰트 크기(네이티브)
 var CB_TRACK_EM=-0.08;                 // 자간 (좁게, 조정값)
 var CB_STROKE_EM=0.14;                 // 흰색 스트로크 두께
 var CB_EXPORT_W=760;                   // 내보내기 가로 px
+var CB_MAX_CHARS=20;                    // 최대 글자수(줄바꿈 제외)
+var CB_MAX_LINES=3;                     // 최대 줄 수
+var CB_LINE_GAP_EM=0.14;               // 줄 간격(em)
+var CB_MULTILINE_H=0.5;                // 여러 줄일 때 줄당 세로 여유 배수 (0=원래대로 작게 / 1.0=한 줄과 거의 같은 크기·넘칠 위험 / 기본 0.5)
 /* 굴림 우선 → 없으면 나눔고딕(웹폰트) → 시스템 고딕 */
 var cbFont = "'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif";
 
@@ -1483,6 +1487,28 @@ function cbFitDraw(ctx, text, cx, cy, fontPx, boxW, color, strokeW){
   cbDrawLine(ctx, text, cx, cy, fontPx, color, strokeW);
 }
 
+/* 여러 줄: 가로(boxW)·세로(boxH) 둘 다 넘으면 폰트 자동 축소 후 중앙정렬로 그리기 */
+function cbLineAdvance(ctx, text, fpx){
+  ctx.font=fpx+"px "+cbFont;
+  var track=fpx*CB_TRACK_EM, chars=Array.from(text), tot=0;
+  chars.forEach(function(c){ tot+=ctx.measureText(c).width; });
+  tot+=track*Math.max(0,chars.length-1);
+  return tot;
+}
+function cbFitDrawLines(ctx, lines, cx, cy, fontPx, boxW, boxH, color, strokeEm){
+  var n=lines.length;
+  var maxW=0; lines.forEach(function(L){ var w=cbLineAdvance(ctx,L,fontPx); if(w>maxW) maxW=w; });
+  var kW=(maxW>boxW && maxW>0) ? boxW/maxW : 1;
+  var blockH=fontPx*( n + (n-1)*CB_LINE_GAP_EM );          // 글자 박스 높이 합(근사)
+  var effBoxH=boxH*( 1 + (n-1)*CB_MULTILINE_H );           // 줄 수 늘면 세로 박스 확장(한 줄일 땐 boxH 그대로)
+  var kH=(blockH>effBoxH*0.98 && blockH>0) ? (effBoxH*0.98)/blockH : 1;
+  var f=fontPx*Math.min(kW,kH);
+  var strokeW=f*strokeEm;
+  var lineH=f*(1+CB_LINE_GAP_EM);
+  var firstMid=cy-(n-1)*lineH/2;                           // 세로 중앙정렬
+  for(var i=0;i<n;i++){ cbDrawLine(ctx, lines[i], cx, firstMid+i*lineH, f, color, strokeW); }
+}
+
 /* ── 캔버스에 블롭+텍스트 렌더 ── */
 async function cbRender(canvas, tpl, text, placeholder){
   var s=CB_EXPORT_W/tpl.w, cw=Math.round(tpl.w*s), ch=Math.round(tpl.h*s);
@@ -1490,11 +1516,16 @@ async function cbRender(canvas, tpl, text, placeholder){
   var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,cw,ch);
   var img=await cbLoadImg(tpl);
   if(img) ctx.drawImage(img,0,0,cw,ch);
-  var cx=(tpl.tx+tpl.tw/2)*s, cy=(tpl.ty+tpl.th/2)*s, boxW=tpl.tw*s, fontPx=CB_FONT_PX*s;
-  var t=(text||'').replace(/\s+/g,' ').trim();
-  if(t!==''){ try{ if(document.fonts&&document.fonts.load) await document.fonts.load(Math.round(fontPx)+"px 'Pretendard'", t); }catch(e){} }
-  if(t===''){ if(placeholder) cbFitDraw(ctx,'텍스트 입력',cx,cy,fontPx,boxW,'#9aa0a6',0); }
-  else cbFitDraw(ctx, t, cx, cy, fontPx, boxW, '#000000', fontPx*CB_STROKE_EM);
+  var cx=(tpl.tx+tpl.tw/2)*s, cy=(tpl.ty+tpl.th/2)*s, boxW=tpl.tw*s, boxH=tpl.th*s, fontPx=CB_FONT_PX*s;
+  /* 줄바꿈은 살리고, 각 줄 내부 공백만 정리 + 앞뒤 빈 줄 제거 */
+  var lines=(text||'').replace(/\r/g,'').split('\n').map(function(L){ return L.replace(/[ \t\f\v]+/g,' ').trim(); });
+  while(lines.length>1 && lines[lines.length-1]==='') lines.pop();
+  while(lines.length>1 && lines[0]==='') lines.shift();
+  if(lines.length>CB_MAX_LINES) lines=lines.slice(0,CB_MAX_LINES);
+  var joined=lines.join('').trim();
+  if(joined!==''){ try{ if(document.fonts&&document.fonts.load) await document.fonts.load(Math.round(fontPx)+"px 'Pretendard'", joined); }catch(e){} }
+  if(joined===''){ if(placeholder) cbFitDrawLines(ctx,['텍스트 입력'],cx,cy,fontPx,boxW,boxH,'#9aa0a6',0); }
+  else cbFitDrawLines(ctx, lines, cx, cy, fontPx, boxW, boxH, '#000000', CB_STROKE_EM);
 }
 
 /* ── 미리보기(레이스 방지) ── */
@@ -1641,7 +1672,16 @@ function initCreate(){
   BUBBLES.forEach(function(t){ cbLoadImg(t); });   // 4종 미리 로드
   loadBubbles();   // DB 최신 배경 목록으로 갱신(실패 시 위 하드코딩 유지)
   var inp=document.getElementById('cbInput'), cnt=document.getElementById('cbCount');
-  if(inp){ inp.addEventListener('input', function(){ if(cnt) cnt.textContent=Array.from(inp.value).length; cbPreview(); }); }
+  if(inp){ inp.addEventListener('input', function(){
+    var v=inp.value.replace(/\r/g,'');
+    var ls=v.split('\n'); if(ls.length>CB_MAX_LINES){ ls=ls.slice(0,CB_MAX_LINES); v=ls.join('\n'); }   // 줄 수 제한
+    var arr=Array.from(v), kept=0, out='';                                                              // 줄바꿈 제외 20자 제한
+    for(var i=0;i<arr.length;i++){ var ch=arr[i]; if(ch==='\n'){ out+=ch; continue; } if(kept<CB_MAX_CHARS){ out+=ch; kept++; } }
+    if(out!==inp.value) inp.value=out;
+    if(cnt) cnt.textContent=Array.from(out.replace(/\n/g,'')).length;
+    inp.style.height='auto'; inp.style.height=inp.scrollHeight+'px';                                     // 줄 늘면 입력창 자동 확장
+    cbPreview();
+  }); }
   cbPreview(); cbUpdateAuthUI();
   try{ var _cv=document.getElementById('cbPreview'); var _st=document.querySelector('.cb-stage');
     [_cv,_st].forEach(function(el){ if(!el) return;
