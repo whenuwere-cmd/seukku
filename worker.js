@@ -26,18 +26,22 @@ export default {
     // ★ 말풍선 배경 이미지: 정적 에셋(/bubbles/*.webp) 우선, 없으면 R2 업로드분 프록시.
     //   - 기존 배경(레포 /bubbles/ 폴더의 webp)은 그대로 정적 서빙.
     //   - 관리자에서 새로 올린 배경은 R2(R2_BASE)에 bubbles/{id}.{ext} 로 들어가므로
-    //     정적에서 404 나면 R2 public 에서 받아 same-origin 으로 되돌려준다. (CORS 불필요)
+    //     정적에서 못 찾으면 R2 public 에서 받아 same-origin 으로 되돌려준다. (CORS 불필요)
+    //   ※ SPA 폴백(not_found_handling)이 없는 파일에도 index.html을 200으로 주므로,
+    //     '응답 content-type 이 image/* 일 때만' 정적을 채택하고, 아니면 R2 로 넘어간다.
     if (url.pathname.startsWith("/bubbles/") && request.method === "GET") {
       const a = await env.ASSETS.fetch(request);
-      if (a.status === 200) return a;
+      const aType = (a.headers.get("content-type") || "").toLowerCase();
+      if (a.status === 200 && aType.startsWith("image/")) return a;
       try {
         const r = await fetch(R2_BASE + url.pathname, { cf: { cacheEverything: true } });
-        if (r.status === 200) {
+        const rType = (r.headers.get("content-type") || "").toLowerCase();
+        if (r.status === 200 && rType.startsWith("image/")) {
           const h = new Headers(r.headers);
           h.set("cache-control", "public, max-age=86400");
           return new Response(r.body, { status: 200, headers: h });
         }
-      } catch (e) { /* R2 실패 시 아래 정적 응답(404) 그대로 반환 */ }
+      } catch (e) { /* R2 실패 시 아래 정적 응답 그대로 반환 */ }
       return a;
     }
 
@@ -148,9 +152,23 @@ async function handleUpload(request, env) {
   if (!text)             return jsonResp({ error: "empty_text" }, 400);
   if (Array.from(text).length > 10) return jsonResp({ error: "text_too_long" }, 400);
   if (!bubble)           return jsonResp({ error: "no_bubble" }, 400);
-  // 허용된 말풍선 종류만
-  const ALLOWED = ["yellow", "green", "blue", "pink", "limeoval", "greenoval", "pinkoval", "sunsetoval", "whiteoval", "whitebox"];
-  if (ALLOWED.indexOf(bubble) === -1) return jsonResp({ error: "bad_bubble" }, 400);
+  // 허용된 말풍선 종류만 — seukku_bubbles(active=true)를 소스로 검증.
+  //   프론트가 이 테이블에서 목록을 불러오므로, 관리자에서 추가한 말풍선도 자동으로 통과됨.
+  //   (예전엔 여기가 하드코딩 10종이라, 관리자가 새로 추가한 말풍선을 고른 유저는 bad_bubble 로 튕겼음)
+  try {
+    const br = await fetch(`${SB_URL}/rest/v1/seukku_bubbles?select=id&active=eq.true`, {
+      headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY }
+    });
+    const list = br.ok ? await br.json() : [];
+    const ALLOWED = list.map(function (b) { return String(b.id); });
+    // 조회는 됐는데 목록에 없으면 진짜 잘못된 값 → 거부
+    if (ALLOWED.length && ALLOWED.indexOf(bubble) === -1) {
+      return jsonResp({ error: "bad_bubble" }, 400);
+    }
+    // 조회 실패(빈 목록)면 막지 않고 통과 — 전송 시 이미 로그인·이미지 검증을 거쳤고, bubble 은 라벨일 뿐이라 위험 낮음
+  } catch (e) {
+    // 검증 조회 자체가 실패해도 업로드는 막지 않음(fail-open)
+  }
 
   // dataURL(base64 png) → 바이너리
   const mm = image.match(/^data:image\/png;base64,(.+)$/);
