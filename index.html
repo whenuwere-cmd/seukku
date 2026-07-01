@@ -1427,6 +1427,7 @@ var CB_EXPORT_W=760;                   // 내보내기 가로 px
 var CB_MAX_CHARS=20;                    // 최대 글자수(줄바꿈 제외)
 var CB_MAX_LINES=3;                     // 최대 줄 수
 var CB_LINE_GAP_EM=0.14;               // 줄 간격(em)
+var CB_MULTILINE_H=0.5;                // 여러 줄일 때 줄당 세로 여유 배수 (0=원래대로 작게 / 1.0=한 줄과 거의 같은 크기·넘칠 위험 / 기본 0.5)
 /* 굴림 우선 → 없으면 나눔고딕(웹폰트) → 시스템 고딕 */
 var cbFont = "'Pretendard','Apple SD Gothic Neo','맑은 고딕','Malgun Gothic',sans-serif";
 
@@ -1499,7 +1500,8 @@ function cbFitDrawLines(ctx, lines, cx, cy, fontPx, boxW, boxH, color, strokeEm)
   var maxW=0; lines.forEach(function(L){ var w=cbLineAdvance(ctx,L,fontPx); if(w>maxW) maxW=w; });
   var kW=(maxW>boxW && maxW>0) ? boxW/maxW : 1;
   var blockH=fontPx*( n + (n-1)*CB_LINE_GAP_EM );          // 글자 박스 높이 합(근사)
-  var kH=(blockH>boxH*0.98 && blockH>0) ? (boxH*0.98)/blockH : 1;
+  var effBoxH=boxH*( 1 + (n-1)*CB_MULTILINE_H );           // 줄 수 늘면 세로 박스 확장(한 줄일 땐 boxH 그대로)
+  var kH=(blockH>effBoxH*0.98 && blockH>0) ? (effBoxH*0.98)/blockH : 1;
   var f=fontPx*Math.min(kW,kH);
   var strokeW=f*strokeEm;
   var lineH=f*(1+CB_LINE_GAP_EM);
